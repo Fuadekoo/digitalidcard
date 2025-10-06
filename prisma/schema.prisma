@@ -14,18 +14,24 @@ enum status {
   REJECTED
 }
 
+enum userStatus {
+  ACTIVE
+  INACTIVE
+}
+
 model user {
-  id          String   @id @default(uuid())
-  username    String   @unique
-  phone       String   @unique
+  id          String     @id @default(uuid())
+  username    String     @unique
+  phone       String     @unique
   password    String
   role        String
-  stationUser station? @relation(fields: [stationId], references: [id])
+  stationUser station?   @relation(fields: [stationId], references: [id])
   stationId   String?
-  isAdmin     Boolean  @default(false)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status      userStatus @default(INACTIVE)
+  isAdmin     Boolean    @default(false)
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   // Uncomment and adjust the relation below if you have a Station model
 
@@ -56,7 +62,7 @@ model station {
 model citizen {
   id               String   @id @default(uuid())
   registralNo      String   @unique
-  profilePhoto     Bytes?
+  profilePhoto     String?
   stationCitizen   station  @relation(fields: [stationId], references: [id])
   stationId        String
   firstName        String
@@ -83,7 +89,7 @@ model order {
   orderStatus      String
   paymentMethod    String
   paymentReference String
-  paymentProof     Bytes?
+  paymentProof     String?
   amount           Int
   stationId        String
   registrarId      String
