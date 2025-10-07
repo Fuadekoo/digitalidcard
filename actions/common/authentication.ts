@@ -2,7 +2,7 @@
 
 import { auth, CustomError, signIn, signOut } from "@/auth";
 import prisma from "@/lib/db";
-import { MutationState } from "@/lib/definition";
+import { MutationState } from "@/lib/definitions";
 import { LoginSchema, PasswordSchema, UsernameSchema } from "@/lib/zodSchema";
 import bcrypt from "bcryptjs";
 
