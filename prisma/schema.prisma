@@ -19,6 +19,15 @@ enum userStatus {
   INACTIVE
 }
 
+enum Role {
+  superAdmin
+  superPrinter
+  stationAdmin
+  stationRegistrar
+  stationPrinter
+  developer
+}
+
 model user {
   id          String     @id @default(uuid())
   username    String     @unique

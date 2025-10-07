@@ -3,9 +3,9 @@
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
 // import { RegisterSchema } from "@/lib/zodSchema";
-import { userStatus } from "@prisma/client";
+import { UserStatus } from "@prisma/client";
 
-export async function changeUserStatus(id: string, status: userStatus) {
+export async function changeUserStatus(id: string, status: UserStatus) {
   await prisma.user.update({ where: { id }, data: { status } });
 }
 

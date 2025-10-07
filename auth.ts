@@ -4,19 +4,19 @@ import Credentials from "next-auth/providers/credentials";
 import bcryptjs from "bcryptjs";
 import prisma from "./lib/db";
 import { loginSchema } from "./lib/zodSchema";
-// import { Role } from "@prisma/client";
+import { role as Role } from "@prisma/client";
 
 declare module "next-auth" {
   interface User {
     id?: string;
-    // role: string;
+    role: string;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT {
     id: string;
-    // role: string;
+    role: string;
   }
 }
 
@@ -30,19 +30,19 @@ export class CustomError extends CredentialsSignin {
 const authConfig = {
   trustHost: true,
   pages: {
-    signIn: "/en/signin",
+    signIn: "/en/login",
     signOut: "/en/signout",
   },
   callbacks: {
     authorized: async ({ auth, request: { nextUrl } }) => {
       const { pathname } = nextUrl;
       // If logged-in user hits /en/signin, send to dashboard
-      if (auth && pathname.startsWith("/en/signin")) {
+      if (auth && pathname.startsWith("/en/login")) {
         return Response.redirect(new URL("/en/dashboard", nextUrl));
       }
 
       // Public pages accessible without login
-      const publicPaths = ["/en/about", "/en/signin"];
+      const publicPaths = ["/en/about", "/en/login"];
       if (publicPaths.some((p) => pathname.startsWith(p))) {
         return true;
       }
@@ -70,13 +70,13 @@ const authConfig = {
         );
         const user = await prisma.user.findFirst({
           where: { username },
-          select: { id: true, password: true },
+          select: { id: true, role: true, password: true },
         });
         if (!user) throw new CustomError("Invalid Username");
         if (!user.password) throw new CustomError("Password Not Set");
         if (!(await bcryptjs.compare(password, user.password)))
           throw new CustomError("Invalid Password");
-        return { id: user.id };
+        return { id: user.id, role: user.role as Role };
       },
     }),
   ],
