@@ -112,9 +112,9 @@ export default function Page() {
             <Image
               alt=""
               src={"/logo.png"}
-              width={1000}
-              height={1000}
-              className="size-40"
+              width={2000}
+              height={2000}
+              className="size-80"
             />
           </Link>
         </div>
