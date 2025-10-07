@@ -4,7 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcryptjs from "bcryptjs";
 import prisma from "./lib/db";
 import { loginSchema } from "./lib/zodSchema";
-import { role as Role } from "@prisma/client";
+// import { role as Role } from "@prisma/client";
 
 declare module "next-auth" {
   interface User {
@@ -38,7 +38,7 @@ const authConfig = {
       const { pathname } = nextUrl;
       // If logged-in user hits /en/signin, send to dashboard
       if (auth && pathname.startsWith("/en/login")) {
-        return Response.redirect(new URL("/en/dashboard", nextUrl));
+        return Response.redirect(new URL("/en/dashboard/dashboard", nextUrl));
       }
 
       // Public pages accessible without login
@@ -76,7 +76,7 @@ const authConfig = {
         if (!user.password) throw new CustomError("Password Not Set");
         if (!(await bcryptjs.compare(password, user.password)))
           throw new CustomError("Invalid Password");
-        return { id: user.id, role: user.role as Role };
+        return { id: user.id, role: user.role };
       },
     }),
   ],

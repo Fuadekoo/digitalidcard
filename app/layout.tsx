@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,8 +17,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Digital ID Card System",
-  description: "A comprehensive digital ID card management system for citizens, stations, and administrators",
-  keywords: "digital id, id card, citizen registration, station management, digital identity, ethiopia, ዲጂታል መለያ, ዜጋ ምዝገባ, ጣቢያ አስተዳደር",
+  description:
+    "A comprehensive digital ID card management system for citizens, stations, and administrators",
+  keywords:
+    "digital id, id card, citizen registration, station management, digital identity, ethiopia, ዲጂታል መለያ, ዜጋ ምዝገባ, ጣቢያ አስተዳደር",
 };
 
 export default async function RootLayout({
@@ -26,7 +29,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
-  
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -35,6 +38,7 @@ export default async function RootLayout({
         <SessionProvider session={session}>
           <div className="h-dvh bg-gradient-to-br from-primary-200 to-secondary-200 text-foreground grid overflow-hidden">
             {children}
+            <Toaster />
           </div>
         </SessionProvider>
       </body>

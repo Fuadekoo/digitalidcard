@@ -79,7 +79,8 @@ export function useRegistration<
     handleSubmit,
     onSubmit: handleSubmit(async (inputData) => {
       const result = await serverAction(inputData);
-      onSuccess?.(result);
+      // Show toast first so navigation/refresh triggered by onSuccess
+      // doesn't remove the toast before it's displayed.
       if (result.status) {
         setIsOpen(false);
         reset();
@@ -91,6 +92,7 @@ export function useRegistration<
           description: result.message ?? "something were wrong",
         });
       }
+      onSuccess?.(result);
     }),
     validationErrors: getFormErrors(formState) as {
       [Key in keyof TFieldValues]: string;
