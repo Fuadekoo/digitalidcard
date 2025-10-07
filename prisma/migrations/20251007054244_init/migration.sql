@@ -1,6 +1,12 @@
 -- CreateEnum
 CREATE TYPE "status" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
 
+-- CreateEnum
+CREATE TYPE "userStatus" AS ENUM ('ACTIVE', 'INACTIVE');
+
+-- CreateEnum
+CREATE TYPE "Role" AS ENUM ('superAdmin', 'superPrinter', 'stationAdmin', 'stationRegistrar', 'stationPrinter', 'developer');
+
 -- CreateTable
 CREATE TABLE "user" (
     "id" TEXT NOT NULL,
@@ -9,6 +15,7 @@ CREATE TABLE "user" (
     "password" TEXT NOT NULL,
     "role" TEXT NOT NULL,
     "stationId" TEXT,
+    "status" "userStatus" NOT NULL DEFAULT 'INACTIVE',
     "isAdmin" BOOLEAN NOT NULL DEFAULT false,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -36,7 +43,8 @@ CREATE TABLE "station" (
 CREATE TABLE "citizen" (
     "id" TEXT NOT NULL,
     "registralNo" TEXT NOT NULL,
-    "profilePhoto" BYTEA,
+    "profilePhoto" TEXT,
+    "stationId" TEXT NOT NULL,
     "firstName" TEXT NOT NULL,
     "middleName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
@@ -63,7 +71,7 @@ CREATE TABLE "order" (
     "orderStatus" TEXT NOT NULL,
     "paymentMethod" TEXT NOT NULL,
     "paymentReference" TEXT NOT NULL,
-    "paymentProof" BYTEA,
+    "paymentProof" TEXT,
     "amount" INTEGER NOT NULL,
     "stationId" TEXT NOT NULL,
     "registrarId" TEXT NOT NULL,
@@ -92,6 +100,9 @@ CREATE UNIQUE INDEX "order_orderNumber_key" ON "order"("orderNumber");
 
 -- AddForeignKey
 ALTER TABLE "user" ADD CONSTRAINT "user_stationId_fkey" FOREIGN KEY ("stationId") REFERENCES "station"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "citizen" ADD CONSTRAINT "citizen_stationId_fkey" FOREIGN KEY ("stationId") REFERENCES "station"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "order" ADD CONSTRAINT "order_stationId_fkey" FOREIGN KEY ("stationId") REFERENCES "station"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
