@@ -110,7 +110,7 @@ export default function Page() {
         <div className="max-md:hidden size-full grid place-content-center bg-gradient-to-br from-primary/10 to-secondary/10">
           <Link href={"/"}>
             <Image
-              alt=""
+              alt="logo image"
               src={"/logo.png"}
               width={2000}
               height={2000}
