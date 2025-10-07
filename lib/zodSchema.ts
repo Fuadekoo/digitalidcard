@@ -16,3 +16,13 @@ export const usernameSchema = z.object({
   username: z.string().nonempty("username is required"),
 });
 export type UsernameSchema = z.infer<typeof usernameSchema>;
+
+export const stationSchema = z.object({
+  code: z.string().nonempty("code is required"),
+  afanOromoName: z.string().nonempty("afan oromo name is required"),
+  amharicName: z.string().nonempty("amharic name is required"),
+  stationAdminName: z.string().nonempty("station admin name is required"),
+  stampPhoto: z.string().nonempty("stamp photo is required"),
+  signPhoto: z.string().nonempty("sign photo is required"),
+});
+export type StationSchema = z.infer<typeof stationSchema>;

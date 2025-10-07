@@ -48,7 +48,15 @@ model user {
   registrarOrders order[] @relation("OrderRegistrar")
 
   // Orders where this user is the printer
-  printerOrders order[] @relation("OrderPrinter")
+  printerOrders order[]      @relation("OrderPrinter")
+  Permission    Permission[]
+}
+
+model Permission {
+  id         String @id @default(uuid())
+  user       user   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  permission String
 }
 
 model station {
