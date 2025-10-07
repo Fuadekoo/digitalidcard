@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { SessionProvider } from "next-auth/react";
+import { auth } from "@/auth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,21 +15,28 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Digital Id Card",
-  description: "this is a digital id card System design by Fuad Abdurahman",
+  title: "Digital ID Card System",
+  description: "A comprehensive digital ID card management system for citizens, stations, and administrators",
+  keywords: "digital id, id card, citizen registration, station management, digital identity, ethiopia, ዲጂታል መለያ, ዜጋ ምዝገባ, ጣቢያ አስተዳደር",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+  
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased select-none fixed inset-0 grid`}
       >
-        {children}
+        <SessionProvider session={session}>
+          <div className="h-dvh bg-gradient-to-br from-primary-200 to-secondary-200 text-foreground grid overflow-hidden">
+            {children}
+          </div>
+        </SessionProvider>
       </body>
     </html>
   );
