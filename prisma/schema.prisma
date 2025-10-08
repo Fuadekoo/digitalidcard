@@ -103,7 +103,7 @@ model order {
   orderNumber      String   @unique
   citizenId        String
   orderType        String
-  orderStatus      String
+  orderStatus      status   @default(PENDING)
   paymentMethod    String
   paymentReference String
   paymentProof     String?
@@ -118,6 +118,6 @@ model order {
 
   station   station @relation(fields: [stationId], references: [id])
   registrar user    @relation("OrderRegistrar", fields: [registrarId], references: [id])
-  printer   user    @relation("OrderPrinter", fields: [printerId], references: [id])
+  printer   user?   @relation("OrderPrinter", fields: [printerId], references: [id])
   citizen   citizen @relation(fields: [citizenId], references: [id])
 }

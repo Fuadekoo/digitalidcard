@@ -323,7 +323,6 @@ async function main() {
       stationId: station1.id,
       registrarId: stationRegistrar1.id,
       printerId: stationPrinter1.id,
-      paidAt: new Date(),
     },
   });
 
@@ -340,8 +339,6 @@ async function main() {
       stationId: station1.id,
       registrarId: stationRegistrar1.id,
       printerId: stationPrinter1.id,
-      paidAt: new Date(),
-      completedAt: new Date(),
     },
   });
 
@@ -373,7 +370,6 @@ async function main() {
       stationId: station3.id,
       registrarId: stationRegistrar1.id,
       printerId: stationPrinter1.id,
-      paidAt: new Date(),
     },
   });
 
@@ -390,8 +386,6 @@ async function main() {
       stationId: station1.id,
       registrarId: stationRegistrar1.id,
       printerId: stationPrinter1.id,
-      paidAt: new Date(),
-      completedAt: new Date(),
     },
   });
 

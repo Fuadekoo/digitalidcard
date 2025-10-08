@@ -48,7 +48,7 @@ export async function getStation({
         sorting(
           `${a.code} ${a.afanOromoName} ${a.amharicName}`,
           `${b.code} ${b.afanOromoName} ${b.amharicName}`,
-          sort
+          sort === "asc"
         )
       )
     );

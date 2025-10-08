@@ -88,7 +88,7 @@ export async function createCitizen(data: z.infer<typeof citizenSchema>) {
     const loginUser = session?.user?.id;
     if (!loginUser) throw new Error("unauthenticated");
     const stationId = await prisma.user.findUnique({
-      where: { id: loginUser },
+      where: { id: loginUser, role: "stationRegistrar" },
       select: { stationId: true },
     });
     if (!stationId?.stationId) throw new Error("station not found");
@@ -142,7 +142,7 @@ export async function deleteCitizen(id: string) {
     const loginUser = session?.user?.id;
     if (!loginUser) throw new Error("unauthenticated");
     const stationId = await prisma.user.findUnique({
-      where: { id: loginUser },
+      where: { id: loginUser, role: "stationRegistrar" },
       select: { stationId: true },
     });
     if (!stationId?.stationId) throw new Error("station not found");

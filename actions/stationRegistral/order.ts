@@ -23,7 +23,7 @@ export async function getOrder({ search, currentPage, row, sort }: Filter) {
           OR: [
             { orderNumber: { contains: search } },
             { orderType: { contains: search } },
-            { orderStatus: { contains: search } },
+            // { orderStatus: { contains: search } },
             { paymentMethod: { contains: search } },
             { paymentReference: { contains: search } },
             { citizen: { firstName: { contains: search } } },
@@ -41,12 +41,13 @@ export async function getOrder({ search, currentPage, row, sort }: Filter) {
           paymentReference: true,
           amount: true,
           createdAt: true,
-          paidAt: true,
-          completedAt: true,
+          updatedAt: true,
           citizen: {
             select: {
               firstName: true,
               lastName: true,
+              gender: true,
+              phone: true,
               registralNo: true,
             },
           },
@@ -68,7 +69,7 @@ export async function getOrder({ search, currentPage, row, sort }: Filter) {
         OR: [
           { orderNumber: { contains: search } },
           { orderType: { contains: search } },
-          { orderStatus: { contains: search } },
+          // { orderStatus: { contains: search } },
           { paymentMethod: { contains: search } },
           { paymentReference: { contains: search } },
           { citizen: { firstName: { contains: search } } },
@@ -91,7 +92,7 @@ export async function getSingleOrder(id: string) {
     if (!adminId) throw new Error("unauthenticated");
 
     const stationId = await prisma.user.findUnique({
-      where: { id: adminId },
+      where: { id: adminId, role: "stationRegistrar" },
       select: { stationId: true },
     });
     if (!stationId?.stationId) throw new Error("station not found");
@@ -108,11 +109,9 @@ export async function getSingleOrder(id: string) {
 export async function createOrder(data: {
   citizenId: string;
   orderType: string;
-  orderStatus: string;
   paymentMethod: string;
   paymentReference: string;
   amount: number;
-  printerId: string;
 }) {
   try {
     const session = await auth();
@@ -120,10 +119,22 @@ export async function createOrder(data: {
     if (!adminId) throw new Error("unauthenticated");
 
     const stationId = await prisma.user.findUnique({
-      where: { id: adminId },
+      where: { id: adminId, role: "stationRegistrar" },
       select: { stationId: true },
     });
     if (!stationId?.stationId) throw new Error("station not found");
+
+    // check the citizen and the user is in the same station
+    const citizen = await prisma.citizen.findUnique({
+      where: { id: data.citizenId, stationId: stationId.stationId },
+    });
+    if (!citizen) throw new Error("citizen not found");
+    const user = await prisma.user.findUnique({
+      where: { id: adminId, stationId: stationId.stationId },
+    });
+    if (!user) throw new Error("user not found");
+    if (citizen.stationId !== user.stationId)
+      throw new Error("citizen and user are not in the same station");
 
     // Generate unique order number
     const orderNumber = `ORD-${Date.now()}-${Math.random()
@@ -135,13 +146,11 @@ export async function createOrder(data: {
         orderNumber,
         citizenId: data.citizenId,
         orderType: data.orderType,
-        orderStatus: data.orderStatus,
         paymentMethod: data.paymentMethod,
         paymentReference: data.paymentReference,
         amount: data.amount,
         stationId: stationId.stationId,
         registrarId: adminId,
-        printerId: data.printerId,
       },
     });
 
@@ -152,6 +161,99 @@ export async function createOrder(data: {
   }
 }
 
-export async function updateOrder() {}
+// export async function updateOrder() {}
 
-export async function deleteOrder() {}
+export async function deleteOrder(id: string) {
+  try {
+    const session = await auth();
+    const adminId = session?.user?.id;
+    if (!adminId) throw new Error("unauthenticated");
+    const stationId = await prisma.user.findUnique({
+      where: { id: adminId, role: "stationRegistrar" },
+      select: { stationId: true },
+    });
+    if (!stationId?.stationId) throw new Error("station not found");
+
+    const order = await prisma.order.findUnique({
+      where: { id, registrarId: adminId, stationId: stationId.stationId },
+    });
+    if (!order) throw new Error("order not found");
+
+    await prisma.order.delete({ where: { id, orderStatus: "REJECTED" } });
+
+    return { status: true, message: "Order deleted successfully" };
+  } catch (error) {
+    console.log(error);
+    return { status: false, message: "Failed to delete order" };
+  }
+}
+
+// track the order using phone number
+export async function trackOrder(phone: string) {
+  try {
+    const session = await auth();
+    const adminId = session?.user?.id;
+    if (!adminId) throw new Error("unauthenticated");
+
+    const stationId = await prisma.user.findUnique({
+      where: { id: adminId, role: "stationRegistrar" },
+      select: { stationId: true },
+    });
+    if (!stationId?.stationId) throw new Error("station not found");
+
+    // Validate phone number is provided
+    if (!phone) {
+      throw new Error("Phone number must be provided");
+    }
+
+    const order = await prisma.order.findFirst({
+      where: {
+        citizen: { phone },
+        stationId: stationId.stationId, // Only search within the registrar's station
+      },
+      select: {
+        id: true,
+        orderNumber: true,
+        orderStatus: true,
+        paymentMethod: true,
+        paymentReference: true,
+        amount: true,
+        createdAt: true,
+        citizen: {
+          select: {
+            firstName: true,
+            lastName: true,
+            phone: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!order) throw new Error("Order not found");
+    return { status: true, message: "Order tracked successfully", data: order };
+  } catch (error) {
+    console.log(error);
+    return { status: false, message: "Failed to track order" };
+  }
+}
+
+export async function trackSingleOrder(id: string) {
+  try {
+    const session = await auth();
+    const adminId = session?.user?.id;
+    if (!adminId) throw new Error("unauthenticated");
+    const stationId = await prisma.user.findUnique({
+      where: { id: adminId, role: "stationRegistrar" },
+      select: { stationId: true },
+    });
+    if (!stationId?.stationId) throw new Error("station not found");
+    const order = await prisma.order.findUnique({
+      where: { id, stationId: stationId.stationId },
+    });
+    if (!order) throw new Error("Order not found");
+    return { status: true, message: "Order tracked successfully", data: order };
+  } catch {
+    return { status: false, message: "Failed to track order" };
+  }
+}

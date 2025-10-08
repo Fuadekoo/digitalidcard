@@ -25,6 +25,15 @@ CREATE TABLE "user" (
 );
 
 -- CreateTable
+CREATE TABLE "Permission" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "permission" TEXT NOT NULL,
+
+    CONSTRAINT "Permission_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "station" (
     "id" TEXT NOT NULL,
     "code" TEXT NOT NULL,
@@ -75,10 +84,9 @@ CREATE TABLE "order" (
     "amount" INTEGER NOT NULL,
     "stationId" TEXT NOT NULL,
     "registrarId" TEXT NOT NULL,
-    "printerId" TEXT NOT NULL,
+    "printerId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "paidAt" TIMESTAMP(3),
-    "completedAt" TIMESTAMP(3),
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "order_pkey" PRIMARY KEY ("id")
 );
@@ -102,6 +110,9 @@ CREATE UNIQUE INDEX "order_orderNumber_key" ON "order"("orderNumber");
 ALTER TABLE "user" ADD CONSTRAINT "user_stationId_fkey" FOREIGN KEY ("stationId") REFERENCES "station"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Permission" ADD CONSTRAINT "Permission_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "citizen" ADD CONSTRAINT "citizen_stationId_fkey" FOREIGN KEY ("stationId") REFERENCES "station"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -111,7 +122,7 @@ ALTER TABLE "order" ADD CONSTRAINT "order_stationId_fkey" FOREIGN KEY ("stationI
 ALTER TABLE "order" ADD CONSTRAINT "order_registrarId_fkey" FOREIGN KEY ("registrarId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "order" ADD CONSTRAINT "order_printerId_fkey" FOREIGN KEY ("printerId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "order" ADD CONSTRAINT "order_printerId_fkey" FOREIGN KEY ("printerId") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "order" ADD CONSTRAINT "order_citizenId_fkey" FOREIGN KEY ("citizenId") REFERENCES "citizen"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -3,7 +3,8 @@ import prisma from "@/lib/db";
 import { MutationState } from "@/lib/definitions";
 import { auth } from "@/auth";
 
-export async function getPermission(
+// gate the station user with permission
+export async function getUserPermission(
   data: { id: string } | undefined
 ): Promise<MutationState> {
   try {
@@ -14,17 +15,24 @@ export async function getPermission(
       where: { id: adminId },
       select: { stationId: true },
     });
-    const permission = await prisma.permission.findMany({
-      where: { userId: data?.id, stationId: stationId?.stationId },
+
+    const userWithPermission = await prisma.user.findMany({
+      where: {
+        stationId: stationId?.stationId,
+      },
+
+      include: {
+        Permission: true,
+      },
     });
     return {
       status: true,
       message: "Permission fetched successfully",
-      data: permission,
+      data: userWithPermission,
     };
   } catch (error) {
     console.log(error);
-    return { status: false, message: "Failed to fetch permission" };
+    return { status: false, message: "Failed to fetch permission and user" };
   }
 }
 
@@ -39,9 +47,12 @@ export async function createPermission(
       where: { id: adminId },
       select: { stationId: true },
     });
+    if (!data?.id || !Array.isArray(data.permission)) {
+      throw new Error("Invalid data for creating permissions");
+    }
     const permission = await prisma.permission.createMany({
-      data: data?.permission.map((permission) => ({
-        userId: data?.id,
+      data: data.permission.map((permission) => ({
+        userId: data.id,
         permission,
       })),
     });
@@ -56,22 +67,37 @@ export async function createPermission(
   }
 }
 
-export async function deletePermission(
-  data: { id: string; permission: string } | undefined
-): Promise<MutationState> {
+export async function deletePermission(id: string): Promise<MutationState> {
   try {
     const session = await auth();
-    const adminId = session?.user?.id;
-    if (!adminId) throw new Error("unauthenticated");
+    const StationAdminId = session?.user?.id;
+    if (!StationAdminId) throw new Error("unauthenticated");
+    const permissionUser = await prisma.permission.findUnique({
+      where: { id },
+      select: { userId: true, permission: true },
+    });
+    if (!permissionUser) {
+      throw new Error("Permission not found");
+    }
+    // the user and the admin is the same station help me
     const stationId = await prisma.user.findUnique({
-      where: { id: adminId },
+      where: { id: StationAdminId, role: "stationAdmin" },
       select: { stationId: true },
     });
+    // check the permission user station id is the station adminid station are the same
+    const userStationId = await prisma.user.findUnique({
+      where: { id: permissionUser?.userId, stationId: stationId?.stationId },
+    });
+    if (!userStationId) {
+      throw new Error(
+        "Permission user station id is not the same as the station admin id"
+      );
+    }
+
     const permission = await prisma.permission.deleteMany({
       where: {
-        userId: data?.id,
-        stationId: stationId?.stationId,
-        permission: data?.permission,
+        userId: permissionUser?.userId,
+        permission: permissionUser?.permission,
       },
     });
     return {

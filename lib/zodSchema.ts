@@ -42,7 +42,7 @@ export const orderSchema = z.object({
   orderStatus: z.string().nonempty("order status is required"),
   paymentMethod: z.string().nonempty("payment method is required"),
   paymentReference: z.string().nonempty("payment reference is required"),
-  amount: z.number().nonempty("amount is required"),
+  amount: z.number().int().positive("amount is required"),
   registrarId: z.string().nonempty("registrar id is required"),
 });
 export type OrderSchema = z.infer<typeof orderSchema>;
