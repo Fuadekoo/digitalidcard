@@ -7,6 +7,20 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function sorting(first: string, second: string, direction: boolean) {
+  return direction
+    ? first > second
+      ? 1
+      : first < second
+      ? -1
+      : 0
+    : first > second
+    ? -1
+    : first < second
+    ? 1
+    : 0;
+}
+
 export function getFormErrors<TFieldValues extends FieldValues>(
   formState: FormState<TFieldValues>
 ): { [Key in keyof TFieldValues]: string } {

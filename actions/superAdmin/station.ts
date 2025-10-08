@@ -4,9 +4,68 @@ import prisma from "@/lib/db";
 import z from "zod";
 import { MutationState } from "@/lib/definitions";
 import { stationSchema } from "@/lib/zodSchema";
+import { sorting } from "@/lib/utils";
 import { auth } from "@/auth";
 
-export async function getStation() {}
+type StationFilter = {
+  search: string;
+  currentPage: number;
+  row: number;
+  sort: string;
+};
+
+export async function getStation({
+  search,
+  currentPage,
+  row,
+  sort,
+}: StationFilter) {
+  const list = await prisma.station
+    .findMany({
+      where: {
+        OR: [
+          { code: { contains: search } },
+          { afanOromoName: { contains: search } },
+          { amharicName: { contains: search } },
+          { stationAdminName: { contains: search } },
+        ],
+      },
+      skip: (currentPage - 1) * row,
+      take: row,
+      select: {
+        id: true,
+        code: true,
+        afanOromoName: true,
+        amharicName: true,
+        stationAdminName: true,
+        stampPhoto: true,
+        signPhoto: true,
+        createdAt: true,
+      },
+    })
+    .then((res) =>
+      res.sort((a, b) =>
+        sorting(
+          `${a.code} ${a.afanOromoName} ${a.amharicName}`,
+          `${b.code} ${b.afanOromoName} ${b.amharicName}`,
+          sort
+        )
+      )
+    );
+
+  const totalData = await prisma.station.count({
+    where: {
+      OR: [
+        { code: { contains: search } },
+        { afanOromoName: { contains: search } },
+        { amharicName: { contains: search } },
+        { stationAdminName: { contains: search } },
+      ],
+    },
+  });
+
+  return { list, totalData };
+}
 
 // gate the single station data
 export async function getSingleStation(id: string): Promise<MutationState> {

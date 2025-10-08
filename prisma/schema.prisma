@@ -99,8 +99,8 @@ model citizen {
 }
 
 model order {
-  id               String    @id @default(uuid())
-  orderNumber      String    @unique
+  id               String   @id @default(uuid())
+  orderNumber      String   @unique
   citizenId        String
   orderType        String
   orderStatus      String
@@ -110,10 +110,9 @@ model order {
   amount           Int
   stationId        String
   registrarId      String
-  printerId        String
-  createdAt        DateTime  @default(now())
-  paidAt           DateTime?
-  completedAt      DateTime?
+  printerId        String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   // Relations
 

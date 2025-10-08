@@ -26,3 +26,23 @@ export const stationSchema = z.object({
   signPhoto: z.string().nonempty("sign photo is required"),
 });
 export type StationSchema = z.infer<typeof stationSchema>;
+
+export const userSchema = z.object({
+  username: z.string().nonempty("username is required"),
+  password: z.string().nonempty("password is required"),
+  phone: z.string().nonempty("phone is required"),
+  role: z.string().nonempty("role is required"),
+  stationId: z.string(),
+});
+export type userType = z.infer<typeof userSchema>;
+
+export const orderSchema = z.object({
+  citizenId: z.string().nonempty("citizen id is required"),
+  orderType: z.string().nonempty("order type is required"),
+  orderStatus: z.string().nonempty("order status is required"),
+  paymentMethod: z.string().nonempty("payment method is required"),
+  paymentReference: z.string().nonempty("payment reference is required"),
+  amount: z.number().nonempty("amount is required"),
+  registrarId: z.string().nonempty("registrar id is required"),
+});
+export type OrderSchema = z.infer<typeof orderSchema>;
