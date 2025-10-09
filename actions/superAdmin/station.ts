@@ -5,7 +5,7 @@ import z from "zod";
 import { MutationState } from "@/lib/definitions";
 import { stationSchema } from "@/lib/zodSchema";
 import { sorting } from "@/lib/utils";
-import { auth } from "@/auth";
+import { requireSuperAdmin, isSuperAdmin } from "@/lib/auth-utils";
 
 type StationFilter = {
   search: string;
@@ -20,6 +20,11 @@ export async function getStation({
   row,
   sort,
 }: StationFilter) {
+  // Check if user is super admin
+  const isAdmin = await isSuperAdmin();
+  if (!isAdmin) {
+    throw new Error("Access denied. Super admin role required.");
+  }
   const list = await prisma.station
     .findMany({
       where: {
@@ -64,12 +69,23 @@ export async function getStation({
     },
   });
 
+  console.log("list", list);
+  console.log("totalData", totalData);
   return { list, totalData };
 }
 
 // gate the single station data
 export async function getSingleStation(id: string): Promise<MutationState> {
   try {
+    // Check if user is super admin
+    const isAdmin = await isSuperAdmin();
+    if (!isAdmin) {
+      return {
+        status: false,
+        message: "Access denied. Super admin role required.",
+      };
+    }
+
     const station = await prisma.station.findUnique({ where: { id } });
     return { status: true, message: "successfully get station", data: station };
   } catch (error) {
@@ -94,8 +110,8 @@ export async function createStation({
     signPhoto,
   });
   try {
-    const sessionId = (await auth())?.user?.id;
-    if (!sessionId) throw new Error("unauthenticated");
+    // Require super admin role
+    const sessionId = await requireSuperAdmin();
 
     await prisma.station.create({
       data: {
@@ -127,6 +143,8 @@ export async function updateStation(
   }: z.infer<typeof stationSchema>
 ): Promise<MutationState> {
   try {
+    // Require super admin role
+    await requireSuperAdmin();
     await prisma.station.update({
       where: { id },
       data: {
@@ -146,9 +164,81 @@ export async function updateStation(
 
 export async function deleteStation(id: string): Promise<MutationState> {
   try {
+    // Require super admin role
+    await requireSuperAdmin();
     await prisma.station.delete({ where: { id } });
     return { status: true, message: "successfully delete station" };
   } catch (error) {
     return { status: false, message: "failed to delete station" };
   }
+}
+
+type StationUserFilter = {
+  search: string;
+  currentPage: number;
+  row: number;
+  sort: string;
+};
+
+export async function getStationUser({
+  stationId,
+  search,
+  currentPage,
+  row,
+  sort,
+}: StationUserFilter & { stationId: string }) {
+  // Check if user is super admin
+  const isAdmin = await isSuperAdmin();
+  if (!isAdmin) {
+    throw new Error("Access denied. Super admin role required.");
+  }
+
+  const list = await prisma.user
+    .findMany({
+      where: {
+        stationId: stationId,
+        OR: [
+          { username: { contains: search } },
+          { phone: { contains: search } },
+          { role: { contains: search } },
+        ],
+      },
+      skip: (currentPage - 1) * row,
+      take: row,
+      select: {
+        id: true,
+        username: true,
+        phone: true,
+        role: true,
+        status: true,
+        isAdmin: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    })
+    .then((res) =>
+      res.sort((a, b) =>
+        sorting(
+          `${a.username} ${a.role}`,
+          `${b.username} ${b.role}`,
+          sort === "asc"
+        )
+      )
+    );
+
+  const totalData = await prisma.user.count({
+    where: {
+      stationId: stationId,
+      OR: [
+        { username: { contains: search } },
+        { phone: { contains: search } },
+        { role: { contains: search } },
+      ],
+    },
+  });
+
+  console.log("stationUser list", list);
+  console.log("stationUser totalData", totalData);
+  return { list, totalData };
 }
