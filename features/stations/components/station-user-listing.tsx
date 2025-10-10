@@ -15,6 +15,7 @@ import { DataTable } from "@/components/ui/table/data-table";
 import { DataTableToolbar } from "@/components/ui/table/data-table-toolbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   MoreHorizontal,
   Eye,
@@ -89,10 +90,17 @@ export default function StationUserListing({
       console.log("Fetching station users with params:", queryParams);
       const result = await getStationUser(queryParams);
       console.log("Station users result:", result);
-      setData(result);
+
+      if (result.status) {
+        setData(result.data);
+      } else {
+        toast.error(result.message || "Failed to load station users");
+        setData({ list: [], totalData: 0 });
+      }
     } catch (error) {
       console.error("Error fetching station user data:", error);
       toast.error("Failed to load station users");
+      setData({ list: [], totalData: 0 });
     } finally {
       setIsLoading(false);
     }
@@ -308,20 +316,122 @@ export default function StationUserListing({
   }
 
   return (
-    <DataTable
-      table={table}
-      actionBar={
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary">
-            {table.getFilteredSelectedRowModel().rows.length} selected
-          </Badge>
-          <Button variant="outline" size="sm">
-            Export Selected
-          </Button>
-        </div>
-      }
-    >
-      <DataTableToolbar table={table} />
-    </DataTable>
+    <div className="space-y-6">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Users
+                </p>
+                <p className="text-2xl font-bold">{data?.totalData || 0}</p>
+              </div>
+              <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
+                <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Active Users
+                </p>
+                <p className="text-2xl font-bold">
+                  {
+                    transformedData.filter(
+                      (user: StationUser) =>
+                        user.isActive && user.status === "ACTIVE"
+                    ).length
+                  }
+                </p>
+              </div>
+              <div className="h-8 w-8 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
+                <UserCheck className="h-4 w-4 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Station Admins
+                </p>
+                <p className="text-2xl font-bold">
+                  {
+                    transformedData.filter(
+                      (user: StationUser) =>
+                        user.role === "stationAdmin" || user.role === "admin"
+                    ).length
+                  }
+                </p>
+              </div>
+              <div className="h-8 w-8 rounded-full bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center">
+                <Shield className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Blocked Users
+                </p>
+                <p className="text-2xl font-bold">
+                  {
+                    transformedData.filter(
+                      (user: StationUser) =>
+                        !user.isActive || user.status !== "ACTIVE"
+                    ).length
+                  }
+                </p>
+              </div>
+              <div className="h-8 w-8 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                <UserX className="h-4 w-4 text-red-600 dark:text-red-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Data Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Station Users</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Manage users for this station. You can view details, edit, and
+            manage user permissions.
+          </p>
+        </CardHeader>
+        <CardContent className="p-0">
+          <DataTable
+            table={table}
+            actionBar={
+              <div className="flex items-center gap-2 px-6 py-3 border-t bg-muted/30">
+                <Badge variant="secondary" className="text-xs">
+                  {table.getFilteredSelectedRowModel().rows.length} selected
+                </Badge>
+                <Button variant="outline" size="sm" className="text-xs">
+                  Export Selected
+                </Button>
+              </div>
+            }
+          >
+            <DataTableToolbar table={table} />
+          </DataTable>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

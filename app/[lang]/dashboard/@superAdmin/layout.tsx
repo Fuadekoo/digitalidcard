@@ -42,7 +42,7 @@ export default async function Layout({
       {
         english: "report",
         amharic: "ሪፖርት",
-        url: "report",
+        url: "reportData",
         Icon: <MessageCircle className="size-6" />,
       },
       {

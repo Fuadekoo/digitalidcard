@@ -249,22 +249,42 @@ export async function getStationUser({
   row,
   sort,
 }: StationUserFilter & { stationId: string }) {
-  // Check if user is super admin
-  const isAdmin = await isSuperAdmin();
-  if (!isAdmin) {
-    throw new Error("Access denied. Super admin role required.");
-  }
+  try {
+    // Check if user is super admin
+    const isAdmin = await isSuperAdmin();
+    if (!isAdmin) {
+      return {
+        status: false,
+        message: "Access denied. Super admin role required.",
+        data: { list: [], totalData: 0 },
+      };
+    }
 
-  const list = await prisma.user
-    .findMany({
-      where: {
-        stationId: stationId,
-        OR: [
-          { username: { contains: search } },
-          { phone: { contains: search } },
-          { role: { contains: search } },
-        ],
-      },
+    // Validate stationId
+    if (!stationId) {
+      return {
+        status: false,
+        message: "Station ID is required.",
+        data: { list: [], totalData: 0 },
+      };
+    }
+
+    // Build search conditions
+    const searchConditions = search
+      ? [
+          { username: { contains: search, mode: "insensitive" as const } },
+          { phone: { contains: search, mode: "insensitive" as const } },
+          { role: { contains: search, mode: "insensitive" as const } },
+        ]
+      : [];
+
+    const whereClause = {
+      stationId: stationId,
+      ...(searchConditions.length > 0 && { OR: searchConditions }),
+    };
+
+    const list = await prisma.user.findMany({
+      where: whereClause,
       skip: (currentPage - 1) * row,
       take: row,
       select: {
@@ -278,29 +298,26 @@ export async function getStationUser({
         createdAt: true,
         updatedAt: true,
       },
-    })
-    .then((res) =>
-      res.sort((a, b) =>
-        sorting(
-          `${a.username} ${a.role}`,
-          `${b.username} ${b.role}`,
-          sort === "asc"
-        )
-      )
-    );
+      orderBy: {
+        createdAt: sort === "asc" ? "asc" : "desc",
+      },
+    });
 
-  const totalData = await prisma.user.count({
-    where: {
-      stationId: stationId,
-      OR: [
-        { username: { contains: search } },
-        { phone: { contains: search } },
-        { role: { contains: search } },
-      ],
-    },
-  });
+    const totalData = await prisma.user.count({
+      where: whereClause,
+    });
 
-  // console.log("stationUser list", list);
-  // console.log("stationUser totalData", totalData);
-  return { list, totalData };
+    return {
+      status: true,
+      message: "Station users retrieved successfully",
+      data: { list, totalData },
+    };
+  } catch (error) {
+    console.error("Error fetching station users:", error);
+    return {
+      status: false,
+      message: "Failed to fetch station users",
+      data: { list: [], totalData: 0 },
+    };
+  }
 }
