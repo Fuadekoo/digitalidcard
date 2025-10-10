@@ -154,3 +154,29 @@ export async function deleteCitizen(id: string) {
     return { status: false, message: "Failed to delete citizen" };
   }
 }
+
+
+// take citizen photo or update the photo
+export async function takeCitizenPhoto(id: string, photo: string) {
+  try {
+    const session = await auth();
+    const loginUser = session?.user?.id;
+    if (!loginUser) throw new Error("unauthenticated");
+    const stationId = await prisma.user.findUnique({
+      where: { id: loginUser, role: "stationRegistrar" },
+      select: { stationId: true },
+    });
+    if (!stationId?.stationId) throw new Error("station not found");
+    const citizen = await prisma.citizen.update({
+      where: { id, stationId: stationId?.stationId },
+      data: { profilePhoto: photo },
+    });
+    return {
+      status: true,
+      message: "Citizen photo updated successfully",
+      data: citizen,
+    };
+  } catch {
+    return { status: false, message: "Failed to update citizen photo" };
+  }
+}
