@@ -37,7 +37,7 @@ interface CitizenFormData {
   firstName: string;
   middleName: string;
   lastName: string;
-  gender: string;
+  gender: "MALE" | "FEMALE" | "OTHER" | "";
   placeOfBirth: string;
   dateOfBirth: string;
   occupation: string;
@@ -74,7 +74,7 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
 
   // Mutation for updating citizen
   const [updateCitizenMutation, isUpdating] = useMutation(
-    async (data: CitizenFormData) => {
+    async (data: Omit<CitizenFormData, "gender"> & { gender: "MALE" | "FEMALE" | "OTHER" }) => {
       const result = await updateCitizen(citizenId, data);
       return result;
     },
@@ -126,12 +126,18 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
     e.preventDefault();
 
     // Validation
-    if (!formData.registralNo || !formData.firstName || !formData.lastName) {
+    if (!formData.registralNo || !formData.firstName || !formData.lastName || !formData.gender) {
       toast.error("Please fill in all required fields");
       return;
     }
 
-    updateCitizenMutation(formData);
+    // Type assertion after validation
+    const validatedData = {
+      ...formData,
+      gender: formData.gender as "MALE" | "FEMALE" | "OTHER",
+    };
+
+    updateCitizenMutation(validatedData);
   };
 
   if (isLoading) {
@@ -253,8 +259,9 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Male">Male</SelectItem>
-                    <SelectItem value="Female">Female</SelectItem>
+                    <SelectItem value="MALE">Male</SelectItem>
+                    <SelectItem value="FEMALE">Female</SelectItem>
+                    <SelectItem value="OTHER">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

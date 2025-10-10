@@ -19,23 +19,17 @@ import {
   Activity,
   AlertCircle,
   Camera,
-  Upload,
   X,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import Image from "next/image";
+import CameraCapture from "@/components/camera-capture";
 
 interface CitizenDetailPageProps {
   citizenId: string;
 }
 
-interface UploadProgress {
-  file: File;
-  progress: number;
-  uuid: string;
-  serverFilename?: string;
-}
 
 const CHUNK_SIZE = 512 * 1024; // 512KB
 
@@ -49,8 +43,9 @@ const formatImageUrl = (url: string | null | undefined): string => {
 };
 
 export default function CitizenDetailPage({ citizenId }: CitizenDetailPageProps) {
-  const [photoUploadProgress, setPhotoUploadProgress] = useState<UploadProgress | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Fetch citizen data
   const [citizenData, isLoading, refresh] = useData(
@@ -69,92 +64,86 @@ export default function CitizenDetailPage({ citizenId }: CitizenDetailPageProps)
       if (result.status) {
         toast.success("Photo updated successfully!");
         refresh();
-        setPhotoUploadProgress(null);
+        setShowCamera(false);
       } else {
         toast.error(result.message || "Failed to update photo");
       }
     }
   );
 
-  // Upload file function
-  const uploadFile = async (
-    file: File,
-    uuid: string,
-    setProgress: React.Dispatch<React.SetStateAction<UploadProgress | null>>
-  ): Promise<string> => {
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-    const uuidName = uuid || getTimestampUUID(ext);
-
+  // Upload blob to server with chunking
+  const uploadBlobToServer = async (blob: Blob): Promise<string> => {
+    const uuidName = getTimestampUUID("jpg");
     const chunkSize = CHUNK_SIZE;
-    const total = Math.ceil(file.size / chunkSize);
+    const total = Math.ceil(blob.size / chunkSize);
     let finalReturnedName: string | null = null;
 
-    for (let i = 0; i < total; i++) {
-      const start = i * chunkSize;
-      const end = Math.min(file.size, start + chunkSize);
-      const chunk = file.slice(start, end);
-
-      const formData = new FormData();
-      formData.append("chunk", chunk);
-      formData.append("filename", uuidName);
-      formData.append("chunkIndex", i.toString());
-      formData.append("totalChunks", total.toString());
-
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        throw new Error("Upload failed");
-      }
-
-      const json = await res.json();
-      if (json?.filename) finalReturnedName = json.filename;
-
-      setProgress((prev) =>
-        prev ? { ...prev, progress: Math.round(((i + 1) / total) * 100) } : null
-      );
-    }
-
-    if (!finalReturnedName) {
-      throw new Error("Upload failed: no filename returned");
-    }
-
-    return finalReturnedName;
-  };
-
-  // Handle photo upload
-  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const file = files[0];
     setIsUploadingPhoto(true);
-
-    const newUpload = {
-      file,
-      progress: 0,
-      uuid: getTimestampUUID(file.name.split(".").pop() || "jpg"),
-    };
-
-    setPhotoUploadProgress(newUpload);
+    setUploadProgress(0);
 
     try {
-      const serverFilename = await uploadFile(file, newUpload.uuid, setPhotoUploadProgress);
+      for (let i = 0; i < total; i++) {
+        const start = i * chunkSize;
+        const end = Math.min(blob.size, start + chunkSize);
+        const chunk = blob.slice(start, end);
 
-      setPhotoUploadProgress((prev) =>
-        prev ? { ...prev, serverFilename, progress: 100 } : null
-      );
+        const formData = new FormData();
+        formData.append("chunk", chunk);
+        formData.append("filename", uuidName);
+        formData.append("chunkIndex", i.toString());
+        formData.append("totalChunks", total.toString());
 
-      // Update the photo in the database
-      updatePhotoMutation(serverFilename);
-    } catch (error) {
-      console.error("Failed to upload photo:", error);
-      setPhotoUploadProgress(null);
-      toast.error("Failed to upload photo");
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!res.ok) {
+          throw new Error("Upload failed");
+        }
+
+        const json = await res.json();
+        if (json?.filename) finalReturnedName = json.filename;
+
+        setUploadProgress(Math.round(((i + 1) / total) * 100));
+      }
+
+      if (!finalReturnedName) {
+        throw new Error("Upload failed: no filename returned");
+      }
+
+      return finalReturnedName;
     } finally {
       setIsUploadingPhoto(false);
+      setUploadProgress(0);
+    }
+  };
+
+  // Handle camera capture
+  const handleCameraCapture = async (imageBlob: Blob) => {
+    try {
+      toast.info("Uploading photo...");
+      const serverFilename = await uploadBlobToServer(imageBlob);
+      updatePhotoMutation(serverFilename);
+      toast.success("Photo uploaded successfully!");
+    } catch (error) {
+      console.error("Failed to upload photo:", error);
+      toast.error("Failed to upload photo. Please try again.");
+    }
+  };
+
+  // Handle opening camera with permission check
+  const handleOpenCamera = async () => {
+    try {
+      // Request camera permission
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      // Stop the stream immediately after permission is granted
+      stream.getTracks().forEach(track => track.stop());
+      // Show camera component
+      setShowCamera(true);
+    } catch (error) {
+      console.error("Camera permission denied:", error);
+      toast.error("Camera permission is required to capture photo. Please allow camera access in your browser settings.");
     }
   };
 
@@ -187,6 +176,40 @@ export default function CitizenDetailPage({ citizenId }: CitizenDetailPageProps)
               Back to Citizens
             </Button>
           </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Show camera view
+  if (showCamera) {
+    return (
+      <div className="w-full h-full flex items-center justify-center p-6">
+        <div className="w-full max-w-3xl">
+          <div className="mb-6 text-center">
+            <h2 className="text-2xl font-bold mb-2">Capture Profile Photo</h2>
+            <p className="text-muted-foreground">
+              Position yourself in the frame and capture your photo
+            </p>
+          </div>
+          <CameraCapture
+            onCapture={handleCameraCapture}
+            onCancel={() => setShowCamera(false)}
+          />
+          {isUploadingPhoto && (
+            <div className="mt-4">
+              <div className="flex justify-between text-sm mb-2">
+                <span>Uploading photo...</span>
+                <span className="font-semibold">{uploadProgress}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -247,57 +270,18 @@ export default function CitizenDetailPage({ citizenId }: CitizenDetailPageProps)
               </div>
 
               <div className="mt-4 w-full">
-                <label
-                  htmlFor="photoUpload"
-                  className="cursor-pointer"
+                <Button
+                  onClick={handleOpenCamera}
+                  className="w-full"
+                  size="lg"
+                  disabled={isUploadingPhoto || isUpdatingPhoto}
                 >
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-500 transition-colors">
-                    <div className="flex flex-col items-center justify-center space-y-2">
-                      <div className="p-2 bg-blue-100 rounded-full">
-                        <Upload className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm font-medium text-blue-600">
-                          {citizenData.profilePhoto ? "Update Photo" : "Upload Photo"}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          PNG, JPG up to 10MB
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <input
-                    id="photoUpload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoChange}
-                    className="hidden"
-                    disabled={isUploadingPhoto || isUpdatingPhoto}
-                  />
-                </label>
-
-                {photoUploadProgress && (
-                  <div className="mt-4">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1">
-                        <div className="flex justify-between text-xs mb-1">
-                          <span className="truncate max-w-[120px]">
-                            {photoUploadProgress.file.name}
-                          </span>
-                          <span className="font-semibold">
-                            {photoUploadProgress.progress}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                            style={{ width: `${photoUploadProgress.progress}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  <Camera className="mr-2 h-5 w-5" />
+                  {citizenData.profilePhoto ? "Update Photo" : "Capture Photo"}
+                </Button>
+                <p className="text-xs text-center text-muted-foreground mt-2">
+                  Click to open camera and capture photo
+                </p>
               </div>
             </div>
           </CardContent>
