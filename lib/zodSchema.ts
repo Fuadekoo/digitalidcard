@@ -55,3 +55,22 @@ export const orderSchema = z.object({
   registrarId: z.string().nonempty("registrar id is required"),
 });
 export type OrderSchema = z.infer<typeof orderSchema>;
+
+export const citizenSchema = z.object({
+  registralNo: z.string().nonempty("registral number is required"),
+  profilePhoto: z.string().optional(),
+  firstName: z.string().nonempty("first name is required"),
+  middleName: z.string().optional(),
+  lastName: z.string().nonempty("last name is required"),
+  gender: z.enum(["MALE", "FEMALE", "OTHER"], {
+    message: "gender is required",
+  }),
+  placeOfBirth: z.string().nonempty("place of birth is required"),
+  dateOfBirth: z.string().nonempty("date of birth is required"),
+  occupation: z.string().nonempty("occupation is required"),
+  phone: z.string().nonempty("phone is required"),
+  emergencyContact: z.string().nonempty("emergency contact is required"),
+  relationship: z.string().nonempty("relationship is required"),
+  emergencyPhone: z.string().nonempty("emergency phone is required"),
+});
+export type CitizenSchema = z.infer<typeof citizenSchema>;

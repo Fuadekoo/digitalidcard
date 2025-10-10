@@ -1,9 +1,14 @@
-import React from 'react'
+import CitizenCreatePage from "@/features/citizen/components/citizen-create-page";
+import PageContainer from "@/components/layout/page-container";
 
-function Page() {
+export const metadata = {
+  title: "Dashboard: Register New Citizen",
+};
+
+export default function Page() {
   return (
-    <div>Page</div>
-  )
+    <PageContainer scrollable={true}>
+      <CitizenCreatePage />
+    </PageContainer>
+  );
 }
-
-export default Page

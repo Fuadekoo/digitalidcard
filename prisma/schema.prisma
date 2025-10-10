@@ -76,6 +76,12 @@ model station {
   citizen citizen[]
 }
 
+enum Sex {
+  MALE
+  FEMALE
+  OTHER
+}
+
 model citizen {
   id               String   @id @default(uuid())
   registralNo      String   @unique
@@ -83,9 +89,9 @@ model citizen {
   stationCitizen   station  @relation(fields: [stationId], references: [id])
   stationId        String
   firstName        String
-  middleName       String
+  middleName       String?
   lastName         String
-  gender           String
+  gender           Sex
   placeOfBirth     String
   dateOfBirth      DateTime
   occupation       String

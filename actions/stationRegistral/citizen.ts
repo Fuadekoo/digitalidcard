@@ -96,6 +96,7 @@ export async function createCitizen(data: z.infer<typeof citizenSchema>) {
     const citizen = await prisma.citizen.create({
       data: {
         ...data,
+        dateOfBirth: new Date(data.dateOfBirth),
         stationId: stationId?.stationId,
       },
     });
@@ -104,7 +105,8 @@ export async function createCitizen(data: z.infer<typeof citizenSchema>) {
       message: "Citizen created successfully",
       data: citizen,
     };
-  } catch {
+  } catch (error){
+    console.log("citizen error",error);
     return { status: false, message: "Failed to create citizen" };
   }
 }
@@ -124,7 +126,10 @@ export async function updateCitizen(
     if (!stationId?.stationId) throw new Error("station not found");
     const citizen = await prisma.citizen.update({
       where: { id, stationId: stationId?.stationId },
-      data,
+      data: {
+        ...data,
+        dateOfBirth: new Date(data.dateOfBirth),
+      },
     });
     return {
       status: true,

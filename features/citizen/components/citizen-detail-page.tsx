@@ -329,7 +329,7 @@ export default function CitizenDetailPage({ citizenId }: CitizenDetailPageProps)
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Gender</p>
-                  <Badge variant={citizenData.gender === "Male" ? "default" : "secondary"}>
+                  <Badge variant={citizenData.gender === "MALE" ? "default" : "secondary"}>
                     {citizenData.gender}
                   </Badge>
                 </div>
