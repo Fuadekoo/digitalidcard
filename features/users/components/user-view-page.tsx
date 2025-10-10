@@ -236,27 +236,37 @@ export default function UserViewPage({ userId }: UserViewPageProps) {
                   </Label>
                   <div className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-muted-foreground" />
-                    <Badge
-                      variant={
-                        user.role === "stationAdmin"
-                          ? "destructive"
-                          : user.role === "stationRegistral"
-                          ? "default"
-                          : user.role === "stationPrintral"
-                          ? "secondary"
-                          : "outline"
+                    {(() => {
+                      // Map old roles to new ones for display
+                      let displayRole = user.role || "N/A";
+                      let badgeVariant:
+                        | "destructive"
+                        | "default"
+                        | "secondary"
+                        | "outline" = "outline";
+
+                      if (
+                        user.role === "stationAdmin" ||
+                        user.role === "admin" ||
+                        user.role === "superAdmin"
+                      ) {
+                        displayRole = "Station Admin";
+                        badgeVariant = "destructive";
+                      } else if (
+                        user.role === "stationRegistral" ||
+                        user.role === "user"
+                      ) {
+                        displayRole = "Station Registral";
+                        badgeVariant = "default";
+                      } else if (user.role === "stationPrintral") {
+                        displayRole = "Station Printral";
+                        badgeVariant = "secondary";
                       }
-                    >
-                      {user.role === "stationAdmin" && "Station Admin"}
-                      {user.role === "stationRegistral" && "Station Registral"}
-                      {user.role === "stationPrintral" && "Station Printral"}
-                      {![
-                        "stationAdmin",
-                        "stationRegistral",
-                        "stationPrintral",
-                      ].includes(user.role) &&
-                        (user.role || "N/A")}
-                    </Badge>
+
+                      return (
+                        <Badge variant={badgeVariant}>{displayRole}</Badge>
+                      );
+                    })()}
                     {user.isAdmin && (
                       <Shield className="h-4 w-4 text-primary" />
                     )}

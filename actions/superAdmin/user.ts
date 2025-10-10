@@ -3,7 +3,7 @@ import prisma from "@/lib/db";
 import bcrypt from "bcryptjs";
 import z from "zod";
 import { MutationState } from "@/lib/definitions";
-import { userSchema, userType } from "@/lib/zodSchema";
+import { userSchema, userType, userUpdateSchema } from "@/lib/zodSchema";
 import { Filter } from "@/lib/definition";
 import { sorting } from "@/lib/utils";
 import { auth } from "@/auth";
@@ -80,21 +80,37 @@ export async function createUser({
 
 export async function updateUser(
   id: string,
-  { username, phone, role, stationId, password }: z.infer<typeof userSchema>
+  {
+    username,
+    phone,
+    role,
+    stationId,
+    password,
+  }: z.infer<typeof userUpdateSchema>
 ): Promise<MutationState> {
   try {
+    // Prepare update data
+    const updateData: any = {
+      username,
+      phone,
+      role,
+      stationId,
+    };
+
+    // Only update password if provided
+    if (password && password.trim()) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updateData.password = hashedPassword;
+    }
+
     const user = await prisma.user.update({
       where: { id },
-      data: {
-        username,
-        phone,
-        role,
-        stationId,
-        password,
-      },
+      data: updateData,
     });
+
     return { status: true, message: "User updated successfully", data: user };
   } catch (error) {
+    console.error("Error updating user:", error);
     return { status: false, message: "Failed to update user" };
   }
 }

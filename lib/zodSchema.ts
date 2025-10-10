@@ -36,6 +36,15 @@ export const userSchema = z.object({
 });
 export type userType = z.infer<typeof userSchema>;
 
+export const userUpdateSchema = z.object({
+  username: z.string().nonempty("username is required"),
+  password: z.string().optional(),
+  phone: z.string().nonempty("phone is required"),
+  role: z.string().nonempty("role is required"),
+  stationId: z.string(),
+});
+export type userUpdateType = z.infer<typeof userUpdateSchema>;
+
 export const orderSchema = z.object({
   citizenId: z.string().nonempty("citizen id is required"),
   orderType: z.string().nonempty("order type is required"),

@@ -205,28 +205,33 @@ export default function UserListingPage() {
         cell: ({ row }) => {
           const role = row.getValue("role") as string;
           const isAdmin = row.original.isAdmin;
+
+          // Map old roles to new ones for display
+          let displayRole = role;
+          let badgeVariant:
+            | "destructive"
+            | "default"
+            | "secondary"
+            | "outline" = "outline";
+
+          if (
+            role === "stationAdmin" ||
+            role === "admin" ||
+            role === "superAdmin"
+          ) {
+            displayRole = "Station Admin";
+            badgeVariant = "destructive";
+          } else if (role === "stationRegistral" || role === "user") {
+            displayRole = "Station Registral";
+            badgeVariant = "default";
+          } else if (role === "stationPrintral") {
+            displayRole = "Station Printral";
+            badgeVariant = "secondary";
+          }
+
           return (
             <div className="flex items-center gap-2">
-              <Badge
-                variant={
-                  role === "stationAdmin"
-                    ? "destructive"
-                    : role === "stationRegistral"
-                    ? "default"
-                    : role === "stationPrintral"
-                    ? "secondary"
-                    : "outline"
-                }
-              >
-                {role === "stationAdmin" && "Station Admin"}
-                {role === "stationRegistral" && "Station Registral"}
-                {role === "stationPrintral" && "Station Printral"}
-                {![
-                  "stationAdmin",
-                  "stationRegistral",
-                  "stationPrintral",
-                ].includes(role) && role}
-              </Badge>
+              <Badge variant={badgeVariant}>{displayRole}</Badge>
               {isAdmin && <Shield className="h-3 w-3 text-primary" />}
             </div>
           );

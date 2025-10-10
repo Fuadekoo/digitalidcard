@@ -44,7 +44,7 @@ interface UserFormData {
   phone: string;
   role: string;
   stationId: string;
-  password: string;
+  password?: string;
 }
 
 export default function UserEditPage({ userId }: UserEditPageProps) {
@@ -73,7 +73,12 @@ export default function UserEditPage({ userId }: UserEditPageProps) {
   // Stable mutation function
   const mutationFn = useCallback(
     async (data: UserFormData) => {
-      const result = await updateUser(userId, data);
+      // If password is empty, remove it from the data to keep existing password
+      const { password, ...userData } = data;
+      const updateData =
+        password && password.trim() ? { ...userData, password } : userData;
+
+      const result = await updateUser(userId, updateData);
       return result;
     },
     [userId]
@@ -99,10 +104,27 @@ export default function UserEditPage({ userId }: UserEditPageProps) {
   useEffect(() => {
     if (userData && userData.data) {
       const user = userData.data as any;
+      console.log("User data loaded:", user); // Debug log
+
+      // Map old role values to new ones if needed
+      let mappedRole = user.role || "";
+      if (user.role === "admin" || user.role === "superAdmin") {
+        mappedRole = "stationAdmin";
+      } else if (user.role === "user") {
+        mappedRole = "stationRegistral"; // Default to registral for old users
+      } else if (
+        !["stationAdmin", "stationRegistral", "stationPrintral"].includes(
+          user.role
+        )
+      ) {
+        // If role is not one of our valid roles, default to registral
+        mappedRole = "stationRegistral";
+      }
+
       setFormData({
         username: user.username || "",
         phone: user.phone || "",
-        role: user.role || "",
+        role: mappedRole,
         stationId: user.stationId || "",
         password: "", // Don't populate password for security
       });
@@ -127,6 +149,12 @@ export default function UserEditPage({ userId }: UserEditPageProps) {
     // Validate required fields
     if (!formData.username || !formData.phone || !formData.role) {
       toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    // Validate password if provided
+    if (formData.password && formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters long.");
       return;
     }
 
@@ -249,18 +277,19 @@ export default function UserEditPage({ userId }: UserEditPageProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="password">New Password</Label>
+                <Label htmlFor="password">New Password (Optional)</Label>
                 <Input
                   id="password"
                   type="password"
-                  value={formData.password}
+                  value={formData.password || ""}
                   onChange={(e) =>
                     handleInputChange("password", e.target.value)
                   }
                   placeholder="Enter new password (leave empty to keep current)"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Leave empty to keep the current password.
+                  Leave empty to keep the current password. Must be at least 6
+                  characters if provided.
                 </p>
               </div>
             </div>
@@ -268,6 +297,12 @@ export default function UserEditPage({ userId }: UserEditPageProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="role">Role *</Label>
+                {/* Debug info - remove this later */}
+                {process.env.NODE_ENV === "development" && (
+                  <div className="text-xs text-muted-foreground">
+                    Current role value: "{formData.role}"
+                  </div>
+                )}
                 <Select
                   value={formData.role}
                   onValueChange={(value) => handleInputChange("role", value)}
@@ -283,6 +318,16 @@ export default function UserEditPage({ userId }: UserEditPageProps) {
                     <SelectItem value="stationPrintral">
                       Station Printral
                     </SelectItem>
+                    {formData.role &&
+                      ![
+                        "stationAdmin",
+                        "stationRegistral",
+                        "stationPrintral",
+                      ].includes(formData.role) && (
+                        <SelectItem value={formData.role}>
+                          Current: {formData.role} (Please select a new role)
+                        </SelectItem>
+                      )}
                   </SelectContent>
                 </Select>
               </div>
