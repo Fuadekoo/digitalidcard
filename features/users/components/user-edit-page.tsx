@@ -1,0 +1,298 @@
+"use client";
+
+import React, { useState, useEffect, useCallback } from "react";
+import { useData } from "@/hooks/useData";
+import useMutation from "@/hooks/useMutation";
+import { getSingleUser, updateUser } from "@/actions/superAdmin/user";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import {
+  ArrowLeft,
+  Save,
+  User,
+  Shield,
+  Phone,
+  Activity,
+  AlertCircle,
+} from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { toast } from "sonner";
+
+interface UserEditPageProps {
+  userId: string;
+}
+
+interface UserFormData {
+  username: string;
+  phone: string;
+  role: string;
+  stationId: string;
+}
+
+export default function UserEditPage({ userId }: UserEditPageProps) {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const isSuperAdmin = session?.user?.role === "superAdmin";
+
+  // Create stable parameters for useData
+  const userParams = React.useMemo(() => userId, [userId]);
+
+  // Fetch user data
+  const [userData, isLoading] = useData(getSingleUser, null, userParams);
+
+  // Form state
+  const [formData, setFormData] = useState<UserFormData>({
+    username: "",
+    phone: "",
+    role: "",
+    stationId: "",
+  });
+
+  // Stable mutation function
+  const mutationFn = useCallback(
+    async (data: UserFormData) => {
+      const result = await updateUser(userId, data);
+      return result;
+    },
+    [userId]
+  );
+
+  // Stable success callback
+  const onSuccess = useCallback(
+    (result: any) => {
+      if (result.status) {
+        toast.success("User updated successfully!");
+        router.push(`/dashboard/user/${userId}`);
+      } else {
+        toast.error(result.message || "Failed to update user");
+      }
+    },
+    [router, userId]
+  );
+
+  // Mutation hook for updating user
+  const [updateUserMutation, isUpdating] = useMutation(mutationFn, onSuccess);
+
+  // Update form data when user data is loaded
+  useEffect(() => {
+    if (userData && userData.data) {
+      const user = userData.data as any;
+      setFormData({
+        username: user.username || "",
+        phone: user.phone || "",
+        role: user.role || "",
+        stationId: user.stationId || "",
+      });
+    }
+  }, [userData]);
+
+  const handleInputChange = (field: keyof UserFormData, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!isSuperAdmin) {
+      toast.error("Access denied. Super admin role required.");
+      return;
+    }
+
+    // Validate required fields
+    if (!formData.username || !formData.phone || !formData.role) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    // Use the mutation hook to update the user
+    updateUserMutation(formData);
+  };
+
+  if (!isSuperAdmin) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 mx-auto text-destructive mb-4" />
+          <h3 className="text-lg font-semibold">Access Denied</h3>
+          <p className="text-muted-foreground">
+            You don't have permission to edit users. Super admin role required.
+          </p>
+          <Link href="/dashboard/user" className="mt-4 inline-block">
+            <Button variant="outline">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Users
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Activity className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
+          <h3 className="text-lg font-semibold">Loading User Data...</h3>
+          <p className="text-muted-foreground">
+            Please wait while we fetch the user information.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!userData || !userData.status || !userData.data) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 mx-auto text-destructive mb-4" />
+          <h3 className="text-lg font-semibold">User Not Found</h3>
+          <p className="text-muted-foreground">
+            The user you're looking for doesn't exist or you don't have
+            permission to view it.
+          </p>
+          <Link href="/dashboard/user" className="mt-4 inline-block">
+            <Button variant="outline">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Users
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard/user">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Users
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold">Edit User</h1>
+            <p className="text-muted-foreground">
+              Update user information and permissions.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Basic Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              User Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">Username *</Label>
+                <Input
+                  id="username"
+                  value={formData.username}
+                  onChange={(e) =>
+                    handleInputChange("username", e.target.value)
+                  }
+                  placeholder="Enter username"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number *</Label>
+                <Input
+                  id="phone"
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange("phone", e.target.value)}
+                  placeholder="Enter phone number"
+                  type="tel"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="role">Role *</Label>
+                <Select
+                  value={formData.role}
+                  onValueChange={(value) => handleInputChange("role", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select user role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="superAdmin">Super Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="stationId">Station ID</Label>
+                <Input
+                  id="stationId"
+                  value={formData.stationId}
+                  onChange={(e) =>
+                    handleInputChange("stationId", e.target.value)
+                  }
+                  placeholder="Enter station ID (optional)"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave empty if user is not assigned to a specific station.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Action Buttons */}
+        <div className="flex items-center justify-end gap-4">
+          <Link href={`/dashboard/user/${userId}`}>
+            <Button variant="outline" type="button">
+              Cancel
+            </Button>
+          </Link>
+          <Button type="submit" disabled={isUpdating}>
+            {isUpdating ? (
+              <>
+                <Activity className="mr-2 h-4 w-4 animate-spin" />
+                Updating...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Update User
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}

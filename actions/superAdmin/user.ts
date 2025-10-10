@@ -17,7 +17,33 @@ export async function getUser({ search, currentPage, row, sort }: Filter) {
         { role: { contains: search } },
       ],
     },
+    skip: (currentPage - 1) * row,
+    take: row,
+    select: {
+      id: true,
+      username: true,
+      phone: true,
+      role: true,
+      status: true,
+      isAdmin: true,
+      isActive: true,
+      stationId: true,
+      createdAt: true,
+      updatedAt: true,
+    },
   });
+
+  const totalData = await prisma.user.count({
+    where: {
+      OR: [
+        { username: { contains: search } },
+        { phone: { contains: search } },
+        { role: { contains: search } },
+      ],
+    },
+  });
+
+  return { list, totalData };
 }
 
 export async function getSingleUser(id: string): Promise<MutationState> {

@@ -133,31 +133,54 @@ export async function createStation({
 
 export async function updateStation(
   id: string,
-  {
-    code,
-    afanOromoName,
-    amharicName,
-    stationAdminName,
-    stampPhoto,
-    signPhoto,
-  }: z.infer<typeof stationSchema>
+  data: any
 ): Promise<MutationState> {
   try {
     // Require super admin role
     await requireSuperAdmin();
-    await prisma.station.update({
+
+    const updateData: any = {};
+
+    // Handle both old schema fields and new fields
+    if (data.code !== undefined) updateData.code = data.code;
+    if (data.afanOromoName !== undefined)
+      updateData.afanOromoName = data.afanOromoName;
+    if (data.amharicName !== undefined)
+      updateData.amharicName = data.amharicName;
+    if (data.stationAdminName !== undefined)
+      updateData.stationAdminName = data.stationAdminName;
+    if (data.stampPhoto !== undefined) updateData.stampPhoto = data.stampPhoto;
+    if (data.signPhoto !== undefined) updateData.signPhoto = data.signPhoto;
+
+    // Handle new fields
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.location !== undefined) updateData.location = data.location;
+    if (data.description !== undefined)
+      updateData.description = data.description;
+    if (data.phone !== undefined) updateData.phone = data.phone;
+    if (data.email !== undefined) updateData.email = data.email;
+    if (data.website !== undefined) updateData.website = data.website;
+    if (data.isActive !== undefined) updateData.isActive = data.isActive;
+    if (data.address !== undefined) updateData.address = data.address;
+    if (data.city !== undefined) updateData.city = data.city;
+    if (data.state !== undefined) updateData.state = data.state;
+    if (data.zipCode !== undefined) updateData.zipCode = data.zipCode;
+    if (data.country !== undefined) updateData.country = data.country;
+
+    updateData.updatedAt = new Date();
+
+    const updatedStation = await prisma.station.update({
       where: { id },
-      data: {
-        code,
-        afanOromoName,
-        amharicName,
-        stationAdminName,
-        stampPhoto,
-        signPhoto,
-      },
+      data: updateData,
     });
-    return { status: true, message: "successfully update station" };
+
+    return {
+      status: true,
+      message: "successfully update station",
+      data: updatedStation,
+    };
   } catch (error) {
+    console.error("Error updating station:", error);
     return { status: false, message: "failed to update station" };
   }
 }
@@ -238,7 +261,7 @@ export async function getStationUser({
     },
   });
 
-  console.log("stationUser list", list);
-  console.log("stationUser totalData", totalData);
+  // console.log("stationUser list", list);
+  // console.log("stationUser totalData", totalData);
   return { list, totalData };
 }

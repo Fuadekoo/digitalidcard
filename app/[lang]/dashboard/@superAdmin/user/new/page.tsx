@@ -1,10 +1,10 @@
 import FormCardSkeleton from "@/components/form-card-skeleton";
 import PageContainer from "@/components/layout/page-container";
 import { Suspense } from "react";
-import StationCreatePage from "@/features/stations/components/station-create-page";
+import UserCreatePage from "@/features/users/components/user-create-page";
 
 export const metadata = {
-  title: "Dashboard: Create Station",
+  title: "Dashboard: Create User",
 };
 
 export default function Page() {
@@ -12,7 +12,7 @@ export default function Page() {
     <PageContainer scrollable>
       <div className="flex-1 space-y-4">
         <Suspense fallback={<FormCardSkeleton />}>
-          <StationCreatePage />
+          <UserCreatePage />
         </Suspense>
       </div>
     </PageContainer>
