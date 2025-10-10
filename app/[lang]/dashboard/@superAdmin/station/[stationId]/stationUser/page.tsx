@@ -23,7 +23,7 @@ export default async function Page(props: pageProps) {
   const searchParams = await props.searchParams;
 
   return (
-    <PageContainer scrollable={false}>
+    <PageContainer scrollable={true}>
       <div className="flex flex-1 flex-col space-y-4">
         <div className="flex items-start justify-between">
           <Heading

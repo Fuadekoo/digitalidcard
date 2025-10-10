@@ -68,49 +68,24 @@ export default function StationUserListing({
   // Check if user is super admin
   const isSuperAdmin = session?.user?.role === "superAdmin";
 
-  // Create stable parameters for useData
+  // Memoize query parameters to prevent infinite re-renders
   const queryParams = React.useMemo(
     () => ({
       stationId,
       search: globalFilter,
       currentPage: pagination.pageIndex + 1,
       row: pagination.pageSize,
-      sort: "desc", // desc or asc
+      sort: "desc",
     }),
     [stationId, globalFilter, pagination.pageIndex, pagination.pageSize]
   );
 
-  // Data fetching
-  const [data, setData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchData = React.useCallback(async () => {
-    try {
-      setIsLoading(true);
-      console.log("Fetching station users with params:", queryParams);
-      const result = await getStationUser(queryParams);
-      console.log("Station users result:", result);
-
-      if (result.status) {
-        setData(result.data);
-      } else {
-        toast.error(result.message || "Failed to load station users");
-        setData({ list: [], totalData: 0 });
-      }
-    } catch (error) {
-      console.error("Error fetching station user data:", error);
-      toast.error("Failed to load station users");
-      setData({ list: [], totalData: 0 });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [queryParams]);
-
-  React.useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const refresh = () => fetchData();
+  // Data fetching using useData hook
+  const [data, isLoading, refresh] = useData(
+    getStationUser,
+    () => {},
+    queryParams
+  );
 
   // Transform data to match StationUser type
   const transformedData = React.useMemo(() => {
@@ -291,7 +266,7 @@ export default function StationUserListing({
   });
 
   // Show loading only if we're actually loading and have no data
-  if (isLoading && !data) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-muted-foreground">Loading station users...</div>
@@ -314,6 +289,9 @@ export default function StationUserListing({
       </div>
     );
   }
+
+  // Show empty state if no users found
+  const hasNoUsers = !isLoading && transformedData.length === 0;
 
   return (
     <div className="space-y-6">
@@ -415,21 +393,39 @@ export default function StationUserListing({
           </p>
         </CardHeader>
         <CardContent className="p-0">
-          <DataTable
-            table={table}
-            actionBar={
-              <div className="flex items-center gap-2 px-6 py-3 border-t bg-muted/30">
-                <Badge variant="secondary" className="text-xs">
-                  {table.getFilteredSelectedRowModel().rows.length} selected
-                </Badge>
-                <Button variant="outline" size="sm" className="text-xs">
-                  Export Selected
-                </Button>
+          {hasNoUsers ? (
+            <div className="flex flex-col items-center justify-center py-16 px-4">
+              <div className="rounded-full bg-muted p-6 mb-4">
+                <User className="h-12 w-12 text-muted-foreground" />
               </div>
-            }
-          >
-            <DataTableToolbar table={table} />
-          </DataTable>
+              <h3 className="text-lg font-semibold mb-2">No Users Found</h3>
+              <p className="text-sm text-muted-foreground text-center mb-6 max-w-md">
+                This station doesn't have any users yet. Add a new user to get started with managing station personnel.
+              </p>
+              <Link href={`/dashboard/station/${stationId}/user/new`}>
+                <Button>
+                  <User className="mr-2 h-4 w-4" />
+                  Add First User
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <DataTable
+              table={table}
+              actionBar={
+                <div className="flex items-center gap-2 px-6 py-3 border-t bg-muted/30">
+                  <Badge variant="secondary" className="text-xs">
+                    {table.getFilteredSelectedRowModel().rows.length} selected
+                  </Badge>
+                  <Button variant="outline" size="sm" className="text-xs">
+                    Export Selected
+                  </Button>
+                </div>
+              }
+            >
+              <DataTableToolbar table={table} />
+            </DataTable>
+          )}
         </CardContent>
       </Card>
     </div>
