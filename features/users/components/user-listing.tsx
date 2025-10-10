@@ -209,14 +209,23 @@ export default function UserListingPage() {
             <div className="flex items-center gap-2">
               <Badge
                 variant={
-                  role === "superAdmin"
+                  role === "stationAdmin"
                     ? "destructive"
-                    : role === "admin"
+                    : role === "stationRegistral"
                     ? "default"
-                    : "secondary"
+                    : role === "stationPrintral"
+                    ? "secondary"
+                    : "outline"
                 }
               >
-                {role}
+                {role === "stationAdmin" && "Station Admin"}
+                {role === "stationRegistral" && "Station Registral"}
+                {role === "stationPrintral" && "Station Printral"}
+                {![
+                  "stationAdmin",
+                  "stationRegistral",
+                  "stationPrintral",
+                ].includes(role) && role}
               </Badge>
               {isAdmin && <Shield className="h-3 w-3 text-primary" />}
             </div>

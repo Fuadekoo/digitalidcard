@@ -12,6 +12,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
   ArrowLeft,
@@ -237,14 +238,24 @@ export default function UserViewPage({ userId }: UserViewPageProps) {
                     <Shield className="h-4 w-4 text-muted-foreground" />
                     <Badge
                       variant={
-                        user.role === "superAdmin"
+                        user.role === "stationAdmin"
                           ? "destructive"
-                          : user.role === "admin"
+                          : user.role === "stationRegistral"
                           ? "default"
-                          : "secondary"
+                          : user.role === "stationPrintral"
+                          ? "secondary"
+                          : "outline"
                       }
                     >
-                      {user.role || "N/A"}
+                      {user.role === "stationAdmin" && "Station Admin"}
+                      {user.role === "stationRegistral" && "Station Registral"}
+                      {user.role === "stationPrintral" && "Station Printral"}
+                      {![
+                        "stationAdmin",
+                        "stationRegistral",
+                        "stationPrintral",
+                      ].includes(user.role) &&
+                        (user.role || "N/A")}
                     </Badge>
                     {user.isAdmin && (
                       <Shield className="h-4 w-4 text-primary" />

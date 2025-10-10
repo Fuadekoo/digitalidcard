@@ -2,13 +2,25 @@
 
 import React, { useState, useCallback } from "react";
 import useMutation from "@/hooks/useMutation";
+import { useData } from "@/hooks/useData";
 import { createUser } from "@/actions/superAdmin/user";
+import { getAllStation } from "@/actions/superAdmin/station";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import {
+  StationSelector,
+  type Station,
+} from "@/components/ui/station-selector";
 import {
   ArrowLeft,
   Save,
@@ -39,6 +51,9 @@ export default function UserCreatePage({}: UserCreatePageProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const isSuperAdmin = session?.user?.role === "superAdmin";
+
+  // Fetch stations data
+  const [stationsData, isStationsLoading] = useData(getAllStation, null);
 
   // Form state
   const [formData, setFormData] = useState<UserFormData>({
@@ -89,7 +104,12 @@ export default function UserCreatePage({}: UserCreatePageProps) {
     }
 
     // Validate required fields
-    if (!formData.username || !formData.phone || !formData.role || !formData.password) {
+    if (
+      !formData.username ||
+      !formData.phone ||
+      !formData.role ||
+      !formData.password
+    ) {
       toast.error("Please fill in all required fields.");
       return;
     }
@@ -117,7 +137,8 @@ export default function UserCreatePage({}: UserCreatePageProps) {
           <AlertCircle className="h-12 w-12 mx-auto text-destructive mb-4" />
           <h3 className="text-lg font-semibold">Access Denied</h3>
           <p className="text-muted-foreground">
-            You don't have permission to create users. Super admin role required.
+            You don't have permission to create users. Super admin role
+            required.
           </p>
           <Link href="/dashboard/user" className="mt-4 inline-block">
             <Button variant="outline">
@@ -168,7 +189,9 @@ export default function UserCreatePage({}: UserCreatePageProps) {
                 <Input
                   id="username"
                   value={formData.username}
-                  onChange={(e) => handleInputChange("username", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("username", e.target.value)
+                  }
                   placeholder="Enter username"
                   required
                 />
@@ -189,24 +212,34 @@ export default function UserCreatePage({}: UserCreatePageProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="role">Role *</Label>
-                <Select value={formData.role} onValueChange={(value) => handleInputChange("role", value)}>
+                <Select
+                  value={formData.role}
+                  onValueChange={(value) => handleInputChange("role", value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select user role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="user">User</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="superAdmin">Super Admin</SelectItem>
+                    <SelectItem value="stationAdmin">Station Admin</SelectItem>
+                    <SelectItem value="stationRegistral">
+                      Station Registral
+                    </SelectItem>
+                    <SelectItem value="stationPrintral">
+                      Station Printral
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="stationId">Station ID</Label>
-                <Input
-                  id="stationId"
+                <Label htmlFor="stationId">Station</Label>
+                <StationSelector
+                  stations={stationsData?.data || []}
                   value={formData.stationId}
-                  onChange={(e) => handleInputChange("stationId", e.target.value)}
-                  placeholder="Enter station ID (optional)"
+                  onValueChange={(value) =>
+                    handleInputChange("stationId", value)
+                  }
+                  placeholder="Select station (optional)"
+                  disabled={isStationsLoading}
                 />
                 <p className="text-xs text-muted-foreground">
                   Leave empty if user is not assigned to a specific station.
@@ -232,7 +265,9 @@ export default function UserCreatePage({}: UserCreatePageProps) {
                   id="password"
                   type="password"
                   value={formData.password}
-                  onChange={(e) => handleInputChange("password", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("password", e.target.value)
+                  }
                   placeholder="Enter password"
                   required
                 />
@@ -246,7 +281,9 @@ export default function UserCreatePage({}: UserCreatePageProps) {
                   id="confirmPassword"
                   type="password"
                   value={formData.confirmPassword}
-                  onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("confirmPassword", e.target.value)
+                  }
                   placeholder="Confirm password"
                   required
                 />

@@ -149,3 +149,14 @@ export async function resetUserPassword(id: string): Promise<MutationState> {
     return { status: false, message: "Failed to reset user password" };
   }
 }
+
+export async function getAllStation() {
+  const stations = await prisma.station.findMany({
+    select: {
+      id: true,
+      code: true,
+      afanOromoName: true,
+    },
+  });
+  return { stations };
+}

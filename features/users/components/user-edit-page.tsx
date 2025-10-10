@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useData } from "@/hooks/useData";
 import useMutation from "@/hooks/useMutation";
 import { getSingleUser, updateUser } from "@/actions/superAdmin/user";
+import { getAllStation } from "@/actions/superAdmin/station";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import {
+  StationSelector,
+  type Station,
+} from "@/components/ui/station-selector";
 import {
   ArrowLeft,
   Save,
@@ -39,6 +44,7 @@ interface UserFormData {
   phone: string;
   role: string;
   stationId: string;
+  password: string;
 }
 
 export default function UserEditPage({ userId }: UserEditPageProps) {
@@ -52,12 +58,16 @@ export default function UserEditPage({ userId }: UserEditPageProps) {
   // Fetch user data
   const [userData, isLoading] = useData(getSingleUser, null, userParams);
 
+  // Fetch stations data
+  const [stationsData, isStationsLoading] = useData(getAllStation, null);
+
   // Form state
   const [formData, setFormData] = useState<UserFormData>({
     username: "",
     phone: "",
     role: "",
     stationId: "",
+    password: "",
   });
 
   // Stable mutation function
@@ -94,6 +104,7 @@ export default function UserEditPage({ userId }: UserEditPageProps) {
         phone: user.phone || "",
         role: user.role || "",
         stationId: user.stationId || "",
+        password: "", // Don't populate password for security
       });
     }
   }, [userData]);
@@ -238,6 +249,24 @@ export default function UserEditPage({ userId }: UserEditPageProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
+                <Label htmlFor="password">New Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) =>
+                    handleInputChange("password", e.target.value)
+                  }
+                  placeholder="Enter new password (leave empty to keep current)"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave empty to keep the current password.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <Label htmlFor="role">Role *</Label>
                 <Select
                   value={formData.role}
@@ -247,21 +276,26 @@ export default function UserEditPage({ userId }: UserEditPageProps) {
                     <SelectValue placeholder="Select user role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="user">User</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="superAdmin">Super Admin</SelectItem>
+                    <SelectItem value="stationAdmin">Station Admin</SelectItem>
+                    <SelectItem value="stationRegistral">
+                      Station Registral
+                    </SelectItem>
+                    <SelectItem value="stationPrintral">
+                      Station Printral
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="stationId">Station ID</Label>
-                <Input
-                  id="stationId"
+                <Label htmlFor="stationId">Station</Label>
+                <StationSelector
+                  stations={stationsData?.data || []}
                   value={formData.stationId}
-                  onChange={(e) =>
-                    handleInputChange("stationId", e.target.value)
+                  onValueChange={(value) =>
+                    handleInputChange("stationId", value)
                   }
-                  placeholder="Enter station ID (optional)"
+                  placeholder="Select station (optional)"
+                  disabled={isStationsLoading}
                 />
                 <p className="text-xs text-muted-foreground">
                   Leave empty if user is not assigned to a specific station.

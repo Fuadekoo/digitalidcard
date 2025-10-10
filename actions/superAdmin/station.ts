@@ -14,6 +14,45 @@ type StationFilter = {
   sort: string;
 };
 
+// Get all stations for dropdown/select purposes
+export async function getAllStation(): Promise<MutationState> {
+  try {
+    // Check if user is super admin
+    const isAdmin = await isSuperAdmin();
+    if (!isAdmin) {
+      return {
+        status: false,
+        message: "Access denied. Super admin role required.",
+      };
+    }
+
+    const stations = await prisma.station.findMany({
+      select: {
+        id: true,
+        code: true,
+        afanOromoName: true,
+        amharicName: true,
+        stationAdminName: true,
+      },
+      orderBy: {
+        code: "asc",
+      },
+    });
+
+    return {
+      status: true,
+      data: stations,
+      message: "Stations retrieved successfully",
+    };
+  } catch (error) {
+    console.error("Error fetching all stations:", error);
+    return {
+      status: false,
+      message: "Failed to fetch stations",
+    };
+  }
+}
+
 export async function getStation({
   search,
   currentPage,
