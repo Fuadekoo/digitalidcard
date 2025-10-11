@@ -222,7 +222,7 @@ export function CreateOrderDialog({
       </div>
 
       {/* Order Summary */}
-      {selectedCitizen && selectedOrderTypeInfo && (
+      {/* {selectedCitizen && selectedOrderTypeInfo && (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Order Summary</CardTitle>
@@ -259,7 +259,7 @@ export function CreateOrderDialog({
             </div>
           </CardContent>
         </Card>
-      )}
+      )} */}
 
       {/* Action Buttons */}
       <div className="flex gap-4 justify-end">

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -65,6 +66,7 @@ export function PaymentIntegration({
   lang,
   onPaymentSuccess,
 }: PaymentIntegrationProps) {
+  const router = useRouter();
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<
     "pending" | "processing" | "success" | "failed"
@@ -81,8 +83,12 @@ export function PaymentIntegration({
         // Extract tx_ref from URL or use a placeholder
         // In real implementation, you might get this from the response
         setTxRef(orderId); // Using orderId as placeholder for tx_ref
-        // Open payment in new tab
-        window.open(state.url, "_blank");
+        
+        // Navigate to payment URL in the same tab (more secure)
+        toast.success("Redirecting to payment page...");
+        setTimeout(() => {
+          window.location.href = state.url;
+        }, 1000);
       } else {
         setPaymentStatus("failed");
         toast.error(state?.message || "Failed to initialize payment");
@@ -149,13 +155,13 @@ export function PaymentIntegration({
   const getStatusMessage = () => {
     switch (paymentStatus) {
       case "pending":
-        return "Payment pending";
+        return "Ready to process payment";
       case "processing":
-        return "Processing payment...";
+        return "Redirecting to payment page...";
       case "success":
-        return "Payment successful";
+        return "Payment completed successfully";
       case "failed":
-        return "Payment failed";
+        return "Payment failed - please try again";
       default:
         return "Unknown status";
     }
@@ -196,7 +202,7 @@ export function PaymentIntegration({
               Process Payment
             </DialogTitle>
             <DialogDescription>
-              Initialize payment for order {orderNumber}
+              Complete payment for order {orderNumber}. You will be redirected to the secure payment page.
             </DialogDescription>
           </DialogHeader>
 
@@ -256,8 +262,8 @@ export function PaymentIntegration({
                     </>
                   ) : (
                     <>
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      Start Payment
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      Pay Now
                     </>
                   )}
                 </Button>
