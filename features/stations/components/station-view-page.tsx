@@ -22,6 +22,7 @@ import {
 import Link from "next/link";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
+import { useParams } from "next/navigation";
 
 interface StationViewPageProps {
   stationId: string;
@@ -29,6 +30,7 @@ interface StationViewPageProps {
 
 export default function StationViewPage({ stationId }: StationViewPageProps) {
   const { data: session } = useSession();
+  const { lang } = useParams<{ lang: string }>();
   const [data, isLoading, refresh] = useData(getSingleStation, null, stationId);
 
   // Check if user is super admin
@@ -109,7 +111,7 @@ export default function StationViewPage({ stationId }: StationViewPageProps) {
                 <Edit className="mr-2 h-4 w-4" />
                 Edit Station
               </Button>
-              <Link href={`/dashboard/station/${stationId}/stationUser`}>
+              <Link href={`/${lang}/dashboard/station/${stationId}/stationUser`}>
                 <Button variant="outline" size="sm">
                   <Users className="mr-2 h-4 w-4" />
                   Manage Users

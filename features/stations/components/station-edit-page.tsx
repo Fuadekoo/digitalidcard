@@ -22,7 +22,7 @@ import {
   ImageIcon,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -87,6 +87,7 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
   const [signUploadProgress, setSignUploadProgress] = useState<UploadProgress | null>(null);
   const [isUploadingStamp, setIsUploadingStamp] = useState(false);
   const [isUploadingSign, setIsUploadingSign] = useState(false);
+  const { lang } = useParams<{ lang: string }>();
 
   // Stable mutation function
   const mutationFn = useCallback(
@@ -102,7 +103,7 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
     (result: any) => {
       if (result.status) {
         toast.success("Station updated successfully!");
-        router.push(`/dashboard/station/${stationId}`);
+        router.push(`/${lang}/dashboard/station/${stationId}`);
       } else {
         toast.error(result.message || "Failed to update station");
       }
