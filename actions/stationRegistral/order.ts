@@ -44,6 +44,7 @@ export async function getOrder({ search, currentPage, row, sort }: Filter) {
           updatedAt: true,
           citizen: {
             select: {
+              id: true,
               firstName: true,
               lastName: true,
               gender: true,
@@ -255,5 +256,77 @@ export async function trackSingleOrder(id: string) {
     return { status: true, message: "Order tracked successfully", data: order };
   } catch {
     return { status: false, message: "Failed to track order" };
+  }
+}
+
+export async function updateOrderStatus(
+  id: string,
+  status: "PENDING" | "APPROVED" | "REJECTED"
+) {
+  try {
+    const session = await auth();
+    const adminId = session?.user?.id;
+    if (!adminId) throw new Error("unauthenticated");
+
+    const stationId = await prisma.user.findUnique({
+      where: { id: adminId, role: "stationRegistrar" },
+      select: { stationId: true },
+    });
+    if (!stationId?.stationId) throw new Error("station not found");
+
+    const order = await prisma.order.findUnique({
+      where: { id, stationId: stationId.stationId },
+    });
+    if (!order) throw new Error("Order not found");
+
+    const updatedOrder = await prisma.order.update({
+      where: { id },
+      data: {
+        orderStatus: status,
+        updatedAt: new Date(),
+      },
+    });
+
+    return {
+      status: true,
+      message: "Order status updated successfully",
+      data: updatedOrder,
+    };
+  } catch (error) {
+    console.log(error);
+    return { status: false, message: "Failed to update order status" };
+  }
+}
+
+export async function MyStationCitizen() {
+  try {
+    const session = await auth();
+    const adminId = session?.user?.id;
+    if (!adminId) throw new Error("unauthenticated");
+    const stationId = await prisma.user.findUnique({
+      where: { id: adminId, role: "stationRegistrar" },
+      select: { stationId: true },
+    });
+    if (!stationId?.stationId) throw new Error("station not found");
+    const citizen = await prisma.citizen.findMany({
+      where: { stationId: stationId.stationId },
+
+      select: {
+        id: true,
+        registralNo: true,
+        firstName: true,
+        middleName: true,
+        lastName: true,
+        phone: true,
+      },
+    });
+    return {
+      status: true,
+      message: "Citizen fetched successfully",
+      data: citizen,
+    };
+  } catch (error) {
+    console.log(error);
+    return { status: false, message: "Failed to fetch citizen" };
   }
 }

@@ -110,7 +110,7 @@ model order {
   citizenId        String
   orderType        String
   orderStatus      status   @default(PENDING)
-  paymentMethod    String
+  paymentMethod    String 
   paymentReference String
   paymentProof     String?
   amount           Int
