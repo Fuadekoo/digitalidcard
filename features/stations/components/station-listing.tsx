@@ -33,6 +33,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { deleteStation } from "@/actions/superAdmin/station";
 
 // Station data type
 export type Station = {
@@ -46,104 +49,136 @@ export type Station = {
   createdAt: Date;
 };
 
-// Table columns definition
-const columns: ColumnDef<Station>[] = [
-  {
-    accessorKey: "code",
-    header: "Station Code",
-    cell: ({ row }) => (
-      <div className="font-medium text-primary">{row.getValue("code")}</div>
-    ),
-  },
-  {
-    accessorKey: "amharicName",
-    header: "Station Name (Amharic)",
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("amharicName")}</div>
-    ),
-  },
-  {
-    accessorKey: "afanOromoName",
-    header: "Station Name (Oromo)",
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("afanOromoName")}</div>
-    ),
-  },
-  {
-    accessorKey: "stationAdminName",
-    header: "Admin Name",
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("stationAdminName")}</div>
-    ),
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Created Date",
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("createdAt"));
-      return (
-        <div className="text-muted-foreground">{date.toLocaleDateString()}</div>
-      );
-    },
-  },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => {
-      const station = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(station.id)}
-            >
-              Copy station ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Eye className="mr-2 h-4 w-4" />
-              View Details
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Station
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Users className="mr-2 h-4 w-4" />
-              Manage Users
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <FileText className="mr-2 h-4 w-4" />
-              View Reports
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete Station
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
-];
-
 // Main Station Listing Component
 export default function StationListingPage() {
   const { data: session } = useSession();
+  const { lang } = useParams<{ lang: string }>();
   const [globalFilter, setGlobalFilter] = useState("");
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
+
+  // Handle delete station
+  const handleDeleteStation = async (stationId: string) => {
+    if (!confirm("Are you sure you want to delete this station? This action cannot be undone.")) {
+      return;
+    }
+
+    try {
+      const result = await deleteStation(stationId);
+      if (result.status) {
+        toast.success(result.message || "Station deleted successfully");
+        refresh();
+      } else {
+        toast.error(result.message || "Failed to delete station");
+      }
+    } catch (error) {
+      console.error("Error deleting station:", error);
+      toast.error("An error occurred while deleting the station");
+    }
+  };
+
+  // Table columns definition
+  const columns: ColumnDef<Station>[] = React.useMemo(() => [
+    {
+      accessorKey: "code",
+      header: "Station Code",
+      cell: ({ row }) => (
+        <div className="font-medium text-primary">{row.getValue("code")}</div>
+      ),
+    },
+    {
+      accessorKey: "amharicName",
+      header: "Station Name (Amharic)",
+      cell: ({ row }) => (
+        <div className="font-medium">{row.getValue("amharicName")}</div>
+      ),
+    },
+    {
+      accessorKey: "afanOromoName",
+      header: "Station Name (Oromo)",
+      cell: ({ row }) => (
+        <div className="font-medium">{row.getValue("afanOromoName")}</div>
+      ),
+    },
+    {
+      accessorKey: "stationAdminName",
+      header: "Admin Name",
+      cell: ({ row }) => (
+        <div className="font-medium">{row.getValue("stationAdminName")}</div>
+      ),
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Created Date",
+      cell: ({ row }) => {
+        const date = new Date(row.getValue("createdAt"));
+        return (
+          <div className="text-muted-foreground">{date.toLocaleDateString()}</div>
+        );
+      },
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const station = row.original;
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => navigator.clipboard.writeText(station.id)}
+              >
+                Copy station ID
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href={`/${lang}/dashboard/station/${station.id}`}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Details
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/${lang}/dashboard/station/${station.id}/edit`}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Station
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/${lang}/dashboard/station/${station.id}/stationUser`}>
+                  <Users className="mr-2 h-4 w-4" />
+                  Manage Users
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/${lang}/dashboard/reportData?stationId=${station.id}`}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  View Reports
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                className="text-destructive"
+                onClick={() => handleDeleteStation(station.id)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Station
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ], [lang, handleDeleteStation]);
 
   // Check if user is super admin
   const isSuperAdmin = session?.user?.role === "superAdmin";

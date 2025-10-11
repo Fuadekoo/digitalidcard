@@ -269,7 +269,7 @@ export default function StationCreatePage({}: StationCreatePageProps) {
             You don't have permission to create stations. Super admin role
             required.
           </p>
-          <Link href="/dashboard/station" className="mt-4 inline-block">
+          <Link href="/en/dashboard/station" className="mt-4 inline-block">
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Stations
@@ -285,7 +285,7 @@ export default function StationCreatePage({}: StationCreatePageProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/station">
+          <Link href="/en/dashboard/station">
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Stations

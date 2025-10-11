@@ -149,7 +149,7 @@ export default function StationUserCreatePage({
           <p className="text-muted-foreground">
             The station you're trying to add a user to doesn't exist.
           </p>
-          <Link href="/dashboard/station">
+          <Link href="/en/dashboard/station">
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Stations

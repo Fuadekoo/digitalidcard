@@ -53,7 +53,7 @@ export default function StationViewPage({ stationId }: StationViewPageProps) {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/station">
+          <Link href="/en/dashboard/station">
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Stations
@@ -91,7 +91,7 @@ export default function StationViewPage({ stationId }: StationViewPageProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/station">
+          <Link href="/en/dashboard/station">
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Stations

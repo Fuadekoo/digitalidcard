@@ -319,7 +319,7 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
             The station you're looking for doesn't exist or you don't have
             permission to view it.
           </p>
-          <Link href="/dashboard/station" className="mt-4 inline-block">
+          <Link href="/en/dashboard/station" className="mt-4 inline-block">
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Stations
@@ -335,7 +335,7 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href={`/dashboard/station/${stationId}`}>
+          <Link href={`/en/dashboard/station/${stationId}`}>
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Station
