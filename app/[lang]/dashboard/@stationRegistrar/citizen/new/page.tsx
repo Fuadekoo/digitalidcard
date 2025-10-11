@@ -5,10 +5,15 @@ export const metadata = {
   title: "Dashboard: Register New Citizen",
 };
 
-export default function Page() {
+interface PageProps {
+  params: Promise<{ lang: string }>;
+}
+
+export default async function Page({ params }: PageProps) {
+  const { lang } = await params;
   return (
     <PageContainer scrollable={true}>
-      <CitizenCreatePage />
+      <CitizenCreatePage lang={lang} />
     </PageContainer>
   );
 }

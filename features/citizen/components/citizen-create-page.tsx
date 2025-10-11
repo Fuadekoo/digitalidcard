@@ -61,7 +61,11 @@ const formatImageUrl = (url: string | null | undefined): string => {
   return `/api/filedata/${encodeURIComponent(url)}`;
 };
 
-export default function CitizenCreatePage() {
+interface CitizenCreatePageProps {
+  lang: string;
+}
+
+export default function CitizenCreatePage({ lang }: CitizenCreatePageProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<FormStep>("form");
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
@@ -85,14 +89,18 @@ export default function CitizenCreatePage() {
 
   // Mutation for creating citizen
   const [createCitizenMutation, isCreating] = useMutation(
-    async (data: Omit<CitizenFormData, "gender"> & { gender: "MALE" | "FEMALE" | "OTHER" }) => {
+    async (
+      data: Omit<CitizenFormData, "gender"> & {
+        gender: "MALE" | "FEMALE" | "OTHER";
+      }
+    ) => {
       const result = await createCitizen(data);
       return result;
     },
     (result) => {
       if (result.status) {
         toast.success("Citizen created successfully!");
-        router.push("/dashboard/citizen");
+        router.push("/${lang}/dashboard/citizen");
       } else {
         console.log("error >>2>>", result);
         toast.error(result.message || "Failed to create citizen");
@@ -100,10 +108,7 @@ export default function CitizenCreatePage() {
     }
   );
 
-  const handleInputChange = (
-    field: keyof CitizenFormData,
-    value: string
-  ) => {
+  const handleInputChange = (field: keyof CitizenFormData, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -183,12 +188,21 @@ export default function CitizenCreatePage() {
     e.preventDefault();
 
     // Validation
-    if (!formData.registralNo || !formData.firstName || !formData.lastName || !formData.gender) {
+    if (
+      !formData.registralNo ||
+      !formData.firstName ||
+      !formData.lastName ||
+      !formData.gender
+    ) {
       toast.error("Please fill in all required fields");
       return;
     }
 
-    if (!formData.middleName || !formData.placeOfBirth || !formData.dateOfBirth) {
+    if (
+      !formData.middleName ||
+      !formData.placeOfBirth ||
+      !formData.dateOfBirth
+    ) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -198,7 +212,11 @@ export default function CitizenCreatePage() {
       return;
     }
 
-    if (!formData.emergencyContact || !formData.relationship || !formData.emergencyPhone) {
+    if (
+      !formData.emergencyContact ||
+      !formData.relationship ||
+      !formData.emergencyPhone
+    ) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -337,7 +355,9 @@ export default function CitizenCreatePage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">Registration Number</p>
+                <p className="text-sm text-muted-foreground">
+                  Registration Number
+                </p>
                 <p className="font-medium">{formData.registralNo}</p>
               </div>
               <div>
@@ -367,7 +387,9 @@ export default function CitizenCreatePage() {
                 <p className="font-medium">{formData.phone}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Emergency Contact</p>
+                <p className="text-sm text-muted-foreground">
+                  Emergency Contact
+                </p>
                 <p className="font-medium">
                   {formData.emergencyContact} ({formData.relationship})
                 </p>
@@ -382,16 +404,12 @@ export default function CitizenCreatePage() {
 
         {/* Action Buttons */}
         <div className="flex items-center justify-end gap-4">
-          <Link href="/dashboard/citizen">
+          <Link href="/${lang}/dashboard/citizen">
             <Button variant="outline" type="button">
               Cancel
             </Button>
           </Link>
-          <Button
-            onClick={handleFinalSubmit}
-            disabled={isCreating}
-            size="lg"
-          >
+          <Button onClick={handleFinalSubmit} disabled={isCreating} size="lg">
             {isCreating ? (
               <>
                 <Activity className="mr-2 h-5 w-5 animate-spin" />
@@ -414,7 +432,7 @@ export default function CitizenCreatePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/citizen">
+          <Link href="/${lang}/dashboard/citizen">
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Citizens
@@ -444,7 +462,9 @@ export default function CitizenCreatePage() {
               <Input
                 id="registralNo"
                 value={formData.registralNo}
-                onChange={(e) => handleInputChange("registralNo", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("registralNo", e.target.value)
+                }
                 placeholder="Enter registration number"
                 required
               />
@@ -456,7 +476,9 @@ export default function CitizenCreatePage() {
                 <Input
                   id="firstName"
                   value={formData.firstName}
-                  onChange={(e) => handleInputChange("firstName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("firstName", e.target.value)
+                  }
                   placeholder="Enter first name"
                   required
                 />
@@ -466,7 +488,9 @@ export default function CitizenCreatePage() {
                 <Input
                   id="middleName"
                   value={formData.middleName}
-                  onChange={(e) => handleInputChange("middleName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("middleName", e.target.value)
+                  }
                   placeholder="Enter middle name"
                   required
                 />
@@ -476,7 +500,9 @@ export default function CitizenCreatePage() {
                 <Input
                   id="lastName"
                   value={formData.lastName}
-                  onChange={(e) => handleInputChange("lastName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("lastName", e.target.value)
+                  }
                   placeholder="Enter last name"
                   required
                 />
@@ -506,7 +532,9 @@ export default function CitizenCreatePage() {
                   id="dateOfBirth"
                   type="date"
                   value={formData.dateOfBirth}
-                  onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("dateOfBirth", e.target.value)
+                  }
                   required
                 />
               </div>
@@ -518,7 +546,9 @@ export default function CitizenCreatePage() {
                 <Input
                   id="placeOfBirth"
                   value={formData.placeOfBirth}
-                  onChange={(e) => handleInputChange("placeOfBirth", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("placeOfBirth", e.target.value)
+                  }
                   placeholder="Enter place of birth"
                   required
                 />
@@ -528,7 +558,9 @@ export default function CitizenCreatePage() {
                 <Input
                   id="occupation"
                   value={formData.occupation}
-                  onChange={(e) => handleInputChange("occupation", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("occupation", e.target.value)
+                  }
                   placeholder="Enter occupation"
                   required
                 />
@@ -570,11 +602,15 @@ export default function CitizenCreatePage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="emergencyContact">Emergency Contact Name *</Label>
+                <Label htmlFor="emergencyContact">
+                  Emergency Contact Name *
+                </Label>
                 <Input
                   id="emergencyContact"
                   value={formData.emergencyContact}
-                  onChange={(e) => handleInputChange("emergencyContact", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("emergencyContact", e.target.value)
+                  }
                   placeholder="Enter emergency contact name"
                   required
                 />
@@ -584,7 +620,9 @@ export default function CitizenCreatePage() {
                 <Input
                   id="relationship"
                   value={formData.relationship}
-                  onChange={(e) => handleInputChange("relationship", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("relationship", e.target.value)
+                  }
                   placeholder="Enter relationship"
                   required
                 />
@@ -595,7 +633,9 @@ export default function CitizenCreatePage() {
               <Input
                 id="emergencyPhone"
                 value={formData.emergencyPhone}
-                onChange={(e) => handleInputChange("emergencyPhone", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("emergencyPhone", e.target.value)
+                }
                 placeholder="Enter emergency phone number"
                 required
               />
@@ -605,7 +645,7 @@ export default function CitizenCreatePage() {
 
         {/* Action Buttons */}
         <div className="flex items-center justify-end gap-4">
-          <Link href="/dashboard/citizen">
+          <Link href="/${lang}/dashboard/citizen">
             <Button variant="outline" type="button">
               Cancel
             </Button>

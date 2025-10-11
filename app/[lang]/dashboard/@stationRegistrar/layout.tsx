@@ -10,9 +10,12 @@ import React from "react";
 
 export default async function Layout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ lang: string }>;
 }) {
+  const { lang } = await params;
   const menu = [
     [
       {

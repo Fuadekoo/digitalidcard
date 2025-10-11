@@ -61,7 +61,7 @@ export type Citizen = {
 };
 
 // Main Citizen Listing Component
-export default function CitizenListingPage() {
+export default function CitizenListingPage({ lang }: { lang: string }) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -82,11 +82,7 @@ export default function CitizenListingPage() {
   );
 
   // Data fetching
-  const [data, isLoading, refresh] = useData(
-    getCitizen,
-    () => {},
-    queryParams
-  );
+  const [data, isLoading, refresh] = useData(getCitizen, () => {}, queryParams);
 
   // Delete citizen mutation
   const [deleteCitizenMutation, isDeleting] = useMutation(
@@ -228,13 +224,13 @@ export default function CitizenListingPage() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href={`/dashboard/citizen/${citizen.id}`}>
+                  <Link href={`/${lang}/dashboard/citizen/${citizen.id}`}>
                     <Eye className="mr-2 h-4 w-4" />
                     View Details
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={`/dashboard/citizen/${citizen.id}/edit`}>
+                  <Link href={`/${lang}/dashboard/citizen/${citizen.id}/edit`}>
                     <Edit className="mr-2 h-4 w-4" />
                     Edit Citizen
                   </Link>

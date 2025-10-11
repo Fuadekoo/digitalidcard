@@ -4,7 +4,10 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useMutation from "@/hooks/useMutation";
 import { useData } from "@/hooks/useData";
-import { getSingleCitizen, updateCitizen } from "@/actions/stationRegistral/citizen";
+import {
+  getSingleCitizen,
+  updateCitizen,
+} from "@/actions/stationRegistral/citizen";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +33,7 @@ import { toast } from "sonner";
 
 interface CitizenEditPageProps {
   citizenId: string;
+  lang: string;
 }
 
 interface CitizenFormData {
@@ -47,7 +51,10 @@ interface CitizenFormData {
   emergencyPhone: string;
 }
 
-export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
+export default function CitizenEditPage({
+  citizenId,
+  lang,
+}: CitizenEditPageProps) {
   const router = useRouter();
 
   const [formData, setFormData] = useState<CitizenFormData>({
@@ -74,14 +81,18 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
 
   // Mutation for updating citizen
   const [updateCitizenMutation, isUpdating] = useMutation(
-    async (data: Omit<CitizenFormData, "gender"> & { gender: "MALE" | "FEMALE" | "OTHER" }) => {
+    async (
+      data: Omit<CitizenFormData, "gender"> & {
+        gender: "MALE" | "FEMALE" | "OTHER";
+      }
+    ) => {
       const result = await updateCitizen(citizenId, data);
       return result;
     },
     (result) => {
       if (result.status) {
         toast.success("Citizen updated successfully!");
-        router.push(`/dashboard/citizen/${citizenId}`);
+        router.push(`/${lang}/dashboard/citizen/${citizenId}`);
       } else {
         toast.error(result.message || "Failed to update citizen");
       }
@@ -112,10 +123,7 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
     }
   }, [citizenData]);
 
-  const handleInputChange = (
-    field: keyof CitizenFormData,
-    value: string
-  ) => {
+  const handleInputChange = (field: keyof CitizenFormData, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -126,7 +134,12 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
     e.preventDefault();
 
     // Validation
-    if (!formData.registralNo || !formData.firstName || !formData.lastName || !formData.gender) {
+    if (
+      !formData.registralNo ||
+      !formData.firstName ||
+      !formData.lastName ||
+      !formData.gender
+    ) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -163,7 +176,10 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
           <p className="text-muted-foreground">
             The citizen you're looking for doesn't exist.
           </p>
-          <Link href="/dashboard/citizen" className="mt-4 inline-block">
+          <Link
+            href={`/${lang}/dashboard/citizen`}
+            className="mt-4 inline-block"
+          >
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Citizens
@@ -179,7 +195,7 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href={`/dashboard/citizen/${citizenId}`}>
+          <Link href={`/${lang}/dashboard/citizen/${citizenId}`}>
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Citizen
@@ -209,7 +225,9 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
               <Input
                 id="registralNo"
                 value={formData.registralNo}
-                onChange={(e) => handleInputChange("registralNo", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("registralNo", e.target.value)
+                }
                 placeholder="Enter registration number"
                 required
               />
@@ -221,7 +239,9 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
                 <Input
                   id="firstName"
                   value={formData.firstName}
-                  onChange={(e) => handleInputChange("firstName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("firstName", e.target.value)
+                  }
                   placeholder="Enter first name"
                   required
                 />
@@ -231,7 +251,9 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
                 <Input
                   id="middleName"
                   value={formData.middleName}
-                  onChange={(e) => handleInputChange("middleName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("middleName", e.target.value)
+                  }
                   placeholder="Enter middle name"
                   required
                 />
@@ -241,7 +263,9 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
                 <Input
                   id="lastName"
                   value={formData.lastName}
-                  onChange={(e) => handleInputChange("lastName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("lastName", e.target.value)
+                  }
                   placeholder="Enter last name"
                   required
                 />
@@ -271,7 +295,9 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
                   id="dateOfBirth"
                   type="date"
                   value={formData.dateOfBirth}
-                  onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("dateOfBirth", e.target.value)
+                  }
                   required
                 />
               </div>
@@ -283,7 +309,9 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
                 <Input
                   id="placeOfBirth"
                   value={formData.placeOfBirth}
-                  onChange={(e) => handleInputChange("placeOfBirth", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("placeOfBirth", e.target.value)
+                  }
                   placeholder="Enter place of birth"
                   required
                 />
@@ -293,7 +321,9 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
                 <Input
                   id="occupation"
                   value={formData.occupation}
-                  onChange={(e) => handleInputChange("occupation", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("occupation", e.target.value)
+                  }
                   placeholder="Enter occupation"
                   required
                 />
@@ -335,11 +365,15 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="emergencyContact">Emergency Contact Name *</Label>
+                <Label htmlFor="emergencyContact">
+                  Emergency Contact Name *
+                </Label>
                 <Input
                   id="emergencyContact"
                   value={formData.emergencyContact}
-                  onChange={(e) => handleInputChange("emergencyContact", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("emergencyContact", e.target.value)
+                  }
                   placeholder="Enter emergency contact name"
                   required
                 />
@@ -349,7 +383,9 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
                 <Input
                   id="relationship"
                   value={formData.relationship}
-                  onChange={(e) => handleInputChange("relationship", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("relationship", e.target.value)
+                  }
                   placeholder="Enter relationship"
                   required
                 />
@@ -360,7 +396,9 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
               <Input
                 id="emergencyPhone"
                 value={formData.emergencyPhone}
-                onChange={(e) => handleInputChange("emergencyPhone", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("emergencyPhone", e.target.value)
+                }
                 placeholder="Enter emergency phone number"
                 required
               />
@@ -370,7 +408,7 @@ export default function CitizenEditPage({ citizenId }: CitizenEditPageProps) {
 
         {/* Action Buttons */}
         <div className="flex items-center justify-end gap-4">
-          <Link href={`/dashboard/citizen/${citizenId}`}>
+          <Link href={`/${lang}/dashboard/citizen/${citizenId}`}>
             <Button variant="outline" type="button">
               Cancel
             </Button>

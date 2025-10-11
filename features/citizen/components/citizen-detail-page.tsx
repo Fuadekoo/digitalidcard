@@ -3,7 +3,10 @@
 import React, { useState } from "react";
 import { useData } from "@/hooks/useData";
 import useMutation from "@/hooks/useMutation";
-import { getSingleCitizen, takeCitizenPhoto } from "@/actions/stationRegistral/citizen";
+import {
+  getSingleCitizen,
+  takeCitizenPhoto,
+} from "@/actions/stationRegistral/citizen";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,8 +31,8 @@ import CameraCapture from "@/components/camera-capture";
 
 interface CitizenDetailPageProps {
   citizenId: string;
+  lang: string;
 }
-
 
 const CHUNK_SIZE = 512 * 1024; // 512KB
 
@@ -42,7 +45,10 @@ const formatImageUrl = (url: string | null | undefined): string => {
   return `/api/filedata/${encodeURIComponent(url)}`;
 };
 
-export default function CitizenDetailPage({ citizenId }: CitizenDetailPageProps) {
+export default function CitizenDetailPage({
+  citizenId,
+  lang,
+}: CitizenDetailPageProps) {
   const [showCamera, setShowCamera] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -138,12 +144,14 @@ export default function CitizenDetailPage({ citizenId }: CitizenDetailPageProps)
       // Request camera permission
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       // Stop the stream immediately after permission is granted
-      stream.getTracks().forEach(track => track.stop());
+      stream.getTracks().forEach((track) => track.stop());
       // Show camera component
       setShowCamera(true);
     } catch (error) {
       console.error("Camera permission denied:", error);
-      toast.error("Camera permission is required to capture photo. Please allow camera access in your browser settings.");
+      toast.error(
+        "Camera permission is required to capture photo. Please allow camera access in your browser settings."
+      );
     }
   };
 
@@ -170,7 +178,10 @@ export default function CitizenDetailPage({ citizenId }: CitizenDetailPageProps)
           <p className="text-muted-foreground">
             The citizen you're looking for doesn't exist.
           </p>
-          <Link href="/dashboard/citizen" className="mt-4 inline-block">
+          <Link
+            href={`/${lang}/dashboard/citizen`}
+            className="mt-4 inline-block"
+          >
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Citizens
@@ -220,7 +231,7 @@ export default function CitizenDetailPage({ citizenId }: CitizenDetailPageProps)
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/citizen">
+          <Link href={`/${lang}/dashboard/citizen`}>
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Citizens
@@ -228,14 +239,15 @@ export default function CitizenDetailPage({ citizenId }: CitizenDetailPageProps)
           </Link>
           <div>
             <h1 className="text-2xl font-bold">
-              {citizenData.firstName} {citizenData.middleName} {citizenData.lastName}
+              {citizenData.firstName} {citizenData.middleName}{" "}
+              {citizenData.lastName}
             </h1>
             <p className="text-muted-foreground">
               Registration No: {citizenData.registralNo}
             </p>
           </div>
         </div>
-        <Link href={`/dashboard/citizen/${citizenId}/edit`}>
+        <Link href={`/${lang}/dashboard/citizen/${citizenId}/edit`}>
           <Button>
             <Edit className="mr-2 h-4 w-4" />
             Edit Citizen
@@ -300,20 +312,38 @@ export default function CitizenDetailPage({ citizenId }: CitizenDetailPageProps)
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">First Name</p>
-                  <p className="text-base font-semibold">{citizenData.firstName}</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    First Name
+                  </p>
+                  <p className="text-base font-semibold">
+                    {citizenData.firstName}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Middle Name</p>
-                  <p className="text-base font-semibold">{citizenData.middleName}</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Middle Name
+                  </p>
+                  <p className="text-base font-semibold">
+                    {citizenData.middleName}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Last Name</p>
-                  <p className="text-base font-semibold">{citizenData.lastName}</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Last Name
+                  </p>
+                  <p className="text-base font-semibold">
+                    {citizenData.lastName}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Gender</p>
-                  <Badge variant={citizenData.gender === "MALE" ? "default" : "secondary"}>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Gender
+                  </p>
+                  <Badge
+                    variant={
+                      citizenData.gender === "MALE" ? "default" : "secondary"
+                    }
+                  >
                     {citizenData.gender}
                   </Badge>
                 </div>
@@ -331,14 +361,18 @@ export default function CitizenDetailPage({ citizenId }: CitizenDetailPageProps)
                     <MapPin className="h-3 w-3" />
                     Place of Birth
                   </p>
-                  <p className="text-base font-semibold">{citizenData.placeOfBirth}</p>
+                  <p className="text-base font-semibold">
+                    {citizenData.placeOfBirth}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
                     <Briefcase className="h-3 w-3" />
                     Occupation
                   </p>
-                  <p className="text-base font-semibold">{citizenData.occupation}</p>
+                  <p className="text-base font-semibold">
+                    {citizenData.occupation}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -376,19 +410,29 @@ export default function CitizenDetailPage({ citizenId }: CitizenDetailPageProps)
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Contact Name</p>
-                  <p className="text-base font-semibold">{citizenData.emergencyContact}</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Contact Name
+                  </p>
+                  <p className="text-base font-semibold">
+                    {citizenData.emergencyContact}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Relationship</p>
-                  <p className="text-base font-semibold">{citizenData.relationship}</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Relationship
+                  </p>
+                  <p className="text-base font-semibold">
+                    {citizenData.relationship}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
                     <Phone className="h-3 w-3" />
                     Emergency Phone
                   </p>
-                  <p className="text-base font-semibold">{citizenData.emergencyPhone}</p>
+                  <p className="text-base font-semibold">
+                    {citizenData.emergencyPhone}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -402,13 +446,17 @@ export default function CitizenDetailPage({ citizenId }: CitizenDetailPageProps)
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Registered On</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Registered On
+                  </p>
                   <p className="text-base font-semibold">
                     {new Date(citizenData.createdAt).toLocaleDateString()}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Last Updated</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Last Updated
+                  </p>
                   <p className="text-base font-semibold">
                     {new Date(citizenData.updatedAt).toLocaleDateString()}
                   </p>

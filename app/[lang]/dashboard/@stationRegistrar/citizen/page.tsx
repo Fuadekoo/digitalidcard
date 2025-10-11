@@ -13,7 +13,12 @@ export const metadata = {
   title: "Dashboard: Citizens",
 };
 
-export default function Page() {
+interface PageProps {
+  params: Promise<{ lang: string }>;
+}
+
+export default async function Page({ params }: PageProps) {
+  const { lang } = await params;
   return (
     <PageContainer scrollable={true}>
       <div className="flex flex-1 flex-col space-y-4">
@@ -23,7 +28,7 @@ export default function Page() {
             description="Manage citizen registrations and information."
           />
           <Link
-            href="/dashboard/citizen/new"
+            href={`/${lang}/dashboard/citizen/new`}
             className={cn(buttonVariants(), "text-xs md:text-sm")}
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -36,7 +41,7 @@ export default function Page() {
             <DataTableSkeleton columnCount={6} rowCount={8} filterCount={2} />
           }
         >
-          <CitizenListingPage />
+          <CitizenListingPage lang={lang} />
         </Suspense>
       </div>
     </PageContainer>

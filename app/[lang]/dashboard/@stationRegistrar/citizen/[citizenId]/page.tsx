@@ -6,15 +6,17 @@ export const metadata = {
 };
 
 interface PageProps {
-  params: {
+  params: Promise<{
+    lang: string;
     citizenId: string;
-  };
+  }>;
 }
 
-export default function Page({ params }: PageProps) {
+export default async function Page({ params }: PageProps) {
+  const { lang, citizenId } = await params;
   return (
     <PageContainer scrollable={true}>
-      <CitizenDetailPage citizenId={params.citizenId} />
+      <CitizenDetailPage citizenId={citizenId} lang={lang} />
     </PageContainer>
   );
 }

@@ -1,10 +1,13 @@
-import React from 'react'
-import ProfileUI from '@/features/profile/components/profile-ui'
+import React from "react";
+import ProfileUI from "@/features/profile/components/profile-ui";
 
-function Page() {
-  return (
-    <ProfileUI />
-  )
+interface PageProps {
+  params: Promise<{ lang: string }>;
 }
 
-export default Page
+async function Page({ params }: PageProps) {
+  const { lang } = await params;
+  return <ProfileUI />;
+}
+
+export default Page;

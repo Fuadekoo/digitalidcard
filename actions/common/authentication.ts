@@ -21,7 +21,10 @@ export async function authenticate(data: LoginSchema): Promise<MutationState> {
 
 export async function logout() {
   try {
-    await signOut({ redirect: false });
+    await signOut({
+      redirect: false,
+      redirectTo: "/login",
+    });
     return { status: true, message: "successfully logout" };
   } catch {
     return { status: false, message: "failed to logout" };
