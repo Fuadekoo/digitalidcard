@@ -1,14 +1,12 @@
 "use client";
 
-import StandaloneLogoutButton from "@/components/layout/standalone-logout-button";
+import LogoutButton from "@/components/layout/logout-button";
 import React from "react";
 
 export default function Logout() {
   return (
-    <StandaloneLogoutButton
-      variant="default"
-      size="default"
-      className="w-full"
-    />
+    <div className="w-full">
+      <LogoutButton />
+    </div>
   );
 }
