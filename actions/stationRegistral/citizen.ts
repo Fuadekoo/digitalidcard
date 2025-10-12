@@ -92,6 +92,19 @@ export async function createCitizen(data: z.infer<typeof citizenSchema>) {
       select: { stationId: true },
     });
     if (!stationId?.stationId) throw new Error("station not found");
+
+    // Check if registralNo already exists
+    const existingCitizen = await prisma.citizen.findUnique({
+      where: { registralNo: data.registralNo },
+    });
+
+    if (existingCitizen) {
+      return {
+        status: false,
+        message: `Registration number ${data.registralNo} already exists. Please use a different registration number.`,
+      };
+    }
+
     // create citizen for their station
     const citizen = await prisma.citizen.create({
       data: {
@@ -105,8 +118,8 @@ export async function createCitizen(data: z.infer<typeof citizenSchema>) {
       message: "Citizen created successfully",
       data: citizen,
     };
-  } catch (error){
-    console.log("citizen error",error);
+  } catch (error) {
+    console.log("citizen error", error);
     return { status: false, message: "Failed to create citizen" };
   }
 }
@@ -124,6 +137,19 @@ export async function updateCitizen(
       select: { stationId: true },
     });
     if (!stationId?.stationId) throw new Error("station not found");
+
+    // Check if registralNo already exists for a different citizen
+    const existingCitizen = await prisma.citizen.findUnique({
+      where: { registralNo: data.registralNo },
+    });
+
+    if (existingCitizen && existingCitizen.id !== id) {
+      return {
+        status: false,
+        message: `Registration number ${data.registralNo} already exists. Please use a different registration number.`,
+      };
+    }
+
     const citizen = await prisma.citizen.update({
       where: { id, stationId: stationId?.stationId },
       data: {
@@ -159,7 +185,6 @@ export async function deleteCitizen(id: string) {
     return { status: false, message: "Failed to delete citizen" };
   }
 }
-
 
 // take citizen photo or update the photo
 export async function takeCitizenPhoto(id: string, photo: string) {
