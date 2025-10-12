@@ -7,16 +7,17 @@ export async function getDashboardData() {
     const [totalOrders, pendingOrders, acceptedOrders, rejectedOrders] =
       await Promise.all([
         prisma.order.count(),
-        prisma.order.count({ where: { orderStatus: "pending" } }),
-        prisma.order.count({ where: { orderStatus: "accepted" } }),
-        prisma.order.count({ where: { orderStatus: "rejected" } }),
+        prisma.order.count({ where: { orderStatus: "PENDING" } }),
+        prisma.order.count({ where: { orderStatus: "APPROVED" } }),
+        prisma.order.count({ where: { orderStatus: "REJECTED" } }),
       ]);
 
     // Get citizen statistics (total, male, female)
     const [totalCitizens, maleCitizens, femaleCitizens] = await Promise.all([
       prisma.citizen.count(),
-      prisma.citizen.count({ where: { gender: "male" } }),
-      prisma.citizen.count({ where: { gender: "female" } }),
+      prisma.citizen.count({ where: { gender: "MALE" } }),
+      prisma.citizen.count({ where: { gender: "FEMALE" } }),
+      prisma.citizen.count({ where: { gender: "OTHER" } }),
     ]);
 
     // Get station statistics
