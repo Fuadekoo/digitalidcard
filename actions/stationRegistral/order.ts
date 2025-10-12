@@ -4,6 +4,157 @@ import { auth } from "@/auth";
 import { Filter } from "@/lib/definition";
 import { sorting } from "@/lib/utils";
 
+export async function getOrdersBySearch(searchTerm: string) {
+  try {
+    // Search by both order number and phone number
+    const orders = await prisma.order.findMany({
+      where: {
+        OR: [
+          {
+            orderNumber: {
+              contains: searchTerm,
+              mode: "insensitive",
+            },
+          },
+          {
+            citizen: {
+              phone: {
+                contains: searchTerm,
+                mode: "insensitive",
+              },
+            },
+          },
+        ],
+      },
+      select: {
+        id: true,
+        orderNumber: true,
+        orderType: true,
+        orderStatus: true,
+        paymentMethod: true,
+        paymentReference: true,
+        amount: true,
+        createdAt: true,
+        updatedAt: true,
+        citizen: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            middleName: true,
+            gender: true,
+            phone: true,
+            registralNo: true,
+            dateOfBirth: true,
+            placeOfBirth: true,
+            occupation: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc", // Show newest orders first
+      },
+    });
+
+    if (!orders || orders.length === 0) {
+      return {
+        status: false,
+        message: "No orders found",
+        data: [],
+      };
+    }
+
+    console.log("orders found> ", orders.length);
+
+    return {
+      status: true,
+      message: `${orders.length} order(s) found successfully`,
+      data: orders,
+    };
+  } catch (error) {
+    console.log("Error fetching orders by search:", error);
+    return {
+      status: false,
+      message: "Failed to fetch orders",
+      data: [],
+    };
+  }
+}
+
+// Get single order by ID
+export async function getOrderById(orderId: string) {
+  try {
+    const order = await prisma.order.findUnique({
+      where: {
+        id: orderId,
+      },
+      select: {
+        id: true,
+        orderNumber: true,
+        orderType: true,
+        orderStatus: true,
+        paymentMethod: true,
+        paymentReference: true,
+        amount: true,
+        createdAt: true,
+        updatedAt: true,
+        citizen: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            middleName: true,
+            gender: true,
+            phone: true,
+            registralNo: true,
+            dateOfBirth: true,
+            placeOfBirth: true,
+            occupation: true,
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      return {
+        status: false,
+        message: "Order not found",
+        data: null,
+      };
+    }
+
+    return {
+      status: true,
+      message: "Order found successfully",
+      data: order,
+    };
+  } catch (error) {
+    console.log("Error fetching order by ID:", error);
+    return {
+      status: false,
+      message: "Failed to fetch order",
+      data: null,
+    };
+  }
+}
+
+// Keep the original function for backward compatibility
+export async function getOrderByNumber(orderNumber: string) {
+  const result = await getOrdersBySearch(orderNumber);
+  if (result.status && result.data.length > 0) {
+    return {
+      status: true,
+      message: result.message,
+      data: result.data[0], // Return first order for backward compatibility
+    };
+  }
+  return {
+    status: false,
+    message: "Order not found",
+    data: null,
+  };
+}
+
 export async function getOrder({ search, currentPage, row, sort }: Filter) {
   try {
     const session = await auth();
@@ -200,7 +351,7 @@ export async function deleteOrder(id: string) {
 }
 
 // track the order using phone number
-export async function trackOrder(phone: string) {
+export async function trackOrder(search: string) {
   try {
     const session = await auth();
     const adminId = session?.user?.id;
@@ -213,13 +364,13 @@ export async function trackOrder(phone: string) {
     if (!stationId?.stationId) throw new Error("station not found");
 
     // Validate phone number is provided
-    if (!phone) {
+    if (!search) {
       throw new Error("Phone number must be provided");
     }
 
     const order = await prisma.order.findFirst({
       where: {
-        citizen: { phone },
+        citizen: { phone: search },
         stationId: stationId.stationId, // Only search within the registrar's station
       },
       select: {

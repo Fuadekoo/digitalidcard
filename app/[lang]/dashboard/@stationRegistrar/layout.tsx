@@ -3,6 +3,7 @@ import {
   BadgeDollarSignIcon,
   Calendar,
   MessageCircle,
+  Search,
   User,
   Users,
 } from "lucide-react";
@@ -41,6 +42,13 @@ export default async function Layout({
         amharic: "ትዕዛዝ",
         url: "order",
         Icon: <BadgeDollarSignIcon className="size-6" />, // You can replace with a more suitable icon if needed
+      },
+      // track order
+      {
+        english: "track order",
+        amharic: "ትዕዛዝ መመለስ",
+        url: "trackOrder",
+        Icon: <Search className="size-6" />,
       },
       {
         english: "profile",
