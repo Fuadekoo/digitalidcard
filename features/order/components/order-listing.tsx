@@ -2,11 +2,7 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Heading } from "@/components/ui/heading";
-import { Separator } from "@/components/ui/separator";
-import { DataTableSkeleton } from "@/components/ui/table/data-table-skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -15,14 +11,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,12 +31,21 @@ import {
   XCircle,
   AlertCircle,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Suspense } from "react";
 import useMutation from "@/hooks/useMutation";
 import { getOrder, deleteOrder } from "@/actions/stationRegistral/order";
 import { CreateOrderDialog, PaymentIntegration } from ".";
+import { DataTable } from "@/components/ui/table/data-table";
+import { DataTableToolbar } from "@/components/ui/table/data-table-toolbar";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 
 interface OrderListingProps {
   lang: string;
@@ -75,44 +72,69 @@ export type Order = {
 };
 
 export function OrderListing({ lang }: OrderListingProps) {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+  // Create stable parameters for useData
+  const queryParams = React.useMemo(
+    () => ({
+      search: globalFilter,
+      currentPage: pagination.pageIndex + 1,
+      row: pagination.pageSize,
+      sort: true as boolean,
+    }),
+    [globalFilter, pagination.pageIndex, pagination.pageSize]
+  );
+
+  // Data fetching
+  const [data, setData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchData = React.useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const result = await getOrder(queryParams);
+      setData(result);
+    } catch (error) {
+      console.error("Error fetching order data:", error);
+      toast.error("Failed to load orders");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [queryParams]);
+
+  React.useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const refresh = () => fetchData();
 
   const [deleteAction, isDeleting] = useMutation(deleteOrder, (state) => {
     if (state?.status) {
       toast.success("Order deleted successfully");
-      fetchOrders();
+      refresh();
     } else {
       toast.error(state?.message || "Failed to delete order");
     }
   });
 
-  const fetchOrders = async () => {
-    try {
-      setIsLoading(true);
-      const result = await getOrder({
-        search: "",
-        currentPage: 1,
-        row: 100,
-        sort: true,
-      });
-
-      if (result?.list) {
-        setOrders(result.list as Order[]);
-      }
-    } catch (error) {
-      console.error("Failed to fetch orders:", error);
-      toast.error("Failed to fetch orders");
-    } finally {
-      setIsLoading(false);
+  // Transform data to match Order type
+  const transformedData = React.useMemo(() => {
+    if (!data?.list) {
+      return [];
     }
-  };
+    return data.list.map((order: any) => ({
+      ...order,
+      createdAt: new Date(order.createdAt),
+      updatedAt: new Date(order.updatedAt),
+    }));
+  }, [data]);
 
-  React.useEffect(() => {
-    fetchOrders();
-  }, []);
-
+  // Helper functions for status and badges
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "PENDING":
@@ -156,183 +178,211 @@ export function OrderListing({ lang }: OrderListingProps) {
     }
   };
 
-  if (isLoading) {
+  // Table columns definition
+  const columns: ColumnDef<Order>[] = React.useMemo(
+    () => [
+      {
+        accessorKey: "orderNumber",
+        header: "Order Number",
+        cell: ({ row }) => (
+          <div className="font-medium text-primary">
+            {row.getValue("orderNumber")}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "citizen",
+        header: "Citizen Name",
+        cell: ({ row }) => {
+          const citizen = row.getValue("citizen") as Order["citizen"];
+          return (
+            <div className="font-medium">
+              {citizen.firstName} {citizen.lastName}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "citizen",
+        header: "Registration No",
+        cell: ({ row }) => {
+          const citizen = row.getValue("citizen") as Order["citizen"];
+          return (
+            <div className="text-muted-foreground">{citizen.registralNo}</div>
+          );
+        },
+      },
+      {
+        accessorKey: "orderType",
+        header: "Order Type",
+        cell: ({ row }) => getOrderTypeBadge(row.getValue("orderType")),
+      },
+      {
+        accessorKey: "orderStatus",
+        header: "Status",
+        cell: ({ row }) => {
+          const status = row.getValue("orderStatus") as string;
+          return (
+            <div className="flex items-center gap-2">
+              {getStatusIcon(status)}
+              {getStatusBadge(status)}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "amount",
+        header: "Amount",
+        cell: ({ row }) => (
+          <div className="font-medium">{row.getValue("amount")} ETB</div>
+        ),
+      },
+      {
+        accessorKey: "createdAt",
+        header: "Created Date",
+        cell: ({ row }) => {
+          const date = new Date(row.getValue("createdAt"));
+          return (
+            <div className="text-muted-foreground">
+              {date.toLocaleDateString()}
+            </div>
+          );
+        },
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => {
+          const order = row.original;
+
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem
+                  onClick={() => navigator.clipboard.writeText(order.id)}
+                >
+                  Copy order ID
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <button className="w-full text-left">
+                    <Eye className="mr-2 h-4 w-4" />
+                    View Details
+                  </button>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <button className="w-full text-left">
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Order
+                  </button>
+                </DropdownMenuItem>
+                {order.orderStatus === "PENDING" && (
+                  <DropdownMenuItem asChild>
+                    <PaymentIntegration
+                      orderId={order.id}
+                      orderNumber={order.orderNumber}
+                      amount={order.amount}
+                      orderType={order.orderType}
+                      citizenName={`${order.citizen.firstName} ${order.citizen.lastName}`}
+                      citizenId={order.citizen.id}
+                      lang={lang}
+                      onPaymentSuccess={refresh}
+                    />
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => handleDelete(order.id)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Order
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+      },
+    ],
+    [lang, handleDelete]
+  );
+
+  // Table configuration
+  const table = useReactTable({
+    data: transformedData,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
+    onPaginationChange: setPagination,
+    state: {
+      globalFilter,
+      pagination,
+    },
+    manualPagination: true,
+    pageCount: Math.ceil((data?.totalData || 0) / pagination.pageSize),
+  });
+
+  // Show loading only if we're actually loading and have no data
+  if (isLoading && !data) {
     return (
-      <div className="flex flex-1 flex-col space-y-4">
-        <div className="flex items-start justify-between">
-          <Heading
-            title="Orders"
-            description="Manage ID card orders and payments."
-          />
-        </div>
-        <Separator />
-        <Suspense
-          fallback={
-            <DataTableSkeleton columnCount={6} rowCount={8} filterCount={2} />
-          }
-        >
-          <div>Loading...</div>
-        </Suspense>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-muted-foreground">Loading orders...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-1 flex-col space-y-4">
-      <div className="flex items-start justify-between">
-        <Heading
-          title="Orders"
-          description="Manage ID card orders and payments."
-        />
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="text-xs md:text-sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Create New Order
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Create New Order</DialogTitle>
-              <DialogDescription>
-                Select a citizen and create a new ID card order.
-              </DialogDescription>
-            </DialogHeader>
-            <CreateOrderDialog
-              lang={lang}
-              onSuccess={() => {
-                setIsCreateDialogOpen(false);
-                fetchOrders();
-              }}
-              onCancel={() => setIsCreateDialogOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
-      </div>
-      <Separator />
-
-      {/* Orders Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5" />
-            Orders ({orders.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {orders.length === 0 ? (
-            <div className="text-center py-8">
-              <CreditCard className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold">No orders found</h3>
-              <p className="text-muted-foreground">
-                Create your first order to get started.
-              </p>
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order Number</TableHead>
-                    <TableHead>Citizen</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Payment Method</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="w-[70px]">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {orders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium">
-                        {order.orderNumber}
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">
-                            {order.citizen.firstName} {order.citizen.lastName}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {order.citizen.registralNo}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {getOrderTypeBadge(order.orderType)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {getStatusIcon(order.orderStatus)}
-                          {getStatusBadge(order.orderStatus)}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-medium">{order.amount} ETB</span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{order.paymentMethod}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        {new Date(order.createdAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <span className="sr-only">Open menu</span>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem asChild>
-                              <button className="w-full text-left">
-                                <Eye className="mr-2 h-4 w-4" />
-                                View Details
-                              </button>
-                            </DropdownMenuItem>
-                            {order.orderStatus === "PENDING" && (
-                              <DropdownMenuItem asChild>
-                                <PaymentIntegration
-                                  orderId={order.id}
-                                  orderNumber={order.orderNumber}
-                                  amount={order.amount}
-                                  orderType={order.orderType}
-                                  citizenName={`${order.citizen.firstName} ${order.citizen.lastName}`}
-                                  citizenId={order.citizen.id}
-                                  lang={lang}
-                                  onPaymentSuccess={fetchOrders}
-                                />
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem asChild>
-                              <button className="w-full text-left">
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit Order
-                              </button>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => handleDelete(order.id)}
-                              disabled={isDeleting}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete Order
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+    <DataTable
+      table={table}
+      actionBar={
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary">
+            {table.getFilteredSelectedRowModel().rows.length} selected
+          </Badge>
+          <Button variant="outline" size="sm">
+            Export Selected
+          </Button>
+          <Dialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+          >
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Plus className="mr-2 h-4 w-4" />
+                Create New Order
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Create New Order</DialogTitle>
+                <DialogDescription>
+                  Select a citizen and create a new ID card order.
+                </DialogDescription>
+              </DialogHeader>
+              <CreateOrderDialog
+                lang={lang}
+                onSuccess={() => {
+                  setIsCreateDialogOpen(false);
+                  refresh();
+                }}
+                onCancel={() => setIsCreateDialogOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
+      }
+    >
+      <DataTableToolbar table={table} />
+    </DataTable>
   );
 }
