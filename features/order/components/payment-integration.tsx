@@ -83,7 +83,7 @@ export function PaymentIntegration({
         // Extract tx_ref from URL or use a placeholder
         // In real implementation, you might get this from the response
         setTxRef(orderId); // Using orderId as placeholder for tx_ref
-        
+
         // Navigate to payment URL in the same tab (more secure)
         toast.success("Redirecting to payment page...");
         setTimeout(() => {
@@ -202,7 +202,8 @@ export function PaymentIntegration({
               Process Payment
             </DialogTitle>
             <DialogDescription>
-              Complete payment for order {orderNumber}. You will be redirected to the secure payment page.
+              Complete payment for order {orderNumber}. You will be redirected
+              to the secure payment page.
             </DialogDescription>
           </DialogHeader>
 
