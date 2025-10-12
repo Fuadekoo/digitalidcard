@@ -352,37 +352,36 @@ export function OrderListing({ lang }: OrderListingProps) {
           <Button variant="outline" size="sm">
             Export Selected
           </Button>
-          <Dialog
-            open={isCreateDialogOpen}
-            onOpenChange={setIsCreateDialogOpen}
-          >
-            <DialogTrigger asChild>
-              <Button size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Create New Order
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Create New Order</DialogTitle>
-                <DialogDescription>
-                  Select a citizen and create a new ID card order.
-                </DialogDescription>
-              </DialogHeader>
-              <CreateOrderDialog
-                lang={lang}
-                onSuccess={() => {
-                  setIsCreateDialogOpen(false);
-                  refresh();
-                }}
-                onCancel={() => setIsCreateDialogOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
         </div>
       }
     >
-      <DataTableToolbar table={table} />
+      <div className="flex items-center justify-between gap-4">
+        <DataTableToolbar table={table} />
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Create New Order
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Create New Order</DialogTitle>
+              <DialogDescription>
+                Select a citizen and create a new ID card order.
+              </DialogDescription>
+            </DialogHeader>
+            <CreateOrderDialog
+              lang={lang}
+              onSuccess={() => {
+                setIsCreateDialogOpen(false);
+                refresh();
+              }}
+              onCancel={() => setIsCreateDialogOpen(false)}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
     </DataTable>
   );
 }
