@@ -30,6 +30,7 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  Search,
 } from "lucide-react";
 import { toast } from "sonner";
 import useMutation from "@/hooks/useMutation";
@@ -37,6 +38,7 @@ import { getOrder, deleteOrder } from "@/actions/stationRegistral/order";
 import { CreateOrderDialog, PaymentIntegration } from ".";
 import { DataTable } from "@/components/ui/table/data-table";
 import { DataTableToolbar } from "@/components/ui/table/data-table-toolbar";
+import { Input } from "@/components/ui/input";
 import {
   ColumnDef,
   flexRender,
@@ -72,7 +74,7 @@ export type Order = {
 };
 
 export function OrderListing({ lang }: OrderListingProps) {
-  const [globalFilter, setGlobalFilter] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -82,12 +84,12 @@ export function OrderListing({ lang }: OrderListingProps) {
   // Create stable parameters for useData
   const queryParams = React.useMemo(
     () => ({
-      search: globalFilter,
+      search: searchInput,
       currentPage: pagination.pageIndex + 1,
       row: pagination.pageSize,
       sort: true as boolean,
     }),
-    [globalFilter, pagination.pageIndex, pagination.pageSize]
+    [searchInput, pagination.pageIndex, pagination.pageSize]
   );
 
   // Data fetching
@@ -106,6 +108,11 @@ export function OrderListing({ lang }: OrderListingProps) {
       setIsLoading(false);
     }
   }, [queryParams]);
+
+  // Reset pagination when search changes
+  React.useEffect(() => {
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  }, [searchInput]);
 
   React.useEffect(() => {
     fetchData();
@@ -182,6 +189,15 @@ export function OrderListing({ lang }: OrderListingProps) {
   const columns: ColumnDef<Order>[] = React.useMemo(
     () => [
       {
+        id: "rowNumber",
+        header: "#",
+        cell: ({ row }) => (
+          <div className="font-medium text-muted-foreground">
+            {pagination.pageIndex * pagination.pageSize + row.index + 1}
+          </div>
+        ),
+      },
+      {
         accessorKey: "orderNumber",
         header: "Order Number",
         cell: ({ row }) => (
@@ -192,9 +208,10 @@ export function OrderListing({ lang }: OrderListingProps) {
       },
       {
         accessorKey: "citizen",
+        id: "citizenName",
         header: "Citizen Name",
         cell: ({ row }) => {
-          const citizen = row.getValue("citizen") as Order["citizen"];
+          const citizen = row.original.citizen;
           return (
             <div className="font-medium">
               {citizen.firstName} {citizen.lastName}
@@ -204,9 +221,10 @@ export function OrderListing({ lang }: OrderListingProps) {
       },
       {
         accessorKey: "citizen",
+        id: "citizenRegNo",
         header: "Registration No",
         cell: ({ row }) => {
-          const citizen = row.getValue("citizen") as Order["citizen"];
+          const citizen = row.original.citizen;
           return (
             <div className="text-muted-foreground">{citizen.registralNo}</div>
           );
@@ -319,13 +337,10 @@ export function OrderListing({ lang }: OrderListingProps) {
     data: transformedData,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    onGlobalFilterChange: setGlobalFilter,
     onPaginationChange: setPagination,
     state: {
-      globalFilter,
       pagination,
     },
     manualPagination: true,
@@ -355,32 +370,49 @@ export function OrderListing({ lang }: OrderListingProps) {
         </div>
       }
     >
-      <div className="flex items-center justify-between gap-4">
-        <DataTableToolbar table={table} />
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Create New Order
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Create New Order</DialogTitle>
-              <DialogDescription>
-                Select a citizen and create a new ID card order.
-              </DialogDescription>
-            </DialogHeader>
-            <CreateOrderDialog
-              lang={lang}
-              onSuccess={() => {
-                setIsCreateDialogOpen(false);
-                refresh();
-              }}
-              onCancel={() => setIsCreateDialogOpen(false)}
+      <div className="space-y-4">
+        {/* Search Bar */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Search by order number, citizen name, or registration number..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-10"
             />
-          </DialogContent>
-        </Dialog>
+          </div>
+          <Dialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+          >
+            <DialogTrigger asChild>
+              <Button className="w-full sm:w-auto">
+                <Plus className="mr-2 h-4 w-4" />
+                Create New Order
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Create New Order</DialogTitle>
+                <DialogDescription>
+                  Select a citizen and create a new ID card order.
+                </DialogDescription>
+              </DialogHeader>
+              <CreateOrderDialog
+                lang={lang}
+                onSuccess={() => {
+                  setIsCreateDialogOpen(false);
+                  refresh();
+                }}
+                onCancel={() => setIsCreateDialogOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Table Toolbar */}
+        <DataTableToolbar table={table} />
       </div>
     </DataTable>
   );

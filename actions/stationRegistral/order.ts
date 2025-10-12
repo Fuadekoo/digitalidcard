@@ -21,13 +21,20 @@ export async function getOrder({ search, currentPage, row, sort }: Filter) {
         where: {
           stationId: stationId.stationId,
           OR: [
-            { orderNumber: { contains: search } },
-            { orderType: { contains: search } },
-            // { orderStatus: { contains: search } },
-            { paymentMethod: { contains: search } },
-            { paymentReference: { contains: search } },
-            { citizen: { firstName: { contains: search } } },
-            { citizen: { lastName: { contains: search } } },
+            { orderNumber: { contains: search, mode: "insensitive" } },
+
+            {
+              citizen: { firstName: { contains: search, mode: "insensitive" } },
+            },
+            {
+              citizen: { lastName: { contains: search, mode: "insensitive" } },
+            },
+            {
+              citizen: {
+                registralNo: { contains: search, mode: "insensitive" },
+              },
+            },
+            { citizen: { phone: { contains: search, mode: "insensitive" } } },
           ],
         },
         skip: (currentPage - 1) * row,
@@ -68,16 +75,19 @@ export async function getOrder({ search, currentPage, row, sort }: Filter) {
       where: {
         stationId: stationId.stationId,
         OR: [
-          { orderNumber: { contains: search } },
-          { orderType: { contains: search } },
-          // { orderStatus: { contains: search } },
-          { paymentMethod: { contains: search } },
-          { paymentReference: { contains: search } },
-          { citizen: { firstName: { contains: search } } },
-          { citizen: { lastName: { contains: search } } },
+          { orderNumber: { contains: search, mode: "insensitive" } },
+          { orderType: { contains: search, mode: "insensitive" } },
+          { citizen: { firstName: { contains: search, mode: "insensitive" } } },
+          { citizen: { lastName: { contains: search, mode: "insensitive" } } },
+          {
+            citizen: { registralNo: { contains: search, mode: "insensitive" } },
+          },
+          { citizen: { phone: { contains: search, mode: "insensitive" } } },
         ],
       },
     });
+    console.log("search data> ", search);
+    console.log("list data> ", list);
 
     return { list, totalData };
   } catch (error) {
