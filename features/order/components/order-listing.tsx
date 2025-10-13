@@ -37,6 +37,7 @@ import useMutation from "@/hooks/useMutation";
 import { getOrder, deleteOrder } from "@/actions/stationRegistral/order";
 import { CreateOrderDialog, PaymentIntegration } from ".";
 import { DataTable } from "@/components/ui/table/data-table";
+import { useData } from "@/hooks/useData";
 import { DataTableToolbar } from "@/components/ui/table/data-table-toolbar";
 import { Input } from "@/components/ui/input";
 import {
@@ -92,33 +93,17 @@ export function OrderListing({ lang }: OrderListingProps) {
     [searchInput, pagination.pageIndex, pagination.pageSize]
   );
 
-  // Data fetching
-  const [data, setData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchData = React.useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const result = await getOrder(queryParams);
-      setData(result);
-    } catch (error) {
-      console.error("Error fetching order data:", error);
-      toast.error("Failed to load orders");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [queryParams]);
+  // Data fetching using useData hook
+  const [data, isLoading, refresh] = useData(
+    getOrder,
+    null,
+    queryParams
+  );
 
   // Reset pagination when search changes
   React.useEffect(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   }, [searchInput]);
-
-  React.useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const refresh = () => fetchData();
 
   const [deleteAction, isDeleting] = useMutation(deleteOrder, (state) => {
     if (state?.status) {

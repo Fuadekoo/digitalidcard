@@ -1,4 +1,4 @@
-import { PrismaClient, Role, userStatus } from "@prisma/client";
+import { PrismaClient, Role, userStatus, orderType } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -314,7 +314,7 @@ async function main() {
     data: {
       orderNumber: "ORD001",
       citizenId: citizen1.id,
-      orderType: "New ID Card",
+      orderType: orderType.NORMAL,
       orderStatus: "PENDING",
       paymentMethod: "Bank Transfer",
       paymentReference: "TXN001",
@@ -330,7 +330,7 @@ async function main() {
     data: {
       orderNumber: "ORD002",
       citizenId: citizen2.id,
-      orderType: "ID Card Renewal",
+      orderType: orderType.URGENT,
       orderStatus: "APPROVED",
       paymentMethod: "Mobile Payment",
       paymentReference: "TXN002",
@@ -346,7 +346,7 @@ async function main() {
     data: {
       orderNumber: "ORD003",
       citizenId: citizen3.id,
-      orderType: "ID Card Replacement",
+      orderType: orderType.NORMAL,
       orderStatus: "PENDING",
       paymentMethod: "Cash",
       paymentReference: "TXN003",
@@ -361,7 +361,7 @@ async function main() {
     data: {
       orderNumber: "ORD004",
       citizenId: citizen4.id,
-      orderType: "New ID Card",
+      orderType: orderType.URGENT,
       orderStatus: "REJECTED",
       paymentMethod: "Bank Transfer",
       paymentReference: "TXN004",
@@ -377,7 +377,7 @@ async function main() {
     data: {
       orderNumber: "ORD005",
       citizenId: citizen5.id,
-      orderType: "ID Card Renewal",
+      orderType: orderType.NORMAL,
       orderStatus: "APPROVED",
       paymentMethod: "Mobile Payment",
       paymentReference: "TXN005",

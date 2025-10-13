@@ -104,21 +104,26 @@ model citizen {
   order            order[]
 }
 
+enum orderType {
+  URGENT
+  NORMAL
+}
+
 model order {
-  id               String   @id @default(uuid())
-  orderNumber      String   @unique
+  id               String    @id @default(uuid())
+  orderNumber      String    @unique
   citizenId        String
-  orderType        String
-  orderStatus      status   @default(PENDING)
-  paymentMethod    String 
+  orderType        orderType
+  orderStatus      status    @default(PENDING)
+  paymentMethod    String
   paymentReference String
   paymentProof     String?
   amount           Int
   stationId        String
   registrarId      String
   printerId        String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   // Relations
 

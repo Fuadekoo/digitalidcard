@@ -47,7 +47,9 @@ export type userUpdateType = z.infer<typeof userUpdateSchema>;
 
 export const orderSchema = z.object({
   citizenId: z.string().nonempty("citizen id is required"),
-  orderType: z.string().nonempty("order type is required"),
+  orderType: z.enum(["URGENT", "NORMAL"], {
+    message: "order type must be either URGENT or NORMAL",
+  }),
   orderStatus: z.string().nonempty("order status is required"),
   paymentMethod: z.string().nonempty("payment method is required"),
   paymentReference: z.string().nonempty("payment reference is required"),

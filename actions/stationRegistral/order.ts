@@ -222,12 +222,13 @@ export async function getOrder({ search, currentPage, row, sort }: Filter) {
         )
       );
 
+    // Count total orders matching the search criteria
     const totalData = await prisma.order.count({
       where: {
         stationId: stationId.stationId,
         OR: [
           { orderNumber: { contains: search, mode: "insensitive" } },
-          { orderType: { contains: search, mode: "insensitive" } },
+    
           { citizen: { firstName: { contains: search, mode: "insensitive" } } },
           { citizen: { lastName: { contains: search, mode: "insensitive" } } },
           {
