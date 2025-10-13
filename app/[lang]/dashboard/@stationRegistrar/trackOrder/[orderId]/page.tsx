@@ -23,10 +23,7 @@ import {
   Eye,
 } from "lucide-react";
 import { toast } from "sonner";
-import {
-  getOrdersBySearch,
-  getOrderById,
-} from "@/actions/stationRegistral/order";
+import { getOrderById } from "@/actions/stationRegistral/order";
 import { useData } from "@/hooks/useData";
 
 interface OrderDetails {
@@ -57,38 +54,20 @@ interface PageProps {
   params: Promise<{ lang: string; orderId: string }>;
 }
 
-export default function TrackOrderSearchPage({ params }: PageProps) {
+export default function TrackOrderDetailsPage({ params }: PageProps) {
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState<string>("");
 
-  // Use useData hook for data management
-  const [ordersData, isLoading, refetch] = useData(async () => {
+  // Use useData hook for data management - only fetch single order by ID
+  const [orderData, isLoading, refetch] = useData(async () => {
     const resolvedParams = await params;
     const orderId = decodeURIComponent(resolvedParams.orderId);
-    setSearchTerm(orderId);
 
-    // Check if the search term looks like an order ID (UUID format)
-    const isOrderId =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-        orderId
-      );
-
-    if (isOrderId) {
-      // If it's an order ID, get single order by ID
-      const result = await getOrderById(orderId);
-      if (result?.status && result.data) {
-        return [result.data]; // Return as array for consistency
-      } else {
-        throw new Error(result?.message || "Order not found");
-      }
+    // Get single order by ID
+    const result = await getOrderById(orderId);
+    if (result?.status && result.data) {
+      return result.data;
     } else {
-      // Otherwise, search by order number or phone
-      const result = await getOrdersBySearch(orderId);
-      if (result?.status && result.data) {
-        return result.data;
-      } else {
-        throw new Error(result?.message || "No orders found");
-      }
+      throw new Error(result?.message || "Order not found");
     }
   }, null);
 
@@ -96,12 +75,12 @@ export default function TrackOrderSearchPage({ params }: PageProps) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!isLoading && (!ordersData || ordersData.length === 0)) {
-      setError(new Error("No orders found"));
+    if (!isLoading && !orderData) {
+      setError(new Error("Order not found"));
     } else {
       setError(null);
     }
-  }, [isLoading, ordersData]);
+  }, [isLoading, orderData]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -215,18 +194,14 @@ export default function TrackOrderSearchPage({ params }: PageProps) {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center">
           <AlertCircle className="h-16 w-16 mx-auto mb-4 text-red-500" />
-          <h2 className="text-2xl font-bold mb-2">No Orders Found</h2>
+          <h2 className="text-2xl font-bold mb-2">Order Not Found</h2>
           <p className="text-muted-foreground mb-6">
-            {error.message ||
-              "No orders found for the search term you entered."}
+            {error.message || "The order you are looking for could not be found."}
           </p>
           <div className="space-x-4">
-            <Button onClick={() => router.back()} variant="outline">
+            <Button onClick={() => router.push("/en/dashboard/trackOrder")} variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Go Back
-            </Button>
-            <Button onClick={() => router.push("/en/dashboard/trackOrder")}>
-              Search Again
+              Back to Search
             </Button>
             <Button onClick={refetch} variant="outline">
               <Clock className="mr-2 h-4 w-4" />
@@ -238,15 +213,15 @@ export default function TrackOrderSearchPage({ params }: PageProps) {
     );
   }
 
-  // Guard clause for undefined ordersData
-  if (!ordersData || ordersData.length === 0) {
+  // Guard clause for undefined orderData
+  if (!orderData) {
     return null;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl relative">
+    <div className="container mx-auto px-4 py-8 max-w-6xl overflow-y-auto">
       {/* Loading overlay for refresh */}
-      {isLoading && ordersData && (
+      {isLoading && orderData && (
         <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center">
           <div className="text-center">
             <Clock className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
@@ -260,20 +235,14 @@ export default function TrackOrderSearchPage({ params }: PageProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => router.back()}>
+          <Button variant="outline" onClick={() => router.push("/en/dashboard/trackOrder")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Track Order
+            Back to Search
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">
-              {ordersData.length === 1
-                ? `Your Order`
-                : `Your Orders (${ordersData.length} Items)`}
-            </h1>
+            <h1 className="text-2xl font-bold">Order Details</h1>
             <p className="text-muted-foreground">
-              {ordersData.length === 1
-                ? `Order #${ordersData[0].orderNumber}`
-                : `Search results for "${searchTerm}"`}
+              Order #{orderData.orderNumber}
             </p>
           </div>
         </div>
@@ -285,120 +254,13 @@ export default function TrackOrderSearchPage({ params }: PageProps) {
         </Button>
       </div>
 
-      {/* Multiple Orders View - Card Layout */}
-      {ordersData.length > 1 ? (
-        <div className="space-y-6">
-          {/* Order Summary Card */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-gray-100 rounded-lg">
-                    <FileText className="h-6 w-6 text-gray-600" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-2xl font-bold">
-                      {ordersData
-                        .reduce((sum, order) => sum + order.amount, 0)
-                        .toLocaleString()}{" "}
-                      ETB
-                    </CardTitle>
-                    <p className="text-muted-foreground">Total Order Value</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Orders Found</p>
-                  <p className="text-2xl font-bold">{ordersData.length}</p>
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
-
-          {/* Individual Order Cards */}
-          <div className="space-y-4">
-            {ordersData.map((order, index) => (
-              <Card
-                key={order.id}
-                className="hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() =>
-                  router.push(`/en/dashboard/trackOrder/${order.id}`)
-                }
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    {/* Left side - Order Info */}
-                    <div className="flex items-center gap-4">
-                      {/* Order Icon */}
-                      <div className="p-3 bg-blue-100 rounded-lg">
-                        <Package className="h-6 w-6 text-blue-600" />
-                      </div>
-
-                      {/* Order Details */}
-                      <div>
-                        <h3 className="font-semibold text-lg mb-1">
-                          Order #{order.orderNumber}
-                        </h3>
-                        <p className="text-muted-foreground mb-2">
-                          {order.citizen.firstName}{" "}
-                          {order.citizen.middleName || ""}{" "}
-                          {order.citizen.lastName}
-                        </p>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>
-                            Created:{" "}
-                            {new Date(order.createdAt).toLocaleDateString()}
-                          </span>
-                          <span>•</span>
-                          <span>ID: {order.id.slice(0, 8)}...</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Right side - Status and Actions */}
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <Badge
-                          className={`${getStatusColor(
-                            order.orderStatus
-                          )} border mb-2`}
-                        >
-                          {order.orderStatus}
-                        </Badge>
-                        <p className="text-sm text-muted-foreground">
-                          Payment: {order.paymentMethod}
-                        </p>
-                        <p className="text-sm font-semibold">
-                          {order.amount} ETB
-                        </p>
-                      </div>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          router.push(`/en/dashboard/trackOrder/${order.id}`);
-                        }}
-                      >
-                        <Eye className="mr-2 h-4 w-4" />
-                        View Details
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      ) : (
-        /* Single Order View */
-        <SingleOrderView
-          order={ordersData[0]}
-          getStatusColor={getStatusColor}
-          getOrderTypeColor={getOrderTypeColor}
-          getTimelineSteps={getTimelineSteps}
-        />
-      )}
+      {/* Single Order View */}
+      <SingleOrderView
+        order={orderData}
+        getStatusColor={getStatusColor}
+        getOrderTypeColor={getOrderTypeColor}
+        getTimelineSteps={getTimelineSteps}
+      />
     </div>
   );
 }
