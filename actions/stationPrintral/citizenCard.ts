@@ -234,3 +234,54 @@ export async function rejectCitizenCard(id: string) {
     return { status: false, message: "Failed to reject citizen card" };
   }
 }
+
+
+export async function getCardData(orderId:string){
+  try {
+    const orderData = await prisma.order.findUnique({
+      where: { id: orderId },
+      select: {
+        id: true,
+        orderNumber: true,
+        orderStatus: true,
+        orderType: true,
+        paymentMethod: true,
+        amount: true,
+        createdAt: true,
+        citizen: {
+          select: {
+            id: true,
+            registralNo: true,
+            firstName: true,
+            middleName: true,
+            lastName: true,
+            phone: true,
+            profilePhoto: true,
+            occupation:true,
+            dateOfBirth:true,
+            gender:true,
+            placeOfBirth:true,
+            emergencyContact:true,
+            emergencyPhone:true,
+            relationship:true,
+            
+            
+          },
+        },
+        station:{
+          select:{
+            id:true,
+            afanOromoName:true,
+            amharicName:true,
+            signPhoto:true,
+            stampPhoto:true,
+            stationAdminName:true,
+          }
+        }
+      },
+    });
+    
+  } catch (error) {
+    
+  }
+}
