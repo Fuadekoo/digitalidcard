@@ -7,6 +7,7 @@ import { citizenSchema } from "@/lib/zodSchema";
 import { Filter } from "@/lib/definition";
 import { sorting } from "@/lib/utils";
 import { auth } from "@/auth";
+import { randomUUID } from "crypto";
 
 export async function getCitizen({ search, currentPage, row, sort }: Filter) {
   try {
@@ -105,12 +106,16 @@ export async function createCitizen(data: z.infer<typeof citizenSchema>) {
       };
     }
 
+    // Generate unique barcode automatically (similar to PHP's uniqid())
+    const barcode = randomUUID();
+
     // create citizen for their station
     const citizen = await prisma.citizen.create({
       data: {
         ...data,
         dateOfBirth: new Date(data.dateOfBirth),
         stationId: stationId?.stationId,
+        barcode: barcode,
       },
     });
     return {
