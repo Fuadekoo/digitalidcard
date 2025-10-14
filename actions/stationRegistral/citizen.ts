@@ -7,7 +7,7 @@ import { citizenSchema } from "@/lib/zodSchema";
 import { Filter } from "@/lib/definition";
 import { sorting } from "@/lib/utils";
 import { auth } from "@/auth";
-import { randomUUID } from "crypto";
+import { randomBytes } from "crypto";
 
 export async function getCitizen({ search, currentPage, row, sort }: Filter) {
   try {
@@ -106,8 +106,19 @@ export async function createCitizen(data: z.infer<typeof citizenSchema>) {
       };
     }
 
-    // Generate unique barcode automatically (similar to PHP's uniqid())
-    const barcode = randomUUID();
+    // Generate unique 12-digit numeric barcode (zero-padded)
+    const generateBarcode = () => {
+      // 6 random bytes -> up to 48 bits of entropy, then mod 1e12 to get 12 digits
+      const hex = randomBytes(6).toString("hex");
+      const val = BigInt("0x" + hex) % BigInt(1000000000000);
+      return val.toString().padStart(12, "0");
+    };
+
+    let barcode = generateBarcode();
+    // Ensure uniqueness in DB (barcode column is unique)
+    while (await prisma.citizen.findFirst({ where: { barcode } })) {
+      barcode = generateBarcode();
+    }
 
     // create citizen for their station
     const citizen = await prisma.citizen.create({

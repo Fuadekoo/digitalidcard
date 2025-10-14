@@ -1,6 +1,6 @@
 import { PrismaClient, Role, userStatus, orderType } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { randomUUID } from "crypto";
+import { randomBytes } from "crypto";
 
 const prisma = new PrismaClient();
 
@@ -222,7 +222,11 @@ async function main() {
       emergencyContact: "Kebede Tesfaye",
       relationship: "Father",
       emergencyPhone: "0918765432",
-      barcode: randomUUID(),
+      barcode: (() => {
+        const hex = randomBytes(6).toString("hex");
+        const val = BigInt("0x" + hex) % BigInt(1000000000000);
+        return val.toString().padStart(12, "0");
+      })(),
     },
   });
 
@@ -242,7 +246,11 @@ async function main() {
       emergencyContact: "Tadesse Gebremedhin",
       relationship: "Husband",
       emergencyPhone: "0928765432",
-      barcode: randomUUID(),
+      barcode: (() => {
+        const hex = randomBytes(6).toString("hex");
+        const val = BigInt("0x" + hex) % BigInt(1000000000000);
+        return val.toString().padStart(12, "0");
+      })(),
     },
   });
 
@@ -262,7 +270,11 @@ async function main() {
       emergencyContact: "Hassan Ahmed",
       relationship: "Brother",
       emergencyPhone: "0938765432",
-      barcode: randomUUID(),
+      barcode: (() => {
+        const hex = randomBytes(6).toString("hex");
+        const val = BigInt("0x" + hex) % BigInt(1000000000000);
+        return val.toString().padStart(12, "0");
+      })(),
     },
   });
 
@@ -282,7 +294,11 @@ async function main() {
       emergencyContact: "Tesfaye Wolde",
       relationship: "Father",
       emergencyPhone: "0948765432",
-      barcode: randomUUID(),
+      barcode: (() => {
+        const hex = randomBytes(6).toString("hex");
+        const val = BigInt("0x" + hex) % BigInt(1000000000000);
+        return val.toString().padStart(12, "0");
+      })(),
     },
   });
 
@@ -302,7 +318,11 @@ async function main() {
       emergencyContact: "Gebremedhin Tesfaye",
       relationship: "Father",
       emergencyPhone: "0958765432",
-      barcode: randomUUID(),
+      barcode: (() => {
+        const hex = randomBytes(6).toString("hex");
+        const val = BigInt("0x" + hex) % BigInt(1000000000000);
+        return val.toString().padStart(12, "0");
+      })(),
     },
   });
 

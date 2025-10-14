@@ -99,7 +99,7 @@ model citizen {
   emergencyContact String
   relationship     String
   emergencyPhone   String
-  barcode          String @unique
+  barcode          String   @unique @db.Char(12)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   order            order[]

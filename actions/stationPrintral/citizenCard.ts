@@ -10,7 +10,7 @@ export async function getCitizenCard({
   currentPage,
   row,
   sort,
-}: Filter) {
+}: Filter & { startDate?: string; endDate?: string }) {
   try {
     const session = await auth();
     const adminId = session?.user?.id;
@@ -41,8 +41,7 @@ export async function getCitizenCard({
           orderNumber: true,
           orderStatus: true,
           orderType: true,
-          paymentMethod: true,
-          amount: true,
+          
           createdAt: true,
           citizen: {
             select: {
@@ -141,8 +140,6 @@ export async function getFilteredCitizenCardByDate({
           orderNumber: true,
           orderStatus: true,
           orderType: true,
-          paymentMethod: true,
-          amount: true,
           createdAt: true,
           citizen: {
             select: {
@@ -245,8 +242,8 @@ export async function getCardData(orderId:string){
         orderNumber: true,
         orderStatus: true,
         orderType: true,
-        paymentMethod: true,
-        amount: true,
+        // paymentMethod: true,
+        // amount: true,
         createdAt: true,
         citizen: {
           select: {
@@ -260,12 +257,11 @@ export async function getCardData(orderId:string){
             occupation:true,
             dateOfBirth:true,
             gender:true,
+            barcode:true,
             placeOfBirth:true,
             emergencyContact:true,
             emergencyPhone:true,
-            relationship:true,
-            
-            
+            relationship:true,   
           },
         },
         station:{
@@ -280,8 +276,9 @@ export async function getCardData(orderId:string){
         }
       },
     });
-    
+    return orderData;
   } catch (error) {
-    
+    console.log(error);
+    return { status: false, message: "Failed to get citizen card data" };
   }
 }
