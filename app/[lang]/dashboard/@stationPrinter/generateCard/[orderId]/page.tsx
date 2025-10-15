@@ -57,7 +57,7 @@ export default function GenerateCardPage({ params }: PageProps) {
 
       // PVC card dimensions (user-provided): 3.37in x 2.125in => 85.6mm x 53.9mm
       const cardWidth = 85.6; // mm (3.37 inches)
-      const cardHeight = 53.9; // mm (2.125 inches)
+      const cardHeight = 53.98; // mm (2.125 inches)
       const cornerRadius = 3.18; // mm (0.125 inches)
 
       // Position cards on A4 page
@@ -382,7 +382,7 @@ export default function GenerateCardPage({ params }: PageProps) {
 
           .id-card-wrapper {
             width: 85.6mm !important;
-            height: 53.9mm !important;
+            height: 53.98mm !important;
             margin: 0 !important;
             padding: 0 !important;
             flex-shrink: 0 !important;
@@ -391,7 +391,7 @@ export default function GenerateCardPage({ params }: PageProps) {
 
           .id-card {
             width: 85.6mm !important;
-            height: 53.9mm !important;
+            height: 53.98mm !important;
             margin: 0 !important;
             padding: 0 !important;
             border: none !important;
@@ -405,7 +405,7 @@ export default function GenerateCardPage({ params }: PageProps) {
           #front,
           #back {
             width: 85.6mm !important;
-            height: 53.9mm !important;
+            height: 53.98mm !important;
             page-break-inside: avoid !important;
             margin: 0 !important;
             padding: 0 !important;
@@ -531,7 +531,7 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
         <div
           id="front"
           className="relative bg-white rounded-lg overflow-hidden id-card"
-          style={{ width: "85.6mm", height: "53.9mm", borderRadius: "3.18mm" }}
+          style={{ width: "85.6mm", height: "53.98mm", borderRadius: "3.18mm" }}
         >
           {/* Background Image */}
           <Image
@@ -645,7 +645,7 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
         <div
           id="back"
           className="relative bg-white rounded-lg overflow-hidden id-card"
-          style={{ width: "85.6mm", height: "53.9mm", borderRadius: "3.18mm" }}
+          style={{ width: "85.6mm", height: "53.98mm", borderRadius: "3.18mm" }}
         >
           {/* Background Image */}
           <Image
