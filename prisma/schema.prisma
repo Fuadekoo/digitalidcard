@@ -99,6 +99,7 @@ model citizen {
   emergencyContact String
   relationship     String
   emergencyPhone   String
+  isVerified       Boolean  @default(false)
   barcode          String   @unique @db.Char(12)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -123,6 +124,7 @@ model order {
   stationId        String
   registrarId      String
   printerId        String?
+  isPrinted        Boolean   @default(false)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
