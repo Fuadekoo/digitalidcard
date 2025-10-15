@@ -334,16 +334,16 @@ export default function GenerateCardPage({ params }: PageProps) {
             display: none !important;
           }
 
-          /* Reset page margins and sizing */
+          /* Reset page margins and sizing, and remove headers/footers */
           @page {
-            margin: 15mm 10mm !important;
+            margin: 0 !important;
             size: A4 portrait !important;
           }
 
           html,
           body {
             margin: 0 !important;
-            padding: 0 !important;
+            padding: 15mm 10mm !important; /* Add padding to compensate for margin removal */
             background: white !important;
             font-size: 12px !important;
           }
@@ -360,9 +360,9 @@ export default function GenerateCardPage({ params }: PageProps) {
 
           .print-container {
             position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 210mm !important;
+            left: 10mm !important; /* Align with body padding */
+            top: 15mm !important; /* Align with body padding */
+            width: 190mm !important; /* A4 width (210mm) - 2*10mm padding */
             height: auto !important;
             margin: 0 !important;
             padding: 0 !important;
@@ -374,7 +374,7 @@ export default function GenerateCardPage({ params }: PageProps) {
             justify-content: flex-start !important;
             align-items: flex-start !important;
             gap: 8mm !important;
-            width: 210mm !important;
+            width: auto !important; /* Let it be defined by content */
             margin: 0 !important;
             padding: 0 !important;
             page-break-inside: avoid !important;
@@ -487,6 +487,39 @@ export default function GenerateCardPage({ params }: PageProps) {
 
 // Separate IdCard component for better management
 function IdCard({ citizen, station }: { citizen: any; station: any }) {
+  const formatImageUrl = (fileName: string | null | undefined): string => {
+    // Use a transparent pixel as a placeholder to avoid showing a broken image icon
+    if (!fileName)
+      return "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+    return `/api/filedata/${encodeURIComponent(fileName)}`;
+  };
+
+  const [profileImgSrc, setProfileImgSrc] = useState(
+    formatImageUrl(citizen.profilePhoto)
+  );
+  const [stampImgSrc, setStampImgSrc] = useState(
+    formatImageUrl(station?.stampPhoto)
+  );
+  const [signImgSrc, setSignImgSrc] = useState(
+    formatImageUrl(station?.signPhoto)
+  );
+
+  // Update image sources if data changes
+  useEffect(() => {
+    setProfileImgSrc(formatImageUrl(citizen.profilePhoto));
+    setStampImgSrc(formatImageUrl(station?.stampPhoto));
+    setSignImgSrc(formatImageUrl(station?.signPhoto));
+  }, [citizen.profilePhoto, station?.stampPhoto, station?.signPhoto]);
+
+  const handleImageError = (
+    setter: React.Dispatch<React.SetStateAction<string>>
+  ) => {
+    // Fallback to a transparent pixel on error
+    setter(
+      "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+    );
+  };
+
   return (
     <div
       className="id-card-container flex gap-4 flex-nowrap"
@@ -516,8 +549,8 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
               <Image
                 src="/oflag.png"
                 alt="Oromia Flag"
-                width={64}
-                height={40}
+                width={48}
+                height={30}
               />
               <div className="text-center">
                 <h2 className="text-xs font-bold">
@@ -530,8 +563,8 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
               <Image
                 src="/ethflag.png"
                 alt="Ethiopian Flag"
-                width={64}
-                height={40}
+                width={48}
+                height={30}
               />
             </div>
 
@@ -541,28 +574,15 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
             {/* Profile and Info */}
             <div className="flex gap-4">
               <div className="flex-shrink-0">
-                {citizen.profilePhoto ? (
-                  <img
-                    src={citizen.profilePhoto}
-                    alt="Profile"
-                    width={96}
-                    height={96}
-                    className="border-2 border-gray-300 rounded object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                      e.currentTarget.nextElementSibling?.classList.remove(
-                        "hidden"
-                      );
-                    }}
-                  />
-                ) : null}
-                <div
-                  className={`w-24 h-24 bg-gray-200 border-2 border-gray-300 rounded flex items-center justify-center ${
-                    citizen.profilePhoto ? "hidden" : ""
-                  }`}
-                >
-                  <span className="text-xs text-gray-500">No Photo</span>
-                </div>
+                <Image
+                  src={profileImgSrc}
+                  alt="Profile"
+                  width={96}
+                  height={120}
+                  className="border-2 border-gray-300 rounded object-cover"
+                  onError={() => handleImageError(setProfileImgSrc)} // Fallback on error
+                  unoptimized // Important for html2canvas to render correctly
+                />
                 <div className="mt-1">
                   <p className="text-xs" style={{ fontSize: "7px" }}>
                     L.G/መ.ቁ: {citizen.registralNo}
@@ -604,16 +624,15 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
 
             {/* Stamp */}
             {station?.stampPhoto && (
-              <div className="absolute bottom-2 right-2">
-                <img
-                  src={station.stampPhoto}
+              <div className="absolute bottom-1 right-1">
+                <Image
+                  src={stampImgSrc}
                   alt="Official Stamp"
-                  width={80}
-                  height={80}
+                  width={75}
+                  height={75}
                   className="object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
+                  onError={() => handleImageError(setStampImgSrc)}
+                  unoptimized
                 />
               </div>
             )}
@@ -640,7 +659,7 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
           {/* Content Overlay */}
           <div className="relative z-10 p-4">
             <div
-              className="flex justify-between items-start mb-4"
+              className="flex justify-between items-start mb-2"
               style={{ alignItems: "center" }}
             >
               <div style={{ flex: 1 }}>
@@ -685,7 +704,7 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
               </div>
             </div>
 
-            <div className="space-y-1 mb-4">
+            <div className="space-y-1 mb-2">
               <p className="text-xs" style={{ fontSize: "9px" }}>
                 Bilbila Jirata/የነዋሪው ሰልክ: <strong>{citizen.phone}</strong>
               </p>
@@ -709,23 +728,25 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
               <p className="text-xs" style={{ fontSize: "8px" }}>
                 ከተሰረቀ ወይም ከጠፋ እባክዎን አስተዳደሩን ያነጋግሩ እና የጠፋውን ካርድ ወዲያውኑ ያሳውቁ።
               </p>
-              <p className="text-xs font-semibold" style={{ fontSize: "9px" }}>
+              <p
+                className="text-xs font-semibold"
+                style={{ fontSize: "9px", marginTop: "4px" }}
+              >
                 {station?.stationAdminName || "Station Administrator"}
               </p>
             </div>
 
-            {/* Signature */}
+            {/* Signature Image */}
             {station?.signPhoto && (
-              <div className="absolute bottom-2 right-2" style={{ zIndex: 10 }}>
-                <img
-                  src={station.signPhoto}
+              <div className="absolute bottom-1 right-1 p-1">
+                <Image
+                  src={signImgSrc}
                   alt="Official Signature"
-                  width={60}
-                  height={60}
+                  width={70}
+                  height={35}
                   className="object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
+                  onError={() => handleImageError(setSignImgSrc)}
+                  unoptimized
                 />
               </div>
             )}
