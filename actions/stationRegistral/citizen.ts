@@ -42,6 +42,7 @@ export async function getCitizen({ search, currentPage, row, sort }: Filter) {
           lastName: true,
           gender: true,
           phone: true,
+          isVerified: true,
           createdAt: true,
         },
       })
@@ -224,5 +225,63 @@ export async function takeCitizenPhoto(id: string, photo: string) {
     };
   } catch {
     return { status: false, message: "Failed to update citizen photo" };
+  }
+}
+
+export async function verifyCitizen(id: string) {
+  try {
+    const session = await auth();
+    const loginUser = session?.user?.id;
+    if (!loginUser) throw new Error("unauthenticated");
+
+    const stationId = await prisma.user.findUnique({
+      where: { id: loginUser },
+      select: { stationId: true },
+    });
+
+    if (!stationId?.stationId) throw new Error("station not found");
+
+    const citizen = await prisma.citizen.update({
+      where: { id, stationId: stationId?.stationId },
+      data: { isVerified: true },
+    });
+
+    return {
+      status: true,
+      message: "Citizen verified successfully",
+      data: citizen,
+    };
+  } catch (error) {
+    console.error("Failed to verify citizen:", error);
+    return { status: false, message: "Failed to verify citizen" };
+  }
+}
+
+export async function unVerifyCitizen(id: string) {
+  try {
+    const session = await auth();
+    const loginUser = session?.user?.id;
+    if (!loginUser) throw new Error("unauthenticated");
+
+    const stationId = await prisma.user.findUnique({
+      where: { id: loginUser },
+      select: { stationId: true },
+    });
+
+    if (!stationId?.stationId) throw new Error("station not found");
+
+    const citizen = await prisma.citizen.update({
+      where: { id, stationId: stationId?.stationId },
+      data: { isVerified: false },
+    });
+
+    return {
+      status: true,
+      message: "Citizen verification removed successfully",
+      data: citizen,
+    };
+  } catch (error) {
+    console.error("Failed to unverify citizen:", error);
+    return { status: false, message: "Failed to unverify citizen" };
   }
 }

@@ -26,6 +26,8 @@ import {
   IdCard,
   ShieldCheck,
   ShieldX,
+  XCircle,
+  Clock,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -38,7 +40,11 @@ import {
 import { toast } from "sonner";
 import Link from "next/link";
 import useMutation from "@/hooks/useMutation";
-import { deleteCitizen } from "@/actions/stationRegistral/citizen";
+import {
+  deleteCitizen,
+  verifyCitizen,
+  unVerifyCitizen,
+} from "@/actions/stationAdmin/citizen";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,7 +65,7 @@ export type Citizen = {
   lastName: string;
   gender: string;
   phone: string;
-  isVerified: boolean;
+  isVerified: "PENDING" | "APPROVED" | "REJECTED";
   createdAt: Date;
 };
 
@@ -72,6 +78,12 @@ export default function CitizenListingPage({ lang }: { lang: string }) {
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [citizenToDelete, setCitizenToDelete] = useState<string | null>(null);
+  const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
+  const [citizenToVerify, setCitizenToVerify] = useState<{
+    id: string;
+    name: string;
+    newStatus: string;
+  } | null>(null);
 
   // Memoize query parameters
   const queryParams = React.useMemo(
@@ -113,6 +125,44 @@ export default function CitizenListingPage({ lang }: { lang: string }) {
   const handleDeleteConfirm = () => {
     if (citizenToDelete) {
       deleteCitizenMutation(citizenToDelete);
+    }
+  };
+
+  const handleVerifyClick = (
+    citizenId: string,
+    name: string,
+    newStatus: string
+  ) => {
+    setCitizenToVerify({ id: citizenId, name, newStatus });
+    setVerifyDialogOpen(true);
+  };
+
+  // Update citizen status mutation
+  const [verifyCitizenMutation, isVerifying] = useMutation(
+    async (citizenId: string, newStatus: string) => {
+      // Call the appropriate action based on status
+      if (newStatus === "APPROVED") {
+        return await verifyCitizen(citizenId);
+      } else if (newStatus === "REJECTED" || newStatus === "PENDING") {
+        return await unVerifyCitizen(citizenId);
+      }
+      return { status: false, message: "Invalid status" };
+    },
+    (result) => {
+      if (result && result.status) {
+        toast.success(result.message || "Status updated successfully");
+        refresh();
+        setVerifyDialogOpen(false);
+        setCitizenToVerify(null);
+      } else {
+        toast.error(result?.message || "Failed to update verification status");
+      }
+    }
+  );
+
+  const handleVerifyConfirm = () => {
+    if (citizenToVerify) {
+      verifyCitizenMutation(citizenToVerify.id, citizenToVerify.newStatus);
     }
   };
 
@@ -196,20 +246,32 @@ export default function CitizenListingPage({ lang }: { lang: string }) {
         header: "Verification Status",
         cell: ({ row }) => {
           const citizen = row.original;
-          return citizen.isVerified ? (
-            <Badge className="bg-green-500 hover:bg-green-600 text-white">
-              <ShieldCheck className="h-3 w-3 mr-1" />
-              Verified
-            </Badge>
-          ) : (
-            <Badge
-              variant="outline"
-              className="text-orange-600 border-orange-600"
-            >
-              <ShieldX className="h-3 w-3 mr-1" />
-              Pending Verification
-            </Badge>
-          );
+          const status = citizen.isVerified;
+
+          // Display status with appropriate styling
+          if (status === "APPROVED") {
+            return (
+              <Badge className="bg-green-500 hover:bg-green-600 text-white border-0">
+                <ShieldCheck className="h-3 w-3 mr-1" />
+                Verified
+              </Badge>
+            );
+          } else if (status === "REJECTED") {
+            return (
+              <Badge className="bg-red-500 hover:bg-red-600 text-white border-0">
+                <XCircle className="h-3 w-3 mr-1" />
+                Rejected
+              </Badge>
+            );
+          } else {
+            // PENDING status
+            return (
+              <Badge className="bg-orange-500 hover:bg-orange-600 text-white border-0">
+                <Clock className="h-3 w-3 mr-1" />
+                Pending
+              </Badge>
+            );
+          }
         },
       },
       {
@@ -235,7 +297,7 @@ export default function CitizenListingPage({ lang }: { lang: string }) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open menu</span>
+                  <span className="sr-only">Actions</span>
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -260,6 +322,54 @@ export default function CitizenListingPage({ lang }: { lang: string }) {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                {/* Verification Actions */}
+                {citizen.isVerified !== "APPROVED" && (
+                  <DropdownMenuItem
+                    onClick={() =>
+                      handleVerifyClick(
+                        citizen.id,
+                        `${citizen.firstName} ${citizen.lastName}`,
+                        "APPROVED"
+                      )
+                    }
+                    className="text-green-600"
+                  >
+                    <ShieldCheck className="mr-2 h-4 w-4" />
+                    Approve Citizen
+                  </DropdownMenuItem>
+                )}
+                {citizen.isVerified !== "REJECTED" && (
+                  <DropdownMenuItem
+                    onClick={() =>
+                      handleVerifyClick(
+                        citizen.id,
+                        `${citizen.firstName} ${citizen.lastName}`,
+                        "REJECTED"
+                      )
+                    }
+                    className="text-red-600"
+                  >
+                    <XCircle className="mr-2 h-4 w-4" />
+                    Reject Citizen
+                  </DropdownMenuItem>
+                )}
+                {citizen.isVerified !== "PENDING" && (
+                  <DropdownMenuItem
+                    onClick={() =>
+                      handleVerifyClick(
+                        citizen.id,
+                        `${citizen.firstName} ${citizen.lastName}`,
+                        "PENDING"
+                      )
+                    }
+                    className="text-orange-600"
+                  >
+                    <Clock className="mr-2 h-4 w-4" />
+                    Set to Pending
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                {/* Delete Action */}
                 <DropdownMenuItem
                   onClick={() => handleDeleteClick(citizen.id)}
                   className="text-destructive"
@@ -469,6 +579,82 @@ export default function CitizenListingPage({ lang }: { lang: string }) {
           </div>
         </div>
       )}
+
+      {/* Status Change Confirmation Dialog */}
+      <AlertDialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              {citizenToVerify?.newStatus === "APPROVED" && (
+                <>
+                  <ShieldCheck className="h-5 w-5 text-green-600" />
+                  Approve Citizen
+                </>
+              )}
+              {citizenToVerify?.newStatus === "REJECTED" && (
+                <>
+                  <XCircle className="h-5 w-5 text-red-600" />
+                  Reject Citizen
+                </>
+              )}
+              {citizenToVerify?.newStatus === "PENDING" && (
+                <>
+                  <Clock className="h-5 w-5 text-orange-600" />
+                  Set to Pending
+                </>
+              )}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {citizenToVerify?.newStatus === "APPROVED" && (
+                <>
+                  Are you sure you want to <strong>approve</strong>{" "}
+                  <span className="font-semibold">{citizenToVerify?.name}</span>
+                  ? This will mark the citizen as verified and they can proceed
+                  with ID card generation.
+                </>
+              )}
+              {citizenToVerify?.newStatus === "REJECTED" && (
+                <>
+                  Are you sure you want to <strong>reject</strong>{" "}
+                  <span className="font-semibold">{citizenToVerify?.name}</span>
+                  ? This will mark the citizen as rejected and they cannot
+                  proceed with ID card generation.
+                </>
+              )}
+              {citizenToVerify?.newStatus === "PENDING" && (
+                <>
+                  Are you sure you want to set{" "}
+                  <span className="font-semibold">{citizenToVerify?.name}</span>{" "}
+                  back to <strong>pending</strong> status? This will require
+                  re-verification.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isVerifying}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleVerifyConfirm}
+              disabled={isVerifying}
+              className={
+                citizenToVerify?.newStatus === "APPROVED"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : citizenToVerify?.newStatus === "REJECTED"
+                  ? "bg-red-600 hover:bg-red-700"
+                  : "bg-orange-600 hover:bg-orange-700"
+              }
+            >
+              {isVerifying
+                ? "Processing..."
+                : citizenToVerify?.newStatus === "APPROVED"
+                ? "Approve"
+                : citizenToVerify?.newStatus === "REJECTED"
+                ? "Reject"
+                : "Set to Pending"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

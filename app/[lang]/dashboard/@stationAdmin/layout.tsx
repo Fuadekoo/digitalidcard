@@ -22,6 +22,12 @@ export default async function Layout({
         Icon: <Users className="size-6" />,
       },
       {
+        english: "citizenManagement",
+        amharic: "ዜግነት መጠቀም",
+        url: "citizenManagement",
+        Icon: <Users className="size-6" />,
+      },
+      {
         english: "report",
         amharic: "ዘገኝ",
         url: "report",

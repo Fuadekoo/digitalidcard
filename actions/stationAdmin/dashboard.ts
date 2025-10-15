@@ -13,18 +13,18 @@ export async function getDashboardData() {
       select: { stationId: true },
     });
     if (!stationId?.stationId) throw new Error("station not found");
-    // Get order statistics (total, pending, accepted, rejected) for this station
-    const [totalOrders, pendingOrders, acceptedOrders, rejectedOrders] =
+    // Get order statistics (total, pending, approved, rejected) for this station
+    const [totalOrders, pendingOrders, approvedOrders, rejectedOrders] =
       await Promise.all([
         prisma.order.count({ where: { stationId: stationId.stationId } }),
         prisma.order.count({
-          where: { stationId: stationId.stationId, orderStatus: "pending" },
+          where: { stationId: stationId.stationId, orderStatus: "PENDING" },
         }),
         prisma.order.count({
-          where: { stationId: stationId.stationId, orderStatus: "accepted" },
+          where: { stationId: stationId.stationId, orderStatus: "APPROVED" },
         }),
         prisma.order.count({
-          where: { stationId: stationId.stationId, orderStatus: "rejected" },
+          where: { stationId: stationId.stationId, orderStatus: "REJECTED" },
         }),
       ]);
 
@@ -32,10 +32,10 @@ export async function getDashboardData() {
     const [totalCitizens, maleCitizens, femaleCitizens] = await Promise.all([
       prisma.citizen.count({ where: { stationId: stationId.stationId } }),
       prisma.citizen.count({
-        where: { stationId: stationId.stationId, gender: "male" },
+        where: { stationId: stationId.stationId, gender: "MALE" },
       }),
       prisma.citizen.count({
-        where: { stationId: stationId.stationId, gender: "female" },
+        where: { stationId: stationId.stationId, gender: "FEMALE" },
       }),
     ]);
 
@@ -102,7 +102,7 @@ export async function getDashboardData() {
       orders: {
         total: totalOrders,
         pending: pendingOrders,
-        accepted: acceptedOrders,
+        accepted: approvedOrders,
         rejected: rejectedOrders,
       },
       citizens: {
