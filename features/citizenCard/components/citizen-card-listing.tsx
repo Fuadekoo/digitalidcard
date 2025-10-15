@@ -2,7 +2,11 @@
 
 import React, { useState } from "react";
 import { useData } from "@/hooks/useData";
-import { getCitizenCard, getFilteredCitizenCardByDate, aproveCitizenCard, rejectCitizenCard } from "@/actions/stationPrintral/citizenCard";
+import {
+  getFilteredCitizenCardByDate,
+  aproveCitizenCard,
+  rejectCitizenCard,
+} from "@/actions/stationPrintral/citizenCard";
 import { type ColumnDef } from "@tanstack/react-table";
 import {
   useReactTable,
@@ -58,7 +62,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { format } from "date-fns";
 import type { DateRange } from "react-day-picker";
 
@@ -88,19 +96,22 @@ const StatusBadge = ({ status }: { status: string }) => {
         return {
           variant: "default" as const,
           icon: CheckCircle,
-          className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400",
+          className:
+            "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400",
         };
       case "REJECTED":
         return {
           variant: "destructive" as const,
           icon: XCircle,
-          className: "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400",
+          className:
+            "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400",
         };
       case "PENDING":
         return {
           variant: "secondary" as const,
           icon: AlertCircle,
-          className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400",
+          className:
+            "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400",
         };
       default:
         return {
@@ -148,7 +159,9 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
   const queryParams = React.useMemo(
     () => ({
       search: searchQuery,
-      startDate: dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : undefined,
+      startDate: dateRange?.from
+        ? format(dateRange.from, "yyyy-MM-dd")
+        : undefined,
       endDate: dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : undefined,
       currentPage: pagination.pageIndex + 1,
       row: pagination.pageSize,
@@ -158,7 +171,11 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
   );
 
   // Data fetching
-  const [data, isLoading, refresh] = useData(getFilteredCitizenCardByDate, () => {}, queryParams);
+  const [data, isLoading, refresh] = useData(
+    getFilteredCitizenCardByDate,
+    () => {},
+    queryParams
+  );
 
   // Approve citizen card mutation
   const [approveMutation, isApproving] = useMutation(
@@ -259,9 +276,13 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
           return (
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={citizen.profilePhoto || ""} alt={citizen.firstName} />
+                <AvatarImage
+                  src={citizen.profilePhoto || ""}
+                  alt={citizen.firstName}
+                />
                 <AvatarFallback className="bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
-                  {citizen.firstName.charAt(0)}{citizen.lastName.charAt(0)}
+                  {citizen.firstName.charAt(0)}
+                  {citizen.lastName.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <div>
@@ -434,15 +455,19 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
               />
             </div>
           </div>
-          
+
           {/* Date Range Filter */}
           <div className="flex gap-2">
             <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
               <PopoverTrigger asChild>
                 <Button
-                  variant={dateRange?.from || dateRange?.to ? "default" : "outline"}
+                  variant={
+                    dateRange?.from || dateRange?.to ? "default" : "outline"
+                  }
                   className={`w-[280px] justify-start text-left font-normal ${
-                    !dateRange?.from && !dateRange?.to && "text-muted-foreground"
+                    !dateRange?.from &&
+                    !dateRange?.to &&
+                    "text-muted-foreground"
                   }`}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
@@ -463,7 +488,9 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
               <PopoverContent className="w-auto p-0" align="start">
                 <div className="p-3">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-medium text-sm">Filter by Date Range</h4>
+                    <h4 className="font-medium text-sm">
+                      Filter by Date Range
+                    </h4>
                     {(dateRange?.from || dateRange?.to) && (
                       <Button
                         variant="ghost"
@@ -494,7 +521,7 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
                 </div>
               </PopoverContent>
             </Popover>
-            
+
             {/* Clear All Filters Button */}
             {(searchQuery || dateRange?.from || dateRange?.to) && (
               <Button
@@ -512,7 +539,7 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
             )}
           </div>
         </div>
-        
+
         {/* Filter Summary */}
         {(searchQuery || dateRange?.from || dateRange?.to) && (
           <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border">
@@ -528,7 +555,8 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
               {dateRange?.from && dateRange?.to && (
                 <Badge variant="secondary" className="gap-1">
                   <CalendarIcon className="h-3 w-3" />
-                  {format(dateRange.from, "MMM dd")} - {format(dateRange.to, "MMM dd, yyyy")}
+                  {format(dateRange.from, "MMM dd")} -{" "}
+                  {format(dateRange.to, "MMM dd, yyyy")}
                 </Badge>
               )}
               {dateRange?.from && !dateRange?.to && (
@@ -549,7 +577,10 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
         table={table}
         actionBar={
           <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/20">
+            <Badge
+              variant="secondary"
+              className="bg-blue-100 text-blue-800 dark:bg-blue-900/20"
+            >
               📊 {data?.totalData || 0} Total Orders
             </Badge>
             <Badge variant="outline">
@@ -570,7 +601,8 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
               Approve Citizen Card Order
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to approve this citizen card order? This will allow the card to be printed and issued to the citizen.
+              Are you sure you want to approve this citizen card order? This
+              will allow the card to be printed and issued to the citizen.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -595,7 +627,9 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
               Reject Citizen Card Order
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to reject this citizen card order? This action cannot be undone and the citizen will need to resubmit their application.
+              Are you sure you want to reject this citizen card order? This
+              action cannot be undone and the citizen will need to resubmit
+              their application.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

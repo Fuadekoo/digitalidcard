@@ -26,6 +26,7 @@ export async function getCitizenCard({
       .findMany({
         where: {
           stationId: stationId.stationId,
+          orderStatus: "PENDING",
           OR: [
             { orderNumber: { contains: search } },
             { citizen: { firstName: { contains: search } } },
@@ -41,7 +42,7 @@ export async function getCitizenCard({
           orderNumber: true,
           orderStatus: true,
           orderType: true,
-          
+
           createdAt: true,
           citizen: {
             select: {
@@ -109,6 +110,7 @@ export async function getFilteredCitizenCardByDate({
     // Build where condition with date filtering
     const whereCondition: any = {
       stationId: stationId.stationId,
+      orderStatus: "PENDING", // Only show pending orders
     };
 
     // Add date filtering if provided
@@ -168,7 +170,7 @@ export async function getFilteredCitizenCardByDate({
     const totalData = await prisma.order.count({
       where: whereCondition,
     });
-
+    console.log("hy>>>", list);
     return {
       list,
       totalData,
@@ -232,8 +234,7 @@ export async function rejectCitizenCard(id: string) {
   }
 }
 
-
-export async function getCardData(orderId:string){
+export async function getCardData(orderId: string) {
   try {
     const orderData = await prisma.order.findUnique({
       where: { id: orderId },
@@ -254,26 +255,26 @@ export async function getCardData(orderId:string){
             lastName: true,
             phone: true,
             profilePhoto: true,
-            occupation:true,
-            dateOfBirth:true,
-            gender:true,
-            barcode:true,
-            placeOfBirth:true,
-            emergencyContact:true,
-            emergencyPhone:true,
-            relationship:true,   
+            occupation: true,
+            dateOfBirth: true,
+            gender: true,
+            barcode: true,
+            placeOfBirth: true,
+            emergencyContact: true,
+            emergencyPhone: true,
+            relationship: true,
           },
         },
-        station:{
-          select:{
-            id:true,
-            afanOromoName:true,
-            amharicName:true,
-            signPhoto:true,
-            stampPhoto:true,
-            stationAdminName:true,
-          }
-        }
+        station: {
+          select: {
+            id: true,
+            afanOromoName: true,
+            amharicName: true,
+            signPhoto: true,
+            stampPhoto: true,
+            stationAdminName: true,
+          },
+        },
       },
     });
     return orderData;

@@ -28,6 +28,12 @@ export default async function Layout({
         Icon: <Users className="size-6" />,
       },
       {
+        english: "printralReport",
+        amharic: "ትዕዛዝ",
+        url: "printralReport",
+        Icon: <Users className="size-6" />,
+      },
+      {
         english: "profile",
         amharic: "መግለጫ",
         url: "profile",
