@@ -85,7 +85,7 @@ export default function StationPrinterPage() {
   };
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6 overflow-y-auto h-full">
       {/* Header and Controls */}
       <div className="no-print mb-8">
         <h1 className="text-3xl font-bold flex items-center gap-3 mb-4">
