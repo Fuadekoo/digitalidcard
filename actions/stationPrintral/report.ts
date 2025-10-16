@@ -68,10 +68,10 @@ export async function getPrinterReport({
     // Get print statistics
     const [totalPrinted, notPrinted] = await Promise.all([
       prisma.order.count({
-        where: { ...dateFilter, isPrinted: true },
+        where: { ...dateFilter, isPrinted: "APPROVED", orderStatus: "APPROVED" },
       }),
       prisma.order.count({
-        where: { ...dateFilter, orderStatus: "APPROVED", isPrinted: false },
+        where: { ...dateFilter, isPrinted: "PENDING", orderStatus: "APPROVED" },
       }),
     ]);
 
@@ -80,7 +80,7 @@ export async function getPrinterReport({
       where: {
         ...dateFilter,
         printerId: adminId,
-        isPrinted: true,
+        isPrinted: "APPROVED",
       },
     });
 

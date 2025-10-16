@@ -234,9 +234,9 @@ export async function aproveCitizenCard(id: string) {
 
     // Super printer marks the card as printed
     const citizenCard = await prisma.order.update({
-      where: { id },
+      where: { id, orderStatus: "APPROVED", isPrinted: "PENDING" },
       data: {
-        isPrinted: true,
+        isPrinted: "APPROVED",
         printerId: adminId, // Assign the super printer as the printer
       },
     });
@@ -260,9 +260,9 @@ export async function rejectCitizenCard(id: string) {
 
     // Super printer marks the card as not printed (reject printing)
     const citizenCard = await prisma.order.update({
-      where: { id },
+      where: { id, orderStatus: "APPROVED", isPrinted: "PENDING" },
       data: {
-        isPrinted: false,
+        isPrinted: "REJECTED",
         printerId: null, // Remove printer assignment
       },
     });

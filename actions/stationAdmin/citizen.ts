@@ -5,6 +5,11 @@ import { Filter } from "@/lib/definition";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
+type CitizenFilter = Filter & {
+  startDate?: string;
+  endDate?: string;
+};
+
 export async function getCitizens({ search, currentPage, row, sort }: Filter) {
   try {
     const session = await auth();
@@ -69,6 +74,107 @@ export async function getCitizens({ search, currentPage, row, sort }: Filter) {
   } catch (error) {
     console.error("Failed to fetch citizens:", error);
     throw new Error("Failed to fetch citizens");
+  }
+}
+
+export async function getFilteredCitizensByDate({
+  search,
+  currentPage,
+  row,
+  sort,
+  startDate,
+  endDate,
+}: CitizenFilter) {
+  try {
+    const session = await auth();
+    const adminId = session?.user?.id;
+    if (!adminId) throw new Error("Unauthenticated");
+
+    // Get admin's station
+    const admin = await prisma.user.findUnique({
+      where: { id: adminId },
+      select: { stationId: true },
+    });
+
+    if (!admin?.stationId) throw new Error("Station not found");
+
+    const skip = (currentPage - 1) * row;
+
+    // Build date filter
+    let dateFilter = {};
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      
+      dateFilter = {
+        createdAt: {
+          gte: start,
+          lte: end,
+        },
+      };
+    }
+
+    // Build where clause with proper AND/OR structure
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const whereCondition: any = {
+      stationId: admin.stationId,
+      ...dateFilter,
+    };
+
+    // Add search conditions if search term exists
+    if (search) {
+      whereCondition.OR = [
+        { firstName: { contains: search, mode: "insensitive" as const } },
+        { lastName: { contains: search, mode: "insensitive" as const } },
+        { middleName: { contains: search, mode: "insensitive" as const } },
+        { phone: { contains: search, mode: "insensitive" as const } },
+        { registralNo: { contains: search, mode: "insensitive" as const } },
+      ];
+    }
+
+    // Get total count
+    const totalData = await prisma.citizen.count({ where: whereCondition });
+
+    // Get citizens
+    const list = await prisma.citizen.findMany({
+      where: whereCondition,
+      include: {
+        stationCitizen: {
+          select: {
+            code: true,
+            afanOromoName: true,
+            amharicName: true,
+          },
+        },
+        order: {
+          select: {
+            id: true,
+            orderStatus: true,
+          },
+        },
+      },
+      orderBy: sort ? { createdAt: "desc" } : { createdAt: "asc" },
+      skip,
+      take: row,
+    });
+
+    return {
+      list,
+      totalData,
+      totalPages: Math.ceil(totalData / row),
+      status: true,
+    };
+  } catch (error) {
+    console.error("Failed to fetch citizens:", error);
+    return {
+      list: [],
+      totalData: 0,
+      totalPages: 0,
+      status: false,
+    };
   }
 }
 

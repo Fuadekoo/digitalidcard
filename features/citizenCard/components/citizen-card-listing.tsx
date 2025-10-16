@@ -461,7 +461,7 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
   return (
     <>
       {/* Search and Filter Controls */}
-      <div className="flex flex-col gap-4 mb-6">
+      <div className="flex flex-col gap-3 mb-3">
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search Input */}
           <div className="flex-1">
