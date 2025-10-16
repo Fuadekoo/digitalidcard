@@ -124,7 +124,7 @@ model order {
   stationId        String
   registrarId      String
   printerId        String?
-  isPrinted        Boolean   @default(false)
+  isPrinted        status    @default(PENDING)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 

@@ -392,18 +392,36 @@ export async function getDashboardDataByStation(stationId: string) {
   }
 }
 
-export async function stationData() {
+export async function getAllStations() {
   try {
     const session = await auth();
     const adminId = session?.user?.id;
     if (!adminId) throw new Error("unauthenticated");
-    const stationData = await prisma.station.findMany({
+    
+    const stations = await prisma.station.findMany({
       select: {
         id: true,
+        code: true,
         afanOromoName: true,
+        amharicName: true,
+        stationAdminName: true,
+      },
+      orderBy: {
+        code: "asc",
       },
     });
-  } catch {
-    return { status: false, message: "Failed to fetch station data" };
+    
+    return {
+      status: true,
+      data: stations,
+      message: "Stations retrieved successfully",
+    };
+  } catch (error) {
+    console.error("Error fetching stations:", error);
+    return { 
+      status: false, 
+      message: "Failed to fetch station data",
+      data: [] 
+    };
   }
 }

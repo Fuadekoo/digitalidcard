@@ -3,7 +3,9 @@ import prisma from "@/lib/db";
 import { auth } from "@/auth";
 import { Filter } from "@/lib/definition";
 import { sorting } from "@/lib/utils";
-import { MutationState } from "@/lib/definitions";
+
+// Extend Filter type to include optional stationId
+type SuperPrinterFilter = Filter & { stationId?: string };
 
 export async function getCitizenCard({
   stationId,
@@ -11,24 +13,45 @@ export async function getCitizenCard({
   currentPage,
   row,
   sort,
-}: Filter) {
+}: SuperPrinterFilter) {
   try {
     const session = await auth();
     const adminId = session?.user?.id;
     if (!adminId) throw new Error("unauthenticated");
 
+    // Build where condition dynamically
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const andConditions: any[] = [
+      { orderStatus: "APPROVED" }, // Only show approved orders that need printing
+      { isPrinted: false }, // Only show orders that haven't been printed yet
+    ];
+
+    // Add station filter if provided
+    if (stationId) {
+      andConditions.push({ stationId: stationId });
+    }
+
+    // Add search filter if search term is provided
+    if (search && search.trim() !== "") {
+      andConditions.push({
+        OR: [
+          { orderNumber: { contains: search, mode: 'insensitive' } },
+          { citizen: { firstName: { contains: search, mode: 'insensitive' } } },
+          { citizen: { lastName: { contains: search, mode: 'insensitive' } } },
+          { citizen: { middleName: { contains: search, mode: 'insensitive' } } },
+          { citizen: { phone: { contains: search, mode: 'insensitive' } } },
+        ],
+      });
+    }
+
+    const whereCondition = {
+      AND: andConditions,
+    };
+
     // Super printer can access all orders from all stations
     const list = await prisma.order
       .findMany({
-        where: {
-          OR: [
-            { orderNumber: { contains: search } },
-            { citizen: { firstName: { contains: search } } },
-            { citizen: { lastName: { contains: search } } },
-            { citizen: { middleName: { contains: search } } },
-            { citizen: { phone: { contains: search } } },
-          ],
-        },
+        where: whereCondition,
         skip: (currentPage - 1) * row,
         take: row,
         select: {
@@ -72,15 +95,7 @@ export async function getCitizenCard({
       );
 
     const totalData = await prisma.order.count({
-      where: {
-        OR: [
-          { orderNumber: { contains: search } },
-          { citizen: { firstName: { contains: search } } },
-          { citizen: { lastName: { contains: search } } },
-          { citizen: { middleName: { contains: search } } },
-          { citizen: { phone: { contains: search } } },
-        ],
-      },
+      where: whereCondition,
     });
 
     return { list, totalData };
@@ -98,36 +113,56 @@ export async function getFilteredCitizenCardByDate({
   currentPage,
   row,
   sort,
-}: Filter & { startDate?: string; endDate?: string; stationId?: string }) {
+}: SuperPrinterFilter & { startDate?: string; endDate?: string }) {
   try {
     const session = await auth();
     const adminId = session?.user?.id;
     if (!adminId) throw new Error("unauthenticated");
 
-    // Build where condition with date filtering for all stations
-    const whereCondition: any = {};
+    // Build where condition dynamically
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const andConditions: any[] = [
+      { orderStatus: "APPROVED" }, // Only show approved orders that need printing
+      { isPrinted: false }, // Only show orders that haven't been printed yet
+    ];
 
-    // Add date filtering if provided
+    // Add date filtering if both dates are provided
     if (startDate && endDate) {
-      whereCondition.createdAt = {
-        gte: new Date(startDate),
-        lte: new Date(endDate),
-      };
+      const startDateTime = new Date(startDate);
+      startDateTime.setHours(0, 0, 0, 0); // Start of day
+      
+      const endDateTime = new Date(endDate);
+      endDateTime.setHours(23, 59, 59, 999); // End of day
+      
+      andConditions.push({
+        createdAt: {
+          gte: startDateTime,
+          lte: endDateTime,
+        },
+      });
     }
+    
+    // Add station filter if provided
     if (stationId) {
-      whereCondition.stationId = stationId;
+      andConditions.push({ stationId: stationId });
     }
 
-    // Add search functionality
-    if (search) {
-      whereCondition.OR = [
-        { orderNumber: { contains: search } },
-        { citizen: { firstName: { contains: search } } },
-        { citizen: { lastName: { contains: search } } },
-        { citizen: { middleName: { contains: search } } },
-        { citizen: { phone: { contains: search } } },
-      ];
+    // Add search functionality (case-insensitive) only if search term exists
+    if (search && search.trim() !== "") {
+      andConditions.push({
+        OR: [
+          { orderNumber: { contains: search, mode: 'insensitive' } },
+          { citizen: { firstName: { contains: search, mode: 'insensitive' } } },
+          { citizen: { lastName: { contains: search, mode: 'insensitive' } } },
+          { citizen: { middleName: { contains: search, mode: 'insensitive' } } },
+          { citizen: { phone: { contains: search, mode: 'insensitive' } } },
+        ],
+      });
     }
+
+    const whereCondition = {
+      AND: andConditions,
+    };
 
     const list = await prisma.order
       .findMany({
@@ -197,23 +232,23 @@ export async function aproveCitizenCard(id: string) {
     const adminId = session?.user?.id;
     if (!adminId) throw new Error("unauthenticated");
 
-    // Super printer can approve orders from any station
+    // Super printer marks the card as printed
     const citizenCard = await prisma.order.update({
-      where: { id, orderStatus: "PENDING" },
+      where: { id },
       data: {
-        orderStatus: "APPROVED",
+        isPrinted: true,
         printerId: adminId, // Assign the super printer as the printer
       },
     });
 
     return {
       status: true,
-      message: "Citizen card approved successfully",
+      message: "Citizen card marked as printed successfully",
       data: citizenCard,
     };
   } catch (error) {
     console.log(error);
-    return { status: false, message: "Failed to approve citizen card" };
+    return { status: false, message: "Failed to mark citizen card as printed" };
   }
 }
 
@@ -223,23 +258,23 @@ export async function rejectCitizenCard(id: string) {
     const adminId = session?.user?.id;
     if (!adminId) throw new Error("unauthenticated");
 
-    // Super printer can reject orders from any station
+    // Super printer marks the card as not printed (reject printing)
     const citizenCard = await prisma.order.update({
-      where: { id, orderStatus: "PENDING" },
+      where: { id },
       data: {
-        orderStatus: "REJECTED",
-        printerId: adminId, // Assign the super printer as the printer
+        isPrinted: false,
+        printerId: null, // Remove printer assignment
       },
     });
 
     return {
       status: true,
-      message: "Citizen card rejected successfully",
+      message: "Print request rejected successfully",
       data: citizenCard,
     };
   } catch (error) {
     console.log(error);
-    return { status: false, message: "Failed to reject citizen card" };
+    return { status: false, message: "Failed to reject print request" };
   }
 }
 
@@ -250,23 +285,35 @@ export async function getCitizenCardByStation({
   currentPage,
   row,
   sort,
-}: Filter & { stationId: string }) {
+}: SuperPrinterFilter & { stationId: string }) {
   try {
     const session = await auth();
     const adminId = session?.user?.id;
     if (!adminId) throw new Error("unauthenticated");
 
+    // Build where condition dynamically
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const andConditions: any[] = [
+      { stationId: stationId },
+    ];
+
+    // Add search filter if search term is provided
+    if (search && search.trim() !== "") {
+      andConditions.push({
+        OR: [
+          { orderNumber: { contains: search, mode: 'insensitive' } },
+          { citizen: { firstName: { contains: search, mode: 'insensitive' } } },
+          { citizen: { lastName: { contains: search, mode: 'insensitive' } } },
+          { citizen: { middleName: { contains: search, mode: 'insensitive' } } },
+          { citizen: { phone: { contains: search, mode: 'insensitive' } } },
+        ],
+      });
+    }
+
     const list = await prisma.order
       .findMany({
         where: {
-          stationId: stationId,
-          OR: [
-            { orderNumber: { contains: search } },
-            { citizen: { firstName: { contains: search } } },
-            { citizen: { lastName: { contains: search } } },
-            { citizen: { middleName: { contains: search } } },
-            { citizen: { phone: { contains: search } } },
-          ],
+          AND: andConditions,
         },
         skip: (currentPage - 1) * row,
         take: row,
@@ -312,14 +359,7 @@ export async function getCitizenCardByStation({
 
     const totalData = await prisma.order.count({
       where: {
-        stationId: stationId,
-        OR: [
-          { orderNumber: { contains: search } },
-          { citizen: { firstName: { contains: search } } },
-          { citizen: { lastName: { contains: search } } },
-          { citizen: { middleName: { contains: search } } },
-          { citizen: { phone: { contains: search } } },
-        ],
+        AND: andConditions,
       },
     });
 
@@ -327,5 +367,58 @@ export async function getCitizenCardByStation({
   } catch (error) {
     console.log(error);
     throw new Error("Failed to fetch citizen cards by station");
+  }
+}
+
+// Get card data for printing (super printer can access any station's orders)
+export async function getCardData(orderId: string) {
+  try {
+    const session = await auth();
+    const adminId = session?.user?.id;
+    if (!adminId) throw new Error("unauthenticated");
+
+    const orderData = await prisma.order.findUnique({
+      where: { id: orderId },
+      select: {
+        id: true,
+        orderNumber: true,
+        orderStatus: true,
+        orderType: true,
+        createdAt: true,
+        citizen: {
+          select: {
+            id: true,
+            registralNo: true,
+            firstName: true,
+            middleName: true,
+            lastName: true,
+            phone: true,
+            profilePhoto: true,
+            occupation: true,
+            dateOfBirth: true,
+            gender: true,
+            barcode: true,
+            placeOfBirth: true,
+            emergencyContact: true,
+            emergencyPhone: true,
+            relationship: true,
+          },
+        },
+        station: {
+          select: {
+            id: true,
+            afanOromoName: true,
+            amharicName: true,
+            signPhoto: true,
+            stampPhoto: true,
+            stationAdminName: true,
+          },
+        },
+      },
+    });
+    return orderData;
+  } catch (error) {
+    console.log(error);
+    return { status: false, message: "Failed to get citizen card data" };
   }
 }

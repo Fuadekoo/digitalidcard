@@ -172,7 +172,7 @@ export default function StationPrinterDashboardPage() {
           <CardContent>
             <ul className="space-y-3 text-sm text-muted-foreground list-disc pl-5">
               <li>Ensure printer is calibrated before starting a batch.</li>
-              <li>Only print orders that are marked as "APPROVED".</li>
+              <li>Only print orders that are marked as &quot;APPROVED&quot;.</li>
               <li>Double-check the card quality for any printing defects.</li>
               <li>Report any equipment malfunctions immediately.</li>
               <li>Securely store printed cards before dispatch.</li>

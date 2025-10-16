@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useData } from "@/hooks/useData";
 import {
   getFilteredCitizenCardByDate,
   aproveCitizenCard,
   rejectCitizenCard,
-} from "@/actions/stationPrintral/citizenCard";
+} from "@/actions/superPrintral/citizenCard";
+import { getAllStations } from "@/actions/superPrintral/dashboard";
 import { type ColumnDef } from "@tanstack/react-table";
 import {
   useReactTable,
@@ -23,7 +24,6 @@ import {
   Eye,
   Check,
   X,
-  // User,
   Phone,
   Calendar as CalendarIcon,
   IdCard,
@@ -34,8 +34,9 @@ import {
   AlertCircle,
   Printer,
   Search,
-  // CalendarDays,
   Filter,
+  Building2,
+  Globe,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -68,15 +69,22 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import type { DateRange } from "react-day-picker";
+import { StationSelector, type Station } from "@/components/ui/station-selector";
 
-// Citizen Card data type
-export type CitizenCard = {
+// Citizen Card data type for super printer (includes station info)
+export type SuperPrinterCitizenCard = {
   id: string;
   orderNumber: string;
   orderStatus: string;
   orderType: string;
   isPrinted: boolean;
   createdAt: Date;
+  station: {
+    id: string;
+    code: string;
+    amharicName: string;
+    afanOromoName: string;
+  };
   citizen: {
     id: string;
     registralNo: string;
@@ -142,11 +150,18 @@ const OrderTypeBadge = ({ type }: { type: string }) => {
   );
 };
 
-// Main Citizen Card Listing Component
-export default function CitizenCardListingPage({ lang }: { lang: string }) {
+// Main Super Printer Citizen Card Listing Component
+export default function SuperPrinterCitizenCardListingPage({
+  lang,
+}: {
+  lang: string;
+}) {
   const [searchQuery, setSearchQuery] = useState("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [selectedStationId, setSelectedStationId] = useState<string>("");
+  const [stations, setStations] = useState<Station[]>([]);
+  const [isLoadingStations, setIsLoadingStations] = useState(true);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -154,6 +169,24 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+
+  // Fetch stations on component mount
+  useEffect(() => {
+    const fetchStations = async () => {
+      setIsLoadingStations(true);
+      try {
+        const result = await getAllStations();
+        if (result.status && result.data) {
+          setStations(result.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch stations:", error);
+      } finally {
+        setIsLoadingStations(false);
+      }
+    };
+    fetchStations();
+  }, []);
 
   // Memoize query parameters
   const queryParams = React.useMemo(
@@ -169,9 +202,13 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
       currentPage: pagination.pageIndex + 1,
       row: pagination.pageSize,
       sort: false,
+      stationId: selectedStationId || undefined,
     }),
-    [searchQuery, dateRange, pagination.pageIndex, pagination.pageSize]
+    [searchQuery, dateRange, pagination.pageIndex, pagination.pageSize, selectedStationId]
   );
+
+  // Get selected station details
+  const selectedStation = stations.find((s) => s.id === selectedStationId);
 
   // Data fetching
   const [data, isLoading, refresh] = useData(
@@ -238,7 +275,7 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
     }
   };
 
-  // Transform data to match CitizenCard type
+  // Transform data to match SuperPrinterCitizenCard type
   const transformedData = React.useMemo(() => {
     if (!data?.list) {
       return [];
@@ -250,7 +287,7 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
   }, [data]);
 
   // Table columns definition
-  const columns: ColumnDef<CitizenCard>[] = React.useMemo(
+  const columns: ColumnDef<SuperPrinterCitizenCard>[] = React.useMemo(
     () => [
       {
         accessorKey: "orderNumber",
@@ -265,8 +302,26 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
               <div>
                 <div className="font-semibold text-sm">{order.orderNumber}</div>
                 <div className="text-xs text-muted-foreground">
-                  Order ID: {order.id.slice(0, 8)}...
+                  ID: {order.id.slice(0, 8)}...
                 </div>
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "station",
+        header: "Station",
+        cell: ({ row }) => {
+          const { station } = row.original;
+          return (
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20">
+                <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <div className="font-medium text-sm">{station.afanOromoName}</div>
+                <div className="text-xs text-muted-foreground">{station.code}</div>
               </div>
             </div>
           );
@@ -462,9 +517,10 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
     <>
       {/* Search and Filter Controls */}
       <div className="flex flex-col gap-4 mb-6">
-        <div className="flex flex-col sm:flex-row gap-4">
+        {/* Top Filter Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Search Input */}
-          <div className="flex-1">
+          <div className="lg:col-span-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -476,13 +532,42 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
             </div>
           </div>
 
+          {/* Station Selector */}
+          <div className="lg:col-span-1">
+            <div className="flex items-center gap-2">
+              <div className="flex-1">
+                <StationSelector
+                  stations={stations}
+                  value={selectedStationId}
+                  onValueChange={(value) => {
+                    setSelectedStationId(value);
+                    setPagination({ ...pagination, pageIndex: 0 });
+                  }}
+                  placeholder={isLoadingStations ? "Loading stations..." : "All Stations"}
+                  disabled={isLoadingStations}
+                />
+              </div>
+              {selectedStationId && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSelectedStationId("")}
+                  className="h-10 w-10"
+                  title="Clear station filter"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+
           {/* Date Range Filter */}
-          <div className="flex gap-2">
+          <div className="lg:col-span-1 flex gap-2">
             <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant={dateRange?.from && dateRange?.to ? "default" : "outline"}
-                  className={`w-[280px] justify-start text-left font-normal ${
+                  className={`w-full justify-start text-left font-normal ${
                     (!dateRange?.from || !dateRange?.to) && "text-muted-foreground"
                   }`}
                 >
@@ -721,16 +806,17 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
             </Popover>
 
             {/* Clear All Filters Button */}
-            {(searchQuery || (dateRange?.from && dateRange?.to)) && (
+            {(searchQuery || (dateRange?.from && dateRange?.to) || selectedStationId) && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => {
                   setSearchQuery("");
                   setDateRange(undefined);
+                  setSelectedStationId("");
                   setPagination({ ...pagination, pageIndex: 0 });
                 }}
-                className="px-3"
+                className="px-3 whitespace-nowrap"
               >
                 <X className="h-4 w-4 mr-1" />
                 Clear All
@@ -740,11 +826,17 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
         </div>
 
         {/* Filter Summary - Only show when filters are actually active */}
-        {(searchQuery || (dateRange?.from && dateRange?.to)) && (
+        {(searchQuery || (dateRange?.from && dateRange?.to) || selectedStationId) && (
           <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border">
             <Filter className="h-4 w-4 text-muted-foreground" />
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span className="text-muted-foreground">Active filters:</span>
+              {selectedStationId && selectedStation && (
+                <Badge variant="default" className="gap-1 bg-purple-600 hover:bg-purple-700">
+                  <Building2 className="h-3 w-3" />
+                  Station: {selectedStation.code} - {selectedStation.afanOromoName}
+                </Badge>
+              )}
               {searchQuery && (
                 <Badge variant="secondary" className="gap-1">
                   <Search className="h-3 w-3" />
@@ -786,13 +878,30 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
       <DataTable
         table={table}
         actionBar={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Badge
               variant="secondary"
               className="bg-blue-100 text-blue-800 dark:bg-blue-900/20"
             >
               📊 {data?.totalData || 0} Total Orders
             </Badge>
+            {selectedStationId && selectedStation ? (
+              <Badge
+                variant="outline"
+                className="bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400"
+              >
+                <Building2 className="mr-1 h-3 w-3" />
+                {selectedStation?.code || ""}
+              </Badge>
+            ) : (
+              <Badge
+                variant="outline"
+                className="bg-gray-50 text-gray-600 border-gray-200"
+              >
+                <Globe className="mr-1 h-3 w-3" />
+                All Stations
+              </Badge>
+            )}
             <Badge variant="outline">
               ✅ {table.getFilteredSelectedRowModel().rows.length} Selected
             </Badge>

@@ -2,17 +2,17 @@ import { buttonVariants } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { DataTableSkeleton } from "@/components/ui/table/data-table-skeleton";
-import { CitizenCardListingPage } from "@/features/citizenCard";
+import { SuperPrinterCitizenCardListingPage } from "@/features/citizenCard";
 import { cn } from "@/lib/utils";
-import { CreditCard, Filter, Download } from "lucide-react";
+import { CreditCard, Download, Globe } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import PageContainer from "@/components/layout/page-container";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata = {
-  title: "Dashboard: Card Printing",
-  description: "Print approved citizen cards and manage print status.",
+  title: "Dashboard: Card Printing (Super Printer)",
+  description: "Print approved citizen cards and manage print status across all stations.",
 };
 
 interface PageProps {
@@ -28,17 +28,17 @@ export default async function Page({ params }: PageProps) {
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <Heading
-              title="Citizen Card Printing"
-              description="Print approved citizen cards and manage print status for your station."
+              title="Citizen Card Printing (All Stations)"
+              description="Print approved citizen cards and manage print status across all stations."
             />
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                 <CreditCard className="mr-1 h-3 w-3" />
                 Card Management
               </Badge>
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                <Filter className="mr-1 h-3 w-3" />
-                Station Printer
+              <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                <Globe className="mr-1 h-3 w-3" />
+                Super Printer
               </Badge>
             </div>
           </div>
@@ -56,14 +56,14 @@ export default async function Page({ params }: PageProps) {
         <Suspense
           fallback={
             <DataTableSkeleton 
-              columnCount={8} 
+              columnCount={9} 
               rowCount={10} 
               filterCount={3}
               withViewOptions={true}
             />
           }
         >
-          <CitizenCardListingPage lang={lang} />
+          <SuperPrinterCitizenCardListingPage lang={lang} />
         </Suspense>
       </div>
     </PageContainer>
