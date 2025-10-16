@@ -730,6 +730,8 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
                       size={90}
                       level="M"
                       includeMargin={false}
+                      bgColor="transparent"
+                      fgColor="#000000"
                     />
                   </div>
                 )}
