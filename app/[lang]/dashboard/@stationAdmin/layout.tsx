@@ -30,7 +30,7 @@ export default async function Layout({
       {
         english: "report",
         amharic: "ዘገኝ",
-        url: "report",
+        url: "stationAdminReport",
         Icon: <Users className="size-6" />,
       },
       {
