@@ -35,11 +35,7 @@ export default function GenerateCardPage({ params }: PageProps) {
 
   // Fetch card data only when we have orderId
   const orderId = resolvedParams?.orderId || "";
-  const [cardData, isLoading] = useData(
-    getCardData,
-    () => {},
-    orderId
-  );
+  const [cardData, isLoading] = useData(getCardData, () => {}, orderId);
 
   // Generate PDF function
   const generatePDF = async () => {
@@ -262,22 +258,20 @@ export default function GenerateCardPage({ params }: PageProps) {
       stationAdminName: string;
     };
   }
-  
+
   const validCardData = cardData as ValidCardData;
   const { citizen, station } = validCardData;
 
   return (
     <div
-      className={`container mx-auto p-6 max-w-6xl ${
+      className={`container mx-auto p-6 max-w-6xl overflow-auto ${
         isPrintMode ? "print-only-cards" : ""
       }`}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Link
-            href={`/${resolvedParams.lang}/dashboard/citizenCard`}
-          >
+          <Link href={`/${resolvedParams.lang}/dashboard/citizenCard`}>
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Orders
@@ -600,9 +594,9 @@ function IdCard({ citizen, station }: IdCardProps) {
           />
 
           {/* Content Overlay */}
-          <div className="relative z-10 p-4">
+          <div className="relative z-10 p-1">
             {/* Header */}
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-between items-center mb-0">
               <Image
                 src="/oflag.png"
                 alt="Oromia Flag"
@@ -610,10 +604,10 @@ function IdCard({ citizen, station }: IdCardProps) {
                 height={30}
               />
               <div className="text-center">
-                <h2 className="text-xs font-bold">
+                <h2 className="text-[10px] font-bold">
                   {station?.afanOromoName || "Station Name"}
                 </h2>
-                <h2 className="text-xs font-bold">
+                <h2 className="text-[10px] font-bold">
                   {station?.amharicName || "የጣቢያ ስም"}
                 </h2>
               </div>
@@ -636,12 +630,12 @@ function IdCard({ citizen, station }: IdCardProps) {
                   alt="Profile"
                   width={96}
                   height={120}
-                  className="border-2 border-gray-300 rounded object-cover"
+                  className="h-24 w-24 border-2 border-gray-300 rounded object-cover"
                   onError={() => handleImageError(setProfileImgSrc)} // Fallback on error
                   unoptimized // Important for html2canvas to render correctly
                 />
                 <div className="mt-1">
-                  <p className="text-xs" style={{ fontSize: "7px" }}>
+                  <p className="text-xs" style={{ fontSize: "10px" }}>
                     L.G/መ.ቁ: {citizen.registralNo}
                   </p>
                 </div>

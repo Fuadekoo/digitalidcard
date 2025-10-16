@@ -543,29 +543,39 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
           />
 
           {/* Content Overlay */}
-          <div className="relative z-10 p-4">
+          <div className="relative z-10 p-4 bg-">
             {/* Header */}
-            <div className="flex justify-between items-center mb-2">
-              <Image
-                src="/oflag.png"
-                alt="Oromia Flag"
-                width={48}
-                height={30}
-              />
-              <div className="text-center">
-                <h2 className="text-xs font-bold">
-                  {station?.afanOromoName || "Station Name"}
+            <div className="relative flex items-center justify-between mb-2">
+              {/* LEFT FLAG */}
+              <div className="flex-shrink-0">
+                <Image
+                  src="/oflag.png"
+                  alt="Oromia Flag"
+                  width={48}
+                  height={30}
+                />
+              </div>
+
+              {/* CENTER TEXT — ABSOLUTELY CENTERED */}
+              <div className="scale-50 bg-red-500 absolute left-1/2 -translate-x-1/2 text-center">
+                <h2 className="text-[5px] font-bold">
+                  {/* {station?.afanOromoName || "Station Name"} */}
+                  abdulkarim
                 </h2>
-                <h2 className="text-xs font-bold">
+                <h2 className="text-[5px] font-bold">
                   {station?.amharicName || "የጣቢያ ስም"}
                 </h2>
               </div>
-              <Image
-                src="/ethflag.png"
-                alt="Ethiopian Flag"
-                width={48}
-                height={30}
-              />
+
+              {/* RIGHT FLAG */}
+              <div className="flex-shrink-0">
+                <Image
+                  src="/ethflag.png"
+                  alt="Ethiopian Flag"
+                  width={48}
+                  height={30}
+                />
+              </div>
             </div>
 
             {/* Divider */}
