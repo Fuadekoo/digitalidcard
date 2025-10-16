@@ -446,7 +446,10 @@ export default function GenerateCardPage({ params }: PageProps) {
           /* Allow overflow for barcode/signature visibility */
           #back {
             overflow: visible !important;
-            padding-right: 4mm !important;
+          }
+          
+          #back > div {
+            padding: 2mm !important;
           }
 
           #front .relative,
@@ -729,7 +732,7 @@ function IdCard({ citizen, station }: IdCardProps) {
           />
 
           {/* Content Overlay */}
-          <div className="relative z-10 p-4">
+          <div className="relative z-10 p-2">
             <div
               className="flex justify-between items-start mb-2"
               style={{ alignItems: "center" }}
