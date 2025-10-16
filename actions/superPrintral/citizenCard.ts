@@ -23,7 +23,7 @@ export async function getCitizenCard({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const andConditions: any[] = [
       { orderStatus: "APPROVED" }, // Only show approved orders that need printing
-      { isPrinted: false }, // Only show orders that haven't been printed yet
+      { isPrinted: "PENDING" }, // Only show orders that haven't been printed yet
     ];
 
     // Add station filter if provided
@@ -123,7 +123,7 @@ export async function getFilteredCitizenCardByDate({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const andConditions: any[] = [
       { orderStatus: "APPROVED" }, // Only show approved orders that need printing
-      { isPrinted: false }, // Only show orders that haven't been printed yet
+      { isPrinted: "PENDING" }, // Only show orders that haven't been printed yet
     ];
 
     // Add date filtering if both dates are provided
