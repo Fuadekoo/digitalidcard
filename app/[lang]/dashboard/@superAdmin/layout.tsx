@@ -7,6 +7,7 @@ import {
   Users,
 } from "lucide-react";
 import React from "react";
+import InstallPrompt from "@/components/installPrompt";
 
 export default async function Layout({
   children,
@@ -54,5 +55,10 @@ export default async function Layout({
     ],
   ];
 
-  return <UserLayout menu={menu}>{children}</UserLayout>;
+  return (
+    <UserLayout menu={menu}>
+      <InstallPrompt />
+      {children}
+    </UserLayout>
+  );
 }
