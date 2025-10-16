@@ -456,8 +456,21 @@ export default function GenerateCardPage({ params }: PageProps) {
           #front img,
           #back img {
             max-width: 100% !important;
-            height: auto !important;
             visibility: visible !important;
+          }
+
+          /* Increase profile photo size for printing - Override all conflicting styles */
+          #front .profile-photo,
+          .profile-photo {
+            width: 26mm !important;
+            min-width: 26mm !important;
+            max-width: 26mm !important;
+            height: 34mm !important;
+            min-height: 34mm !important;
+            max-height: 34mm !important;
+            object-fit: cover !important;
+            border-radius: 2mm !important;
+            display: block !important;
           }
 
           /* Text elements */
@@ -589,7 +602,7 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
                   alt="Profile"
                   width={96}
                   height={120}
-                  className="border-2 border-gray-300 rounded object-cover"
+                  className="profile-photo border-2 border-gray-300 rounded object-cover"
                   onError={() => handleImageError(setProfileImgSrc)} // Fallback on error
                   unoptimized // Important for html2canvas to render correctly
                 />
