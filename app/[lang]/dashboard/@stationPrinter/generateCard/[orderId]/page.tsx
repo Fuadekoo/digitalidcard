@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Download, Printer, ArrowLeft, CreditCard } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import Barcode from "react-barcode";
+import { QRCodeSVG } from "qrcode.react";
 import dynamic from "next/dynamic";
 import { format } from "date-fns";
 
@@ -473,6 +473,14 @@ export default function GenerateCardPage({ params }: PageProps) {
             display: block !important;
           }
 
+          /* QR Code print styles */
+          #back svg {
+            max-width: 24mm !important;
+            max-height: 24mm !important;
+            width: 24mm !important;
+            height: 24mm !important;
+          }
+
           /* Text elements */
           .id-card p,
           .id-card h2,
@@ -712,15 +720,16 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
                   <div
                     style={{
                       width: "34mm",
-                      textAlign: "end",
-                      lineHeight: 1,
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      alignItems: "center",
                     }}
                   >
-                    <Barcode
+                    <QRCodeSVG
                       value={citizen.barcode}
-                      width={1}
-                      height={15}
-                      fontSize={5}
+                      size={90}
+                      level="M"
+                      includeMargin={false}
                     />
                   </div>
                 )}
