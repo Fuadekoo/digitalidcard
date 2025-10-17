@@ -61,6 +61,7 @@ export async function getCitizenCard({
           orderType: true,
           paymentMethod: true,
           amount: true,
+          isPrinted: true,
           createdAt: true,
           station: {
             select: {
@@ -100,8 +101,8 @@ export async function getCitizenCard({
 
     return { list, totalData };
   } catch (error) {
-    console.log(error);
-    throw new Error("Failed to fetch citizen cards");
+    console.error("Error in getCitizenCard:", error);
+    return { list: [], totalData: 0 };
   }
 }
 
@@ -176,6 +177,7 @@ export async function getFilteredCitizenCardByDate({
           orderType: true,
           paymentMethod: true,
           amount: true,
+          isPrinted: true,
           createdAt: true,
           station: {
             select: {
@@ -221,8 +223,14 @@ export async function getFilteredCitizenCardByDate({
       dateRange: startDate && endDate ? { startDate, endDate } : null,
     };
   } catch (error) {
-    console.log(error);
-    throw new Error("Failed to fetch citizen cards");
+    console.error("Error in getFilteredCitizenCardByDate:", error);
+    return {
+      list: [],
+      totalData: 0,
+      currentPage: 1,
+      totalPages: 0,
+      dateRange: null,
+    };
   }
 }
 
@@ -324,6 +332,7 @@ export async function getCitizenCardByStation({
           orderType: true,
           paymentMethod: true,
           amount: true,
+          isPrinted: true,
           createdAt: true,
           station: {
             select: {
@@ -365,8 +374,8 @@ export async function getCitizenCardByStation({
 
     return { list, totalData };
   } catch (error) {
-    console.log(error);
-    throw new Error("Failed to fetch citizen cards by station");
+    console.error("Error in getCitizenCardByStation:", error);
+    return { list: [], totalData: 0 };
   }
 }
 

@@ -68,6 +68,7 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import type { DateRange } from "react-day-picker";
+import { status } from "@prisma/client";
 
 // Citizen Card data type
 export type CitizenCard = {
@@ -75,7 +76,7 @@ export type CitizenCard = {
   orderNumber: string;
   orderStatus: string;
   orderType: string;
-  isPrinted: boolean;
+  isPrinted: status;
   createdAt: Date;
   citizen: {
     id: string;

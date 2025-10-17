@@ -70,6 +70,7 @@ import {
 import { format } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { StationSelector, type Station } from "@/components/ui/station-selector";
+import { status } from "@prisma/client";
 
 // Citizen Card data type for super printer (includes station info)
 export type SuperPrinterCitizenCard = {
@@ -77,7 +78,7 @@ export type SuperPrinterCitizenCard = {
   orderNumber: string;
   orderStatus: string;
   orderType: string;
-  isPrinted: boolean;
+  isPrinted: status;
   createdAt: Date;
   station: {
     id: string;
