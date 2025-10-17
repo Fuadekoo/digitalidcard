@@ -109,7 +109,7 @@ export default function CitizenCreatePage({ lang }: CitizenCreatePageProps) {
     (result) => {
       if (result.status) {
         toast.success("Citizen created successfully!");
-        router.push("/${lang}/dashboard/citizen");
+        router.push(`/${lang}/dashboard/citizen`);
       } else {
         console.log("error >>2>>", result);
         toast.error(result.message || "Failed to create citizen");
