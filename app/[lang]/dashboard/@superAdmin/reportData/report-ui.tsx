@@ -1,14 +1,35 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FileText, Printer, Download, Calendar as CalendarIcon } from "lucide-react";
+import {
+  FileText,
+  Printer,
+  Download,
+  Calendar as CalendarIcon,
+} from "lucide-react";
 import { format } from "date-fns";
 import { getAllStations, getReport } from "@/actions/superAdmin/report";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
@@ -108,21 +129,21 @@ export default function ReportUI() {
 
     try {
       const doc = new jsPDF();
-      
+
       // Add header
       doc.setFontSize(20);
       doc.setFont("helvetica", "bold");
       doc.text("Digital ID Card System", 14, 20);
-      
+
       doc.setFontSize(12);
       doc.setFont("helvetica", "normal");
       doc.text("Station Activity Report", 14, 28);
-      
+
       // Add report info
       doc.setFontSize(10);
       doc.text(`Report #: RPT-${Date.now().toString().slice(-6)}`, 150, 20);
       doc.text(`Generated: ${format(new Date(), "PPP")}`, 150, 26);
-      
+
       // Add station info
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
@@ -131,13 +152,13 @@ export default function ReportUI() {
       doc.setFontSize(10);
       doc.text(`Name: ${reportData.station.name}`, 14, 52);
       doc.text(`Code: ${reportData.station.code}`, 14, 58);
-      
+
       doc.setFont("helvetica", "bold");
       doc.text("Report Period", 120, 45);
       doc.setFont("helvetica", "normal");
       doc.text(`From: ${format(startDate, "PPP")}`, 120, 52);
       doc.text(`To: ${format(endDate, "PPP")}`, 120, 58);
-      
+
       // Add table with report data
       autoTable(doc, {
         startY: 70,
@@ -160,24 +181,39 @@ export default function ReportUI() {
           1: { cellWidth: 40, halign: "right" },
         },
       });
-      
+
       // Add total revenue
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const finalY = (doc as any).lastAutoTable.finalY || 150;
       doc.setFontSize(12);
       doc.setFont("helvetica", "bold");
       doc.text("TOTAL REVENUE", 14, finalY + 15);
       doc.setTextColor(34, 197, 94); // Green color
-      doc.text(`$${(reportData.totalRevenue / 100).toFixed(2)}`, 180, finalY + 15, { align: "right" });
-      
+      doc.text(
+        `$${(reportData.totalRevenue / 100).toFixed(2)}`,
+        180,
+        finalY + 15,
+        { align: "right" }
+      );
+
       // Add footer
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(8);
       doc.setFont("helvetica", "normal");
-      doc.text("This is a computer-generated report", 105, 280, { align: "center" });
-      doc.text("Digital ID Card Management System", 105, 285, { align: "center" });
-      
+      doc.text("This is a computer-generated report", 105, 280, {
+        align: "center",
+      });
+      doc.text("Digital ID Card Management System", 105, 285, {
+        align: "center",
+      });
+
       // Save the PDF
-      doc.save(`Station_Report_${reportData.station.code}_${format(new Date(), "yyyy-MM-dd")}.pdf`);
+      doc.save(
+        `Station_Report_${reportData.station.code}_${format(
+          new Date(),
+          "yyyy-MM-dd"
+        )}.pdf`
+      );
       toast.success("Report downloaded successfully");
     } catch (error) {
       console.error("Error generating PDF:", error);
@@ -189,7 +225,9 @@ export default function ReportUI() {
     <div className="p-4 md:p-6 overflow-y-auto">
       {/* Header */}
       <div className="mb-8 no-print">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Station Report</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Station Report
+        </h1>
         <p className="text-gray-600">
           Generate comprehensive reports for station activities
         </p>
@@ -222,7 +260,8 @@ export default function ReportUI() {
                 <SelectContent>
                   {stations.map((station) => (
                     <SelectItem key={station.id} value={station.id}>
-                      {station.afanOromoName || station.amharicName} ({station.code})
+                      {station.afanOromoName || station.amharicName} (
+                      {station.code})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -282,7 +321,9 @@ export default function ReportUI() {
           <div className="mt-6">
             <Button
               onClick={generateReport}
-              disabled={isGenerating || !selectedStation || !startDate || !endDate}
+              disabled={
+                isGenerating || !selectedStation || !startDate || !endDate
+              }
               size="lg"
             >
               {isGenerating ? "Generating..." : "Generate Report"}
@@ -300,7 +341,11 @@ export default function ReportUI() {
               <Printer className="w-4 h-4" />
               Print Report
             </Button>
-            <Button onClick={handleDownload} variant="secondary" className="gap-2">
+            <Button
+              onClick={handleDownload}
+              variant="secondary"
+              className="gap-2"
+            >
               <Download className="w-4 h-4" />
               Download PDF
             </Button>
@@ -319,7 +364,9 @@ export default function ReportUI() {
                     <p className="text-gray-600">Station Activity Report</p>
                   </div>
                   <div className="text-right">
-                    <h3 className="text-3xl font-bold text-gray-900">RECEIPT</h3>
+                    <h3 className="text-3xl font-bold text-gray-900">
+                      RECEIPT
+                    </h3>
                     <p className="text-sm text-gray-600 mt-2">
                       Report #: RPT-{Date.now().toString().slice(-6)}
                     </p>

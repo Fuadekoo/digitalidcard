@@ -171,7 +171,7 @@ export default function SuperPrinterDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {data.recentOrders.slice(0, 5).map((order: any) => (
                 <div
                   key={order.id}
@@ -223,34 +223,38 @@ export default function SuperPrinterDashboardPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                {data.stationStatistics.map((station: any) => (
-                  <TableRow key={station.stationId}>
-                    <TableCell className="font-medium">
-                      <div>
-                        <div>{station.stationName}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {station.stationCode}
+                {data.stationStatistics.map(
+                  (
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    station: any
+                  ) => (
+                    <TableRow key={station.stationId}>
+                      <TableCell className="font-medium">
+                        <div>
+                          <div>{station.stationName}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {station.stationCode}
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {station.totalOrders}
-                    </TableCell>
-                    <TableCell className="text-right text-green-600">
-                      {station.approvedOrders}
-                    </TableCell>
-                    <TableCell className="text-right text-yellow-600">
-                      {station.pendingOrders}
-                    </TableCell>
-                    <TableCell className="text-right text-red-600">
-                      {station.rejectedOrders}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Badge variant="outline">{station.approvalRate}%</Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {station.totalOrders}
+                      </TableCell>
+                      <TableCell className="text-right text-green-600">
+                        {station.approvedOrders}
+                      </TableCell>
+                      <TableCell className="text-right text-yellow-600">
+                        {station.pendingOrders}
+                      </TableCell>
+                      <TableCell className="text-right text-red-600">
+                        {station.rejectedOrders}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Badge variant="outline">{station.approvalRate}%</Badge>
+                      </TableCell>
+                    </TableRow>
+                  )
+                )}
               </TableBody>
             </Table>
           </div>

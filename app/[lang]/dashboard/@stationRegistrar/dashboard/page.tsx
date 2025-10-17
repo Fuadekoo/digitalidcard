@@ -94,9 +94,15 @@ export default function StationRegistrarDashboard({ params }: PageProps) {
   const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [lineChartYear, setLineChartYear] = useState<number>(new Date().getFullYear());
-  const [typeChartYear, setTypeChartYear] = useState<number>(new Date().getFullYear());
+  const [lineChartYear, setLineChartYear] = useState<number>(
+    new Date().getFullYear()
+  );
+  const [typeChartYear, setTypeChartYear] = useState<number>(
+    new Date().getFullYear()
+  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [lineChartData, setLineChartData] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [typeChartData, setTypeChartData] = useState<any[]>([]);
   const [isLineChartLoading, setIsLineChartLoading] = useState(false);
   const [isTypeChartLoading, setIsTypeChartLoading] = useState(false);

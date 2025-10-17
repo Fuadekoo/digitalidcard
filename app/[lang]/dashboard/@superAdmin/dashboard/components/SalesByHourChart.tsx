@@ -12,7 +12,12 @@ import {
   YAxis,
 } from "recharts";
 
-export type SalesPoint = { hour: string; total: number; online?: number; inStore?: number };
+export type SalesPoint = {
+  hour: string;
+  total: number;
+  online?: number;
+  inStore?: number;
+};
 
 export default function SalesByHourChart({
   data,
@@ -46,16 +51,61 @@ export default function SalesByHourChart({
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-5">
       <h4 className="text-md font-semibold text-gray-800 mb-4">{title}</h4>
       <ResponsiveContainer width="100%" height={height}>
-        <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+        <LineChart
+          data={chartData}
+          margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+        >
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="hour" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
-          <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          <Tooltip contentStyle={{ backgroundColor: "white", border: "1px solid #e5e7eb", borderRadius: "0.5rem" }} formatter={(value: any, name: any) => [`$${value}`, name]} />
+          <XAxis
+            dataKey="hour"
+            stroke="#9ca3af"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+          />
+          <YAxis
+            stroke="#9ca3af"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+          />
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "white",
+              border: "1px solid #e5e7eb",
+              borderRadius: "0.5rem",
+            }}
+            formatter={(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              value: any,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              name: any
+            ) => [`$${value}`, name]}
+          />
           <Legend />
-          <Line type="monotone" dataKey="total" name="Total Sales" stroke="#2563eb" strokeWidth={2} activeDot={{ r: 6 }} />
-          <Line type="monotone" dataKey="online" name="Online" stroke="#16a34a" strokeWidth={2} />
-          <Line type="monotone" dataKey="inStore" name="In-Store" stroke="#f59e0b" strokeWidth={2} />
+          <Line
+            type="monotone"
+            dataKey="total"
+            name="Total Sales"
+            stroke="#2563eb"
+            strokeWidth={2}
+            activeDot={{ r: 6 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="online"
+            name="Online"
+            stroke="#16a34a"
+            strokeWidth={2}
+          />
+          <Line
+            type="monotone"
+            dataKey="inStore"
+            name="In-Store"
+            stroke="#f59e0b"
+            strokeWidth={2}
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>
