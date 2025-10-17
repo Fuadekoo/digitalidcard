@@ -51,30 +51,28 @@ export default function StationUserCreatePage({
   const isSuperAdmin = session?.user?.role === "superAdmin";
 
   // Fetch station data
-  const { data: stationData, isLoading: isStationLoading } = useData(
+  const [stationData, isStationLoading] = useData(
     getSingleStation,
+    () => {},
     stationId
   );
 
   // Create user mutation
-  const createUserMutation = useMutation({
-    mutationFn: async (data: UserFormData) => {
+  const [createUserMutation, isCreating] = useMutation(
+    async (data: UserFormData) => {
       const result = await createUser(data);
       return result;
     },
-    onSuccess: (result) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (result: any) => {
       if (result.status) {
         toast.success("User created successfully!");
         router.push(`/dashboard/station/${stationId}/stationUser`);
       } else {
         toast.error(result.message || "Failed to create user");
       }
-    },
-    onError: (error) => {
-      console.error("Error creating user:", error);
-      toast.error("Failed to create user");
-    },
-  });
+    }
+  );
 
   const handleInputChange = (field: keyof UserFormData, value: string) => {
     setFormData((prev) => ({
@@ -108,7 +106,7 @@ export default function StationUserCreatePage({
       return;
     }
 
-    createUserMutation.mutate(formData);
+    createUserMutation(formData);
   };
 
   // Show loading state
@@ -258,12 +256,8 @@ export default function StationUserCreatePage({
             </div>
 
             <div className="flex gap-3 pt-4">
-              <Button
-                type="submit"
-                disabled={createUserMutation.isPending}
-                className="flex-1"
-              >
-                {createUserMutation.isPending ? "Creating..." : "Create User"}
+              <Button type="submit" disabled={isCreating} className="flex-1">
+                {isCreating ? "Creating..." : "Create User"}
               </Button>
               <Link href={`/dashboard/station/${stationId}/stationUser`}>
                 <Button type="button" variant="outline">
