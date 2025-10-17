@@ -34,6 +34,7 @@ export default function PaymentMethodsPieChart({
             cx="50%"
             cy="50%"
             labelLine={false}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             label={({ method, amount }: any) => {
               const percent = ((amount / total) * 100).toFixed(0);
               return `${method} ${percent}%`;
@@ -50,6 +51,7 @@ export default function PaymentMethodsPieChart({
             ))}
           </Pie>
           <Tooltip
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
             formatter={(value: any) => [`$${value}`, "Amount"]}
             contentStyle={{
               backgroundColor: "white",

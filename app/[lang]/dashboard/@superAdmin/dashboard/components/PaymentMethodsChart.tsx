@@ -27,6 +27,7 @@ export default function PaymentMethodsChart({
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="method" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
           <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           <Tooltip formatter={(value: any) => [`$${value}`, "Amount"]} contentStyle={{ backgroundColor: "white", border: "1px solid #e5e7eb", borderRadius: "0.5rem" }} />
           <Bar dataKey="amount" fill="#6366f1" radius={[6, 6, 0, 0]} />
         </BarChart>

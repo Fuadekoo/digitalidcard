@@ -132,8 +132,10 @@ export default function GenerateCardPage({ params }: PageProps) {
       doc.setLineWidth(0.2);
 
       // Front card border (rounded if supported)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (typeof (doc as any).roundedRect === "function") {
         // jsPDF roundedRect(x, y, w, h, rx, ry, style?)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (doc as any).roundedRect(
           margin,
           margin,
@@ -142,6 +144,7 @@ export default function GenerateCardPage({ params }: PageProps) {
           cornerRadius,
           cornerRadius
         );
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (doc as any).roundedRect(
           margin + cardWidth + spacing,
           margin,
@@ -230,7 +233,9 @@ export default function GenerateCardPage({ params }: PageProps) {
 
   // TypeScript type assertion after null checks
   const validCardData = cardData as NonNullable<typeof cardData> & {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     citizen: NonNullable<any>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     station: NonNullable<any>;
   };
   const { citizen, station } = validCardData;
@@ -510,7 +515,15 @@ export default function GenerateCardPage({ params }: PageProps) {
 }
 
 // Separate IdCard component for better management
-function IdCard({ citizen, station }: { citizen: any; station: any }) {
+function IdCard({
+  citizen,
+  station,
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  citizen: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  station: any;
+}) {
   const formatImageUrl = (fileName: string | null | undefined): string => {
     // Use a transparent pixel as a placeholder to avoid showing a broken image icon
     if (!fileName)

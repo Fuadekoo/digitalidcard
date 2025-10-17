@@ -360,6 +360,7 @@ function SingleOrderView({
   getOrderTypeColor: (type: string) => string;
   getPrintStatusColor: (status: string) => string;
   getAcceptStatusColor: (status: string) => string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getTimelineSteps: (order: OrderDetails) => any[];
 }) {
   const timelineSteps = getTimelineSteps(order);

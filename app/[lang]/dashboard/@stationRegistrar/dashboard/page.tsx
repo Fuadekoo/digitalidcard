@@ -211,7 +211,7 @@ export default function StationRegistrarDashboard({ params }: PageProps) {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Station Registrar Dashboard</h1>
         <p className="text-muted-foreground">
-          Overview of your station's orders and citizens
+          Overview of your station&apos;s orders and citizens
         </p>
       </div>
 
@@ -345,7 +345,10 @@ export default function StationRegistrarDashboard({ params }: PageProps) {
                 <TrendingUp className="h-5 w-5" />
                 Monthly Order Trends
               </CardTitle>
-              <Select value={lineChartYear.toString()} onValueChange={handleLineChartYearChange}>
+              <Select
+                value={lineChartYear.toString()}
+                onValueChange={handleLineChartYearChange}
+              >
                 <SelectTrigger className="w-[120px]">
                   <SelectValue placeholder="Select year" />
                 </SelectTrigger>
@@ -412,7 +415,10 @@ export default function StationRegistrarDashboard({ params }: PageProps) {
                 <Package className="h-5 w-5" />
                 Orders by Type (Urgent vs Normal)
               </CardTitle>
-              <Select value={typeChartYear.toString()} onValueChange={handleTypeChartYearChange}>
+              <Select
+                value={typeChartYear.toString()}
+                onValueChange={handleTypeChartYearChange}
+              >
                 <SelectTrigger className="w-[120px]">
                   <SelectValue placeholder="Select year" />
                 </SelectTrigger>
@@ -445,8 +451,18 @@ export default function StationRegistrarDashboard({ params }: PageProps) {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="urgent" stackId="a" fill="#ef4444" name="Urgent Orders" />
-                <Bar dataKey="normal" stackId="a" fill="#3b82f6" name="Normal Orders" />
+                <Bar
+                  dataKey="urgent"
+                  stackId="a"
+                  fill="#ef4444"
+                  name="Urgent Orders"
+                />
+                <Bar
+                  dataKey="normal"
+                  stackId="a"
+                  fill="#3b82f6"
+                  name="Normal Orders"
+                />
               </BarChart>
             </ResponsiveContainer>
             {/* Summary below chart */}
@@ -569,7 +585,9 @@ export default function StationRegistrarDashboard({ params }: PageProps) {
                     </div>
                     <div className="flex items-center gap-3">
                       <Badge
-                        className={`${getStatusColor(order.orderStatus)} border`}
+                        className={`${getStatusColor(
+                          order.orderStatus
+                        )} border`}
                       >
                         {order.orderStatus}
                       </Badge>

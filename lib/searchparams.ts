@@ -8,6 +8,7 @@ export const searchParamsCache = {
 };
 
 // Serialize search params for cache keys
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const serialize = (params: Record<string, any>) => {
   return JSON.stringify(params);
 };

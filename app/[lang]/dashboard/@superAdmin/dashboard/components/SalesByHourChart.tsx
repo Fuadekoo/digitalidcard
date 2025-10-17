@@ -50,6 +50,7 @@ export default function SalesByHourChart({
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="hour" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
           <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           <Tooltip contentStyle={{ backgroundColor: "white", border: "1px solid #e5e7eb", borderRadius: "0.5rem" }} formatter={(value: any, name: any) => [`$${value}`, name]} />
           <Legend />
           <Line type="monotone" dataKey="total" name="Total Sales" stroke="#2563eb" strokeWidth={2} activeDot={{ r: 6 }} />
