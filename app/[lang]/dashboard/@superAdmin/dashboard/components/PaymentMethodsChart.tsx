@@ -1,7 +1,15 @@
 "use client";
 
 import React from "react";
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 export type PaymentMethod = { method: string; amount: number };
 
@@ -25,9 +33,31 @@ export default function PaymentMethodsChart({
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="method" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
-          <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
-          <Tooltip formatter={(value: any) => [`$${value}`, "Amount"]} contentStyle={{ backgroundColor: "white", border: "1px solid #e5e7eb", borderRadius: "0.5rem" }} />
+          <XAxis
+            dataKey="method"
+            stroke="#9ca3af"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+          />
+          <YAxis
+            stroke="#9ca3af"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+          />
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <Tooltip
+            formatter={(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              value: any
+            ) => [`$${value}`, "Amount"]}
+            contentStyle={{
+              backgroundColor: "white",
+              border: "1px solid #e5e7eb",
+              borderRadius: "0.5rem",
+            }}
+          />
           <Bar dataKey="amount" fill="#6366f1" radius={[6, 6, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>

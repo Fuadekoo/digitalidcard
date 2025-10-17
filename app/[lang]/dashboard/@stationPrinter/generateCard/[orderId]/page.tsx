@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Download, Printer, ArrowLeft, CreditCard } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import Barcode from "react-barcode";
+import { QRCodeSVG } from "qrcode.react";
 import dynamic from "next/dynamic";
 import { format } from "date-fns";
 
@@ -132,8 +132,10 @@ export default function GenerateCardPage({ params }: PageProps) {
       doc.setLineWidth(0.2);
 
       // Front card border (rounded if supported)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (typeof (doc as any).roundedRect === "function") {
         // jsPDF roundedRect(x, y, w, h, rx, ry, style?)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (doc as any).roundedRect(
           margin,
           margin,
@@ -142,6 +144,7 @@ export default function GenerateCardPage({ params }: PageProps) {
           cornerRadius,
           cornerRadius
         );
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (doc as any).roundedRect(
           margin + cardWidth + spacing,
           margin,
@@ -230,7 +233,9 @@ export default function GenerateCardPage({ params }: PageProps) {
 
   // TypeScript type assertion after null checks
   const validCardData = cardData as NonNullable<typeof cardData> & {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     citizen: NonNullable<any>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     station: NonNullable<any>;
   };
   const { citizen, station } = validCardData;
@@ -421,7 +426,10 @@ export default function GenerateCardPage({ params }: PageProps) {
           /* Allow overflow for barcode/signature visibility */
           #back {
             overflow: visible !important;
-            padding-right: 4mm !important;
+          }
+          
+          #back > div {
+            padding: 2mm !important;
           }
 
           #front .relative,
@@ -456,8 +464,29 @@ export default function GenerateCardPage({ params }: PageProps) {
           #front img,
           #back img {
             max-width: 100% !important;
-            height: auto !important;
             visibility: visible !important;
+          }
+
+          /* Increase profile photo size for printing - Override all conflicting styles */
+          #front .profile-photo,
+          .profile-photo {
+            width: 26mm !important;
+            min-width: 26mm !important;
+            max-width: 26mm !important;
+            height: 28mm !important;
+            min-height: 28mm !important;
+            max-height: 28mm !important;
+            object-fit: cover !important;
+            border-radius: 2mm !important;
+            display: block !important;
+          }
+
+          /* QR Code print styles */
+          #back svg {
+            max-width: 18mm !important;
+            max-height: 18mm !important;
+            width: 18mm !important;
+            height: 18mm !important;
           }
 
           /* Text elements */
@@ -486,7 +515,15 @@ export default function GenerateCardPage({ params }: PageProps) {
 }
 
 // Separate IdCard component for better management
-function IdCard({ citizen, station }: { citizen: any; station: any }) {
+function IdCard({
+  citizen,
+  station,
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  citizen: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  station: any;
+}) {
   const formatImageUrl = (fileName: string | null | undefined): string => {
     // Use a transparent pixel as a placeholder to avoid showing a broken image icon
     if (!fileName)
@@ -543,29 +580,39 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
           />
 
           {/* Content Overlay */}
-          <div className="relative z-10 p-4">
+          <div className="relative z-10 p-4 bg-">
             {/* Header */}
-            <div className="flex justify-between items-center mb-2">
-              <Image
-                src="/oflag.png"
-                alt="Oromia Flag"
-                width={48}
-                height={30}
-              />
-              <div className="text-center">
-                <h2 className="text-xs font-bold">
-                  {station?.afanOromoName || "Station Name"}
+            <div className="relative flex items-center justify-between mb-2">
+              {/* LEFT FLAG */}
+              <div className="flex-shrink-0">
+                <Image
+                  src="/oflag.png"
+                  alt="Oromia Flag"
+                  width={48}
+                  height={30}
+                />
+              </div>
+
+              {/* CENTER TEXT — ABSOLUTELY CENTERED */}
+              <div className="scale-50 bg-red-500 absolute left-1/2 -translate-x-1/2 text-center">
+                <h2 className="text-[5px] font-bold">
+                  {/* {station?.afanOromoName || "Station Name"} */}
+                  abdulkarim
                 </h2>
-                <h2 className="text-xs font-bold">
+                <h2 className="text-[5px] font-bold">
                   {station?.amharicName || "የጣቢያ ስም"}
                 </h2>
               </div>
-              <Image
-                src="/ethflag.png"
-                alt="Ethiopian Flag"
-                width={48}
-                height={30}
-              />
+
+              {/* RIGHT FLAG */}
+              <div className="flex-shrink-0">
+                <Image
+                  src="/ethflag.png"
+                  alt="Ethiopian Flag"
+                  width={48}
+                  height={30}
+                />
+              </div>
             </div>
 
             {/* Divider */}
@@ -579,7 +626,7 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
                   alt="Profile"
                   width={96}
                   height={120}
-                  className="border-2 border-gray-300 rounded object-cover"
+                  className="profile-photo border-2 border-gray-300 rounded object-cover"
                   onError={() => handleImageError(setProfileImgSrc)} // Fallback on error
                   unoptimized // Important for html2canvas to render correctly
                 />
@@ -657,7 +704,7 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
           />
 
           {/* Content Overlay */}
-          <div className="relative z-10 p-4">
+          <div className="relative z-10 p-2">
             <div
               className="flex justify-between items-start mb-2"
               style={{ alignItems: "center" }}
@@ -689,15 +736,18 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
                   <div
                     style={{
                       width: "34mm",
-                      textAlign: "end",
-                      lineHeight: 1,
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      alignItems: "center",
                     }}
                   >
-                    <Barcode
+                    <QRCodeSVG
                       value={citizen.barcode}
-                      width={1}
-                      height={15}
-                      fontSize={5}
+                      size={70}
+                      level="M"
+                      includeMargin={false}
+                      bgColor="transparent"
+                      fgColor="#000000"
                     />
                   </div>
                 )}

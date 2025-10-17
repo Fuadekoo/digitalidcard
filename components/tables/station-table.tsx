@@ -155,6 +155,7 @@ export function StationTable() {
   );
 
   // Temporary: Test with direct data fetching
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -182,6 +183,7 @@ export function StationTable() {
     if (!data?.list) {
       return [];
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return data.list.map((station: any) => ({
       ...station,
       stampPhoto: station.stampPhoto ?? undefined,

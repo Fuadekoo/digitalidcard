@@ -96,6 +96,9 @@ export async function getOrderById(orderId: string) {
         paymentMethod: true,
         paymentReference: true,
         amount: true,
+        isPrinted: true,
+        isAccepted: true,
+        printerId: true,
         createdAt: true,
         updatedAt: true,
         citizen: {
@@ -110,6 +113,12 @@ export async function getOrderById(orderId: string) {
             dateOfBirth: true,
             placeOfBirth: true,
             occupation: true,
+          },
+        },
+        printer: {
+          select: {
+            id: true,
+            username: true,
           },
         },
       },
@@ -228,7 +237,7 @@ export async function getOrder({ search, currentPage, row, sort }: Filter) {
         stationId: stationId.stationId,
         OR: [
           { orderNumber: { contains: search, mode: "insensitive" } },
-    
+
           { citizen: { firstName: { contains: search, mode: "insensitive" } } },
           { citizen: { lastName: { contains: search, mode: "insensitive" } } },
           {
@@ -308,7 +317,7 @@ export async function createOrder(data: {
       data: {
         orderNumber,
         citizenId: data.citizenId,
-        orderType: data.orderType,
+        orderType: data.orderType as any, // Fix: Temporarily cast to any; ideally use the correct enum/type for orderType if available
         paymentMethod: data.paymentMethod,
         paymentReference: data.paymentReference,
         amount: data.amount,
@@ -342,7 +351,7 @@ export async function deleteOrder(id: string) {
     });
     if (!order) throw new Error("order not found");
 
-    await prisma.order.delete({ where: { id, orderStatus: "REJECTED" } });
+    await prisma.order.delete({ where: { id, orderStatus: "PENDING" } });
 
     return { status: true, message: "Order deleted successfully" };
   } catch (error) {

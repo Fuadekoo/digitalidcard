@@ -34,6 +34,9 @@ interface OrderDetails {
   paymentMethod: string;
   paymentReference: string;
   amount: number;
+  isPrinted: "PENDING" | "APPROVED" | "REJECTED";
+  isAccepted: "PENDING" | "APPROVED" | "REJECTED";
+  printerId: string | null;
   createdAt: Date;
   updatedAt: Date;
   citizen: {
@@ -48,6 +51,10 @@ interface OrderDetails {
     placeOfBirth: string;
     occupation: string;
   };
+  printer?: {
+    id: string;
+    username: string;
+  } | null;
 }
 
 interface PageProps {
@@ -106,6 +113,32 @@ export default function TrackOrderDetailsPage({ params }: PageProps) {
     }
   };
 
+  const getPrintStatusColor = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "APPROVED":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "REJECTED":
+        return "bg-red-100 text-red-800 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const getAcceptStatusColor = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "APPROVED":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "REJECTED":
+        return "bg-red-100 text-red-800 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
   const getTimelineSteps = (order: OrderDetails) => {
     const steps = [
       {
@@ -119,7 +152,7 @@ export default function TrackOrderDetailsPage({ params }: PageProps) {
       {
         id: 2,
         title: "Payment Processed",
-        description: `Payment of ${order.amount} ETB received`,
+        description: `Payment of ${order.amount} ETB received via ${order.paymentMethod}`,
         status: order.orderStatus !== "PENDING" ? "completed" : "pending",
         date: new Date(order.createdAt),
         icon: CreditCard,
@@ -147,18 +180,57 @@ export default function TrackOrderDetailsPage({ params }: PageProps) {
         },
         {
           id: 4,
-          title: "Processing",
-          description: "Your ID card is being manufactured",
-          status: "completed",
-          date: new Date(order.updatedAt),
+          title: "Card Printing",
+          description:
+            order.isPrinted === "APPROVED"
+              ? `ID card has been printed by ${
+                  order.printer ? order.printer.username : "Unknown Printer"
+                }`
+              : order.isPrinted === "REJECTED"
+              ? "Card printing was rejected"
+              : "Your ID card is being printed",
+          status:
+            order.isPrinted === "APPROVED"
+              ? "completed"
+              : order.isPrinted === "REJECTED"
+              ? "error"
+              : "current",
+          date:
+            order.isPrinted === "APPROVED"
+              ? new Date(order.updatedAt)
+              : new Date(),
           icon: Package,
         },
         {
           id: 5,
+          title: "Card Acceptance",
+          description:
+            order.isAccepted === "APPROVED"
+              ? "ID card has been accepted and verified"
+              : order.isAccepted === "REJECTED"
+              ? "Card acceptance was rejected"
+              : "Waiting for card acceptance",
+          status:
+            order.isAccepted === "APPROVED"
+              ? "completed"
+              : order.isAccepted === "REJECTED"
+              ? "error"
+              : "pending",
+          date:
+            order.isAccepted === "APPROVED"
+              ? new Date(order.updatedAt)
+              : new Date(),
+          icon: CheckCircle,
+        },
+        {
+          id: 6,
           title: "Ready for Collection",
           description: "Your ID card is ready at the station",
-          status: "current",
-          date: new Date(order.updatedAt),
+          status: order.isAccepted === "APPROVED" ? "current" : "pending",
+          date:
+            order.isAccepted === "APPROVED"
+              ? new Date(order.updatedAt)
+              : new Date(),
           icon: MapPin,
         }
       );
@@ -196,10 +268,14 @@ export default function TrackOrderDetailsPage({ params }: PageProps) {
           <AlertCircle className="h-16 w-16 mx-auto mb-4 text-red-500" />
           <h2 className="text-2xl font-bold mb-2">Order Not Found</h2>
           <p className="text-muted-foreground mb-6">
-            {error.message || "The order you are looking for could not be found."}
+            {error.message ||
+              "The order you are looking for could not be found."}
           </p>
           <div className="space-x-4">
-            <Button onClick={() => router.push("/en/dashboard/trackOrder")} variant="outline">
+            <Button
+              onClick={() => router.push("/en/dashboard/trackOrder")}
+              variant="outline"
+            >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Search
             </Button>
@@ -235,7 +311,10 @@ export default function TrackOrderDetailsPage({ params }: PageProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => router.push("/en/dashboard/trackOrder")}>
+          <Button
+            variant="outline"
+            onClick={() => router.push("/en/dashboard/trackOrder")}
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Search
           </Button>
@@ -259,6 +338,8 @@ export default function TrackOrderDetailsPage({ params }: PageProps) {
         order={orderData}
         getStatusColor={getStatusColor}
         getOrderTypeColor={getOrderTypeColor}
+        getPrintStatusColor={getPrintStatusColor}
+        getAcceptStatusColor={getAcceptStatusColor}
         getTimelineSteps={getTimelineSteps}
       />
     </div>
@@ -270,11 +351,16 @@ function SingleOrderView({
   order,
   getStatusColor,
   getOrderTypeColor,
+  getPrintStatusColor,
+  getAcceptStatusColor,
   getTimelineSteps,
 }: {
   order: OrderDetails;
   getStatusColor: (status: string) => string;
   getOrderTypeColor: (type: string) => string;
+  getPrintStatusColor: (status: string) => string;
+  getAcceptStatusColor: (status: string) => string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getTimelineSteps: (order: OrderDetails) => any[];
 }) {
   const timelineSteps = getTimelineSteps(order);
@@ -322,6 +408,31 @@ function SingleOrderView({
                   {order.paymentReference}
                 </span>
               </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Print Status:</span>
+                <Badge
+                  className={`${getPrintStatusColor(order.isPrinted)} border`}
+                >
+                  {order.isPrinted}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">
+                  Acceptance Status:
+                </span>
+                <Badge
+                  className={`${getAcceptStatusColor(order.isAccepted)} border`}
+                >
+                  {order.isAccepted}
+                </Badge>
+              </div>
+              {order.printer && (
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Printer:</span>
+                  <span className="font-medium">{order.printer.username}</span>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

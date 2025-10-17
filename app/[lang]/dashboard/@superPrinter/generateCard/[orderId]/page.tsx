@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Download, Printer, ArrowLeft, CreditCard } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import Barcode from "react-barcode";
+import { QRCodeSVG } from "qrcode.react";
 import { format } from "date-fns";
 
 // Dynamic imports for client-side only libraries
@@ -35,11 +35,7 @@ export default function GenerateCardPage({ params }: PageProps) {
 
   // Fetch card data only when we have orderId
   const orderId = resolvedParams?.orderId || "";
-  const [cardData, isLoading] = useData(
-    getCardData,
-    () => {},
-    orderId
-  );
+  const [cardData, isLoading] = useData(getCardData, () => {}, orderId);
 
   // Generate PDF function
   const generatePDF = async () => {
@@ -262,22 +258,20 @@ export default function GenerateCardPage({ params }: PageProps) {
       stationAdminName: string;
     };
   }
-  
+
   const validCardData = cardData as ValidCardData;
   const { citizen, station } = validCardData;
 
   return (
     <div
-      className={`container mx-auto p-6 max-w-6xl ${
+      className={`container mx-auto p-6 max-w-6xl overflow-auto ${
         isPrintMode ? "print-only-cards" : ""
       }`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-4">
-          <Link
-            href={`/${resolvedParams.lang}/dashboard/citizenCard`}
-          >
+          <Link href={`/${resolvedParams.lang}/dashboard/citizenCard`}>
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Orders
@@ -452,7 +446,10 @@ export default function GenerateCardPage({ params }: PageProps) {
           /* Allow overflow for barcode/signature visibility */
           #back {
             overflow: visible !important;
-            padding-right: 4mm !important;
+          }
+
+          #back > div {
+            padding: 2mm !important;
           }
 
           #front .relative,
@@ -487,8 +484,29 @@ export default function GenerateCardPage({ params }: PageProps) {
           #front img,
           #back img {
             max-width: 100% !important;
-            height: auto !important;
             visibility: visible !important;
+          }
+
+          /* Increase profile photo size for printing - Override all conflicting styles */
+          #front .profile-photo,
+          .profile-photo {
+            width: 26mm !important;
+            min-width: 26mm !important;
+            max-width: 26mm !important;
+            height: 28mm !important;
+            min-height: 28mm !important;
+            max-height: 28mm !important;
+            object-fit: cover !important;
+            border-radius: 2mm !important;
+            display: block !important;
+          }
+
+          /* QR Code print styles */
+          #back svg {
+            max-width: 18mm !important;
+            max-height: 18mm !important;
+            width: 18mm !important;
+            height: 18mm !important;
           }
 
           /* Text elements */
@@ -600,9 +618,9 @@ function IdCard({ citizen, station }: IdCardProps) {
           />
 
           {/* Content Overlay */}
-          <div className="relative z-10 p-4">
+          <div className="relative z-10 p-1">
             {/* Header */}
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-between items-center mb-0">
               <Image
                 src="/oflag.png"
                 alt="Oromia Flag"
@@ -610,10 +628,10 @@ function IdCard({ citizen, station }: IdCardProps) {
                 height={30}
               />
               <div className="text-center">
-                <h2 className="text-xs font-bold">
+                <h2 className="text-[10px] font-bold">
                   {station?.afanOromoName || "Station Name"}
                 </h2>
-                <h2 className="text-xs font-bold">
+                <h2 className="text-[10px] font-bold">
                   {station?.amharicName || "የጣቢያ ስም"}
                 </h2>
               </div>
@@ -636,12 +654,12 @@ function IdCard({ citizen, station }: IdCardProps) {
                   alt="Profile"
                   width={96}
                   height={120}
-                  className="border-2 border-gray-300 rounded object-cover"
+                  className="profile-photo h-24 w-24 border-2 border-gray-300 rounded object-cover"
                   onError={() => handleImageError(setProfileImgSrc)} // Fallback on error
                   unoptimized // Important for html2canvas to render correctly
                 />
                 <div className="mt-1">
-                  <p className="text-xs" style={{ fontSize: "7px" }}>
+                  <p className="text-xs" style={{ fontSize: "10px" }}>
                     L.G/መ.ቁ: {citizen.registralNo}
                   </p>
                 </div>
@@ -714,7 +732,7 @@ function IdCard({ citizen, station }: IdCardProps) {
           />
 
           {/* Content Overlay */}
-          <div className="relative z-10 p-4">
+          <div className="relative z-10 p-2">
             <div
               className="flex justify-between items-start mb-2"
               style={{ alignItems: "center" }}
@@ -746,15 +764,18 @@ function IdCard({ citizen, station }: IdCardProps) {
                   <div
                     style={{
                       width: "34mm",
-                      textAlign: "end",
-                      lineHeight: 1,
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      alignItems: "center",
                     }}
                   >
-                    <Barcode
+                    <QRCodeSVG
                       value={citizen.barcode}
-                      width={1}
-                      height={15}
-                      fontSize={5}
+                      size={70}
+                      level="M"
+                      includeMargin={false}
+                      bgColor="transparent"
+                      fgColor="#000000"
                     />
                   </div>
                 )}

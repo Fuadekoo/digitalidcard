@@ -12,6 +12,17 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -94,11 +105,7 @@ export function OrderListing({ lang }: OrderListingProps) {
   );
 
   // Data fetching using useData hook
-  const [data, isLoading, refresh] = useData(
-    getOrder,
-    null,
-    queryParams
-  );
+  const [data, isLoading, refresh] = useData(getOrder, null, queryParams);
 
   // Reset pagination when search changes
   React.useEffect(() => {
@@ -165,9 +172,7 @@ export function OrderListing({ lang }: OrderListingProps) {
   };
 
   const handleDelete = async (orderId: string) => {
-    if (window.confirm("Are you sure you want to delete this order?")) {
-      await deleteAction(orderId);
-    }
+    await deleteAction(orderId);
   };
 
   // Table columns definition
@@ -300,14 +305,51 @@ export function OrderListing({ lang }: OrderListingProps) {
                     />
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive"
-                  onClick={() => handleDelete(order.id)}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Order
-                </DropdownMenuItem>
+                {order.orderStatus === "PENDING" && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onSelect={(e) => e.preventDefault()}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete Order
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Order</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete order{" "}
+                            <span className="font-semibold text-primary">
+                              {order.orderNumber}
+                            </span>{" "}
+                            for{" "}
+                            <span className="font-semibold">
+                              {order.citizen.firstName} {order.citizen.lastName}
+                            </span>
+                            ?
+                            <br />
+                            <br />
+                            This action cannot be undone and will permanently
+                            remove the order from the system.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(order.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete Order
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           );

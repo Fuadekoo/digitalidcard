@@ -67,7 +67,9 @@ export default function SuperPrinterDashboardPage() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <h3 className="text-lg font-semibold mb-2">Failed to Load Data</h3>
-          <p className="text-muted-foreground">{dashboardData.message || "Unable to load dashboard data"}</p>
+          <p className="text-muted-foreground">
+            {dashboardData.message || "Unable to load dashboard data"}
+          </p>
         </div>
       </div>
     );
@@ -149,7 +151,9 @@ export default function SuperPrinterDashboardPage() {
             <ul className="space-y-3 text-sm text-muted-foreground list-disc pl-5">
               <li>You can manage orders from all stations.</li>
               <li>Ensure printer is calibrated before starting a batch.</li>
-              <li>Only print orders that are marked as &quot;APPROVED&quot;.</li>
+              <li>
+                Only print orders that are marked as &quot;APPROVED&quot;.
+              </li>
               <li>Double-check the card quality for any printing defects.</li>
               <li>Report any equipment malfunctions immediately.</li>
               <li>Coordinate with station admins for special requests.</li>
@@ -167,6 +171,7 @@ export default function SuperPrinterDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {data.recentOrders.slice(0, 5).map((order: any) => (
                 <div
                   key={order.id}
@@ -218,33 +223,38 @@ export default function SuperPrinterDashboardPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.stationStatistics.map((station: any) => (
-                  <TableRow key={station.stationId}>
-                    <TableCell className="font-medium">
-                      <div>
-                        <div>{station.stationName}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {station.stationCode}
+                {data.stationStatistics.map(
+                  (
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    station: any
+                  ) => (
+                    <TableRow key={station.stationId}>
+                      <TableCell className="font-medium">
+                        <div>
+                          <div>{station.stationName}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {station.stationCode}
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {station.totalOrders}
-                    </TableCell>
-                    <TableCell className="text-right text-green-600">
-                      {station.approvedOrders}
-                    </TableCell>
-                    <TableCell className="text-right text-yellow-600">
-                      {station.pendingOrders}
-                    </TableCell>
-                    <TableCell className="text-right text-red-600">
-                      {station.rejectedOrders}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Badge variant="outline">{station.approvalRate}%</Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {station.totalOrders}
+                      </TableCell>
+                      <TableCell className="text-right text-green-600">
+                        {station.approvedOrders}
+                      </TableCell>
+                      <TableCell className="text-right text-yellow-600">
+                        {station.pendingOrders}
+                      </TableCell>
+                      <TableCell className="text-right text-red-600">
+                        {station.rejectedOrders}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Badge variant="outline">{station.approvalRate}%</Badge>
+                      </TableCell>
+                    </TableRow>
+                  )
+                )}
               </TableBody>
             </Table>
           </div>
@@ -299,23 +309,22 @@ export default function SuperPrinterDashboardPage() {
               <Activity className="h-5 w-5" />
               Station Performance
             </CardTitle>
-            <CardDescription>
-              Order counts by station (top 5)
-            </CardDescription>
+            <CardDescription>Order counts by station (top 5)</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart 
+              <BarChart
                 data={data.stationStatistics
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   .sort((a: any, b: any) => b.totalOrders - a.totalOrders)
                   .slice(0, 5)
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   .map((s: any) => ({
                     station: s.stationCode,
                     approved: s.approvedOrders,
                     pending: s.pendingOrders,
                     rejected: s.rejectedOrders,
-                  }))
-                }
+                  }))}
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="station" />
@@ -327,21 +336,9 @@ export default function SuperPrinterDashboardPage() {
                   }}
                 />
                 <Legend />
-                <Bar
-                  dataKey="approved"
-                  fill="#22c55e"
-                  name="Approved"
-                />
-                <Bar
-                  dataKey="pending"
-                  fill="#eab308"
-                  name="Pending"
-                />
-                <Bar
-                  dataKey="rejected"
-                  fill="#ef4444"
-                  name="Rejected"
-                />
+                <Bar dataKey="approved" fill="#22c55e" name="Approved" />
+                <Bar dataKey="pending" fill="#eab308" name="Pending" />
+                <Bar dataKey="rejected" fill="#ef4444" name="Rejected" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

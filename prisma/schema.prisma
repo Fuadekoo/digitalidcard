@@ -125,6 +125,7 @@ model order {
   registrarId      String
   printerId        String?
   isPrinted        status    @default(PENDING)
+  isAccepted       status    @default(PENDING)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 

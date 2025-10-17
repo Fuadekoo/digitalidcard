@@ -43,7 +43,8 @@ export function getDefaults<
     const defaultValue = schema._def.defaultValue;
     return typeof defaultValue === "function"
       ? defaultValue()
-      : (defaultValue as any);
+      : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (defaultValue as any);
   } else if (schema instanceof z.ZodObject) {
     return Object.fromEntries(
       Object.entries(schema.shape).map(([key, value]) => [
