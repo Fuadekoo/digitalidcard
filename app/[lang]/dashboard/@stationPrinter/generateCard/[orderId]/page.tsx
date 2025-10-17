@@ -468,9 +468,9 @@ export default function GenerateCardPage({ params }: PageProps) {
             width: 26mm !important;
             min-width: 26mm !important;
             max-width: 26mm !important;
-            height: 34mm !important;
-            min-height: 34mm !important;
-            max-height: 34mm !important;
+            height: 28mm !important;
+            min-height: 28mm !important;
+            max-height: 28mm !important;
             object-fit: cover !important;
             border-radius: 2mm !important;
             display: block !important;
@@ -478,10 +478,10 @@ export default function GenerateCardPage({ params }: PageProps) {
 
           /* QR Code print styles */
           #back svg {
-            max-width: 24mm !important;
-            max-height: 24mm !important;
-            width: 24mm !important;
-            height: 24mm !important;
+            max-width: 18mm !important;
+            max-height: 18mm !important;
+            width: 18mm !important;
+            height: 18mm !important;
           }
 
           /* Text elements */
@@ -730,7 +730,7 @@ function IdCard({ citizen, station }: { citizen: any; station: any }) {
                   >
                     <QRCodeSVG
                       value={citizen.barcode}
-                      size={90}
+                      size={70}
                       level="M"
                       includeMargin={false}
                       bgColor="transparent"
