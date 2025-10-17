@@ -48,6 +48,11 @@ export default async function PaymentVerificationPage({ params }: PageProps) {
   }
 
   const { data } = paymentStatus;
+
+  if (!data) {
+    redirect(`/${lang}/dashboard/order`);
+  }
+
   const isApproved = data.orderStatus === "APPROVED";
 
   return (

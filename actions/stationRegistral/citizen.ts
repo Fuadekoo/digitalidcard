@@ -243,7 +243,7 @@ export async function verifyCitizen(id: string) {
 
     const citizen = await prisma.citizen.update({
       where: { id, stationId: stationId?.stationId },
-      data: { isVerified: true },
+      data: { isVerified: "APPROVED" },
     });
 
     return {
@@ -272,7 +272,7 @@ export async function unVerifyCitizen(id: string) {
 
     const citizen = await prisma.citizen.update({
       where: { id, stationId: stationId?.stationId },
-      data: { isVerified: false },
+      data: { isVerified: "REJECTED" },
     });
 
     return {

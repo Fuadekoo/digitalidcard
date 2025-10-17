@@ -134,15 +134,17 @@ export async function getCitizenStatistics(
     ...(stationId ? { stationId } : {}),
   };
 
-  const [total, male, female] = await Promise.all([
+  const [total, male, female, other] = await Promise.all([
     prisma.citizen.count({ where: whereClause }),
-    prisma.citizen.count({ where: { ...whereClause, gender: "male" } }),
-    prisma.citizen.count({ where: { ...whereClause, gender: "female" } }),
+    prisma.citizen.count({ where: { ...whereClause, gender: "MALE" } }),
+    prisma.citizen.count({ where: { ...whereClause, gender: "FEMALE" } }),
+    prisma.citizen.count({ where: { ...whereClause, gender: "OTHER" } }),
   ]);
 
   return {
     total,
     male,
     female,
+    other,
   };
 }

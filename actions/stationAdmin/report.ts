@@ -58,9 +58,9 @@ export async function getOrderStatistics(
 
   const [total, pending, accepted, rejected] = await Promise.all([
     prisma.order.count({ where: whereClause }),
-    prisma.order.count({ where: { ...whereClause, orderStatus: "pending" } }),
-    prisma.order.count({ where: { ...whereClause, orderStatus: "accepted" } }),
-    prisma.order.count({ where: { ...whereClause, orderStatus: "rejected" } }),
+    prisma.order.count({ where: { ...whereClause, orderStatus: "PENDING" } }),
+    prisma.order.count({ where: { ...whereClause, orderStatus: "APPROVED" } }),
+    prisma.order.count({ where: { ...whereClause, orderStatus: "REJECTED" } }),
   ]);
 
   return {
@@ -84,8 +84,9 @@ export async function getCitizenStatistics(
 
   const [total, male, female] = await Promise.all([
     prisma.citizen.count({ where: whereClause }),
-    prisma.citizen.count({ where: { ...whereClause, gender: "male" } }),
-    prisma.citizen.count({ where: { ...whereClause, gender: "female" } }),
+    prisma.citizen.count({ where: { ...whereClause, gender: "MALE" } }),
+    prisma.citizen.count({ where: { ...whereClause, gender: "FEMALE" } }),
+    prisma.citizen.count({ where: { ...whereClause, gender: "OTHER" } }),
   ]);
 
   return {

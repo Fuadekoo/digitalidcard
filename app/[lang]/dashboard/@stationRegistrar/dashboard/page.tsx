@@ -511,8 +511,12 @@ export default function StationRegistrarDashboard({ params }: PageProps) {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) =>
-                    `${name}: ${(percent * 100).toFixed(0)}%`
+                  label={
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    (props: any) => {
+                      const { name, percent } = props;
+                      return `${name}: ${(percent * 100).toFixed(0)}%`;
+                    }
                   }
                   outerRadius={80}
                   fill="#8884d8"
