@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import { useData } from "@/hooks/useData";
-import { 
+import {
   getFilteredCitizensByDate,
   verifyCitizen,
   unVerifyCitizen,
-  deleteCitizen 
+  deleteCitizen,
 } from "@/actions/stationAdmin/citizen";
 import { type ColumnDef } from "@tanstack/react-table";
 import {
@@ -146,19 +146,23 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
   const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
   const [unverifyDialogOpen, setUnverifyDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedCitizenId, setSelectedCitizenId] = useState<string | null>(null);
+  const [selectedCitizenId, setSelectedCitizenId] = useState<string | null>(
+    null
+  );
 
   // Memoize query parameters
   const queryParams = React.useMemo(
     () => ({
       search: searchQuery,
       // Only send dates when BOTH from and to are selected
-      startDate: dateRange?.from && dateRange?.to
-        ? format(dateRange.from, "yyyy-MM-dd")
-        : undefined,
-      endDate: dateRange?.from && dateRange?.to 
-        ? format(dateRange.to, "yyyy-MM-dd") 
-        : undefined,
+      startDate:
+        dateRange?.from && dateRange?.to
+          ? format(dateRange.from, "yyyy-MM-dd")
+          : undefined,
+      endDate:
+        dateRange?.from && dateRange?.to
+          ? format(dateRange.to, "yyyy-MM-dd")
+          : undefined,
       currentPage: pagination.pageIndex + 1,
       row: pagination.pageSize,
       sort: false,
@@ -282,7 +286,9 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
                 <IdCard className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <div className="font-semibold text-sm">{citizen.registralNo}</div>
+                <div className="font-semibold text-sm">
+                  {citizen.registralNo}
+                </div>
                 <div className="text-xs text-muted-foreground">
                   ID: {citizen.id.slice(0, 8)}...
                 </div>
@@ -331,7 +337,9 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
               <div className="text-sm font-medium">
                 {station.afanOromoName || station.amharicName || "N/A"}
               </div>
-              <div className="text-xs text-muted-foreground">{station.code}</div>
+              <div className="text-xs text-muted-foreground">
+                {station.code}
+              </div>
             </div>
           );
         },
@@ -384,6 +392,13 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
           const isVerified = citizen.isVerified === "APPROVED";
           const hasOrders = citizen.order.length > 0;
 
+          // Debug logging
+          // console.log(`Citizen ${citizen.firstName} ${citizen.lastName}:`, {
+          //   ordersCount: citizen.order.length,
+          //   hasOrders,
+          //   orders: citizen.order
+          // });
+
           return (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -401,7 +416,9 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href={`/${lang}/dashboard/citizenManagement/${citizen.id}`}>
+                  <Link
+                    href={`/${lang}/dashboard/citizenManagement/${citizen.id}`}
+                  >
                     <Eye className="mr-2 h-4 w-4" />
                     View Details
                   </Link>
@@ -425,15 +442,14 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
                     Unverify Citizen
                   </DropdownMenuItem>
                 )}
-                {!hasOrders && (
-                  <DropdownMenuItem
-                    onClick={() => handleDeleteClick(citizen.id)}
-                    className="text-destructive"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete Citizen
-                  </DropdownMenuItem>
-                )}
+                <DropdownMenuItem
+                  onClick={() => handleDeleteClick(citizen.id)}
+                  className="text-destructive"
+                  disabled={hasOrders}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Citizen {hasOrders ? "(Has Orders)" : ""}
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           );
@@ -497,9 +513,12 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
             <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
               <PopoverTrigger asChild>
                 <Button
-                  variant={dateRange?.from && dateRange?.to ? "default" : "outline"}
+                  variant={
+                    dateRange?.from && dateRange?.to ? "default" : "outline"
+                  }
                   className={`w-[280px] justify-start text-left font-normal ${
-                    (!dateRange?.from || !dateRange?.to) && "text-muted-foreground"
+                    (!dateRange?.from || !dateRange?.to) &&
+                    "text-muted-foreground"
                   }`}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
@@ -517,7 +536,10 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 max-h-[600px] overflow-auto" align="start">
+              <PopoverContent
+                className="w-auto p-0 max-h-[600px] overflow-auto"
+                align="start"
+              >
                 <div className="p-0 max-w-[95vw]">
                   {/* Quick Date Presets */}
                   <div className="p-3 border-b bg-muted/30 overflow-y-auto max-h-[200px]">
@@ -601,7 +623,11 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
                         size="sm"
                         onClick={() => {
                           const today = new Date();
-                          const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                          const firstDayOfMonth = new Date(
+                            today.getFullYear(),
+                            today.getMonth(),
+                            1
+                          );
                           setDateRange({ from: firstDayOfMonth, to: today });
                           setIsDatePickerOpen(false);
                           setPagination({ ...pagination, pageIndex: 0 });
@@ -615,9 +641,20 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
                         size="sm"
                         onClick={() => {
                           const today = new Date();
-                          const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
-                          const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-                          setDateRange({ from: lastMonthStart, to: lastMonthEnd });
+                          const lastMonthEnd = new Date(
+                            today.getFullYear(),
+                            today.getMonth(),
+                            0
+                          );
+                          const lastMonthStart = new Date(
+                            today.getFullYear(),
+                            today.getMonth() - 1,
+                            1
+                          );
+                          setDateRange({
+                            from: lastMonthStart,
+                            to: lastMonthEnd,
+                          });
                           setIsDatePickerOpen(false);
                           setPagination({ ...pagination, pageIndex: 0 });
                         }}
@@ -635,44 +672,51 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
                     </h4>
                     <div className="overflow-x-auto">
                       <Calendar
-                      mode="range"
-                      defaultMonth={dateRange?.from || new Date()}
-                      selected={dateRange}
-                      onSelect={(range) => {
-                        if (!range) {
-                          setDateRange(undefined);
-                          return;
-                        }
-                        
-                        if (dateRange?.from && dateRange?.to && range?.from && range?.to) {
-                          const isSameDate = range.from.getTime() === range.to.getTime();
-                          
-                          if (isSameDate) {
-                            setDateRange({ from: range.from, to: undefined });
+                        mode="range"
+                        defaultMonth={dateRange?.from || new Date()}
+                        selected={dateRange}
+                        onSelect={(range) => {
+                          if (!range) {
+                            setDateRange(undefined);
                             return;
                           }
-                        }
-                        
-                        if (range?.from && range?.to) {
-                          const isSameDate = range.from.getTime() === range.to.getTime();
-                          
-                          if (isSameDate) {
-                            setDateRange({ from: range.from, to: undefined });
-                            return;
-                          } else {
-                            setDateRange(range);
+
+                          if (
+                            dateRange?.from &&
+                            dateRange?.to &&
+                            range?.from &&
+                            range?.to
+                          ) {
+                            const isSameDate =
+                              range.from.getTime() === range.to.getTime();
+
+                            if (isSameDate) {
+                              setDateRange({ from: range.from, to: undefined });
+                              return;
+                            }
                           }
-                        } else if (range?.from && !range?.to) {
-                          setDateRange({ from: range.from, to: undefined });
-                        }
-                      }}
-                      numberOfMonths={2}
-                      modifiers={{
-                        today: new Date(),
-                      }}
-                      modifiersClassNames={{
-                        today: "bg-accent/50 font-bold underline",
-                      }}
+
+                          if (range?.from && range?.to) {
+                            const isSameDate =
+                              range.from.getTime() === range.to.getTime();
+
+                            if (isSameDate) {
+                              setDateRange({ from: range.from, to: undefined });
+                              return;
+                            } else {
+                              setDateRange(range);
+                            }
+                          } else if (range?.from && !range?.to) {
+                            setDateRange({ from: range.from, to: undefined });
+                          }
+                        }}
+                        numberOfMonths={2}
+                        modifiers={{
+                          today: new Date(),
+                        }}
+                        modifiersClassNames={{
+                          today: "bg-accent/50 font-bold underline",
+                        }}
                       />
                     </div>
                     {dateRange?.from && !dateRange?.to && (
@@ -699,7 +743,8 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
                               Range Selected
                             </div>
                             <div className="text-green-600/80 dark:text-green-400/80">
-                              {format(dateRange.from, "MMM dd")} - {format(dateRange.to, "MMM dd, yyyy")}
+                              {format(dateRange.from, "MMM dd")} -{" "}
+                              {format(dateRange.to, "MMM dd, yyyy")}
                             </div>
                           </div>
                         </div>
@@ -765,7 +810,8 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
               {dateRange?.from && dateRange?.to && (
                 <Badge variant="secondary" className="gap-1">
                   <CalendarIcon className="h-3 w-3" />
-                  {format(dateRange.from, "MMM dd")} - {format(dateRange.to, "MMM dd, yyyy")}
+                  {format(dateRange.from, "MMM dd")} -{" "}
+                  {format(dateRange.to, "MMM dd, yyyy")}
                 </Badge>
               )}
               <span className="text-muted-foreground ml-2">
@@ -774,13 +820,15 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
             </div>
           </div>
         )}
-        
+
         {/* Date Selection Helper */}
         {dateRange?.from && !dateRange?.to && (
           <div className="flex items-center gap-2 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
             <AlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
             <div className="text-sm text-orange-800 dark:text-orange-300">
-              <strong>Date selection in progress:</strong> Start date selected ({format(dateRange.from, "MMM dd, yyyy")}). Please select an end date to apply the date filter.
+              <strong>Date selection in progress:</strong> Start date selected (
+              {format(dateRange.from, "MMM dd, yyyy")}). Please select an end
+              date to apply the date filter.
             </div>
             <Button
               variant="ghost"
@@ -822,7 +870,8 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
               Verify Citizen
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to verify this citizen? This will mark them as approved and allow them to create orders.
+              Are you sure you want to verify this citizen? This will mark them
+              as approved and allow them to create orders.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -839,7 +888,10 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
       </AlertDialog>
 
       {/* Unverify Confirmation Dialog */}
-      <AlertDialog open={unverifyDialogOpen} onOpenChange={setUnverifyDialogOpen}>
+      <AlertDialog
+        open={unverifyDialogOpen}
+        onOpenChange={setUnverifyDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
@@ -847,11 +899,14 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
               Unverify Citizen
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to unverify this citizen? This will mark them as rejected and prevent them from creating new orders.
+              Are you sure you want to unverify this citizen? This will mark
+              them as rejected and prevent them from creating new orders.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isUnverifying}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isUnverifying}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleUnverifyConfirm}
               disabled={isUnverifying}
@@ -872,7 +927,8 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
               Delete Citizen
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this citizen? This action cannot be undone. Only citizens without orders can be deleted.
+              Are you sure you want to delete this citizen? This action cannot
+              be undone. Only citizens without orders can be deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -96,6 +96,9 @@ export async function getOrderById(orderId: string) {
         paymentMethod: true,
         paymentReference: true,
         amount: true,
+        isPrinted: true,
+        isAccepted: true,
+        printerId: true,
         createdAt: true,
         updatedAt: true,
         citizen: {
@@ -110,6 +113,12 @@ export async function getOrderById(orderId: string) {
             dateOfBirth: true,
             placeOfBirth: true,
             occupation: true,
+          },
+        },
+        printer: {
+          select: {
+            id: true,
+            username: true,
           },
         },
       },
