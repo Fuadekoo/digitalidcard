@@ -317,6 +317,7 @@ export async function createOrder(data: {
       data: {
         orderNumber,
         citizenId: data.citizenId,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         orderType: data.orderType as any, // Fix: Temporarily cast to any; ideally use the correct enum/type for orderType if available
         paymentMethod: data.paymentMethod,
         paymentReference: data.paymentReference,
