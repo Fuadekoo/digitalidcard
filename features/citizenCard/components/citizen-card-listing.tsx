@@ -75,7 +75,7 @@ export type CitizenCard = {
   orderNumber: string;
   orderStatus: string;
   orderType: string;
-  isPrinted: boolean;
+  isPrinted: "PENDING" | "APPROVED" | "REJECTED";
   createdAt: Date;
   citizen: {
     id: string;
@@ -160,12 +160,14 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
     () => ({
       search: searchQuery,
       // Only send dates when BOTH from and to are selected
-      startDate: dateRange?.from && dateRange?.to
-        ? format(dateRange.from, "yyyy-MM-dd")
-        : undefined,
-      endDate: dateRange?.from && dateRange?.to 
-        ? format(dateRange.to, "yyyy-MM-dd") 
-        : undefined,
+      startDate:
+        dateRange?.from && dateRange?.to
+          ? format(dateRange.from, "yyyy-MM-dd")
+          : undefined,
+      endDate:
+        dateRange?.from && dateRange?.to
+          ? format(dateRange.to, "yyyy-MM-dd")
+          : undefined,
       currentPage: pagination.pageIndex + 1,
       row: pagination.pageSize,
       sort: false,
@@ -335,18 +337,11 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
         accessorKey: "isPrinted",
         header: "Print Status",
         cell: ({ row }) => {
-          const isPrinted = row.getValue("isPrinted") as boolean;
-          return isPrinted ? (
-            <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
-              <CheckCircle className="mr-1 h-3 w-3" />
-              Printed
-            </Badge>
-          ) : (
-            <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
-              <Printer className="mr-1 h-3 w-3" />
-              Not Printed
-            </Badge>
-          );
+          const isPrinted = row.getValue("isPrinted") as
+            | "PENDING"
+            | "APPROVED"
+            | "REJECTED";
+          return <StatusBadge status={isPrinted} />;
         },
       },
       {
@@ -372,7 +367,6 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
         header: "Actions",
         cell: ({ row }) => {
           const order = row.original;
-          const isNotPrinted = !order.isPrinted;
 
           return (
             <DropdownMenu>
@@ -402,24 +396,24 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
                     Generate & Print Card
                   </Link>
                 </DropdownMenuItem>
-                {isNotPrinted && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => handleApproveClick(order.id)}
-                      className="text-green-600 dark:text-green-400"
-                    >
-                      <Check className="mr-2 h-4 w-4" />
-                      Mark as Printed
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleRejectClick(order.id)}
-                      className="text-destructive"
-                    >
-                      <X className="mr-2 h-4 w-4" />
-                      Reject Print
-                    </DropdownMenuItem>
-                  </>
+                <DropdownMenuSeparator />
+                {order.isPrinted !== "APPROVED" && (
+                  <DropdownMenuItem
+                    onClick={() => handleApproveClick(order.id)}
+                    className="text-green-600 dark:text-green-400"
+                  >
+                    <Check className="mr-2 h-4 w-4" />
+                    Mark as Printed
+                  </DropdownMenuItem>
+                )}
+                {order.isPrinted !== "PENDING" && (
+                  <DropdownMenuItem
+                    onClick={() => handleRejectClick(order.id)}
+                    className="text-orange-600 dark:text-orange-400"
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    Reset to Pending
+                  </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
@@ -481,9 +475,12 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
             <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
               <PopoverTrigger asChild>
                 <Button
-                  variant={dateRange?.from && dateRange?.to ? "default" : "outline"}
+                  variant={
+                    dateRange?.from && dateRange?.to ? "default" : "outline"
+                  }
                   className={`w-[280px] justify-start text-left font-normal ${
-                    (!dateRange?.from || !dateRange?.to) && "text-muted-foreground"
+                    (!dateRange?.from || !dateRange?.to) &&
+                    "text-muted-foreground"
                   }`}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
@@ -501,7 +498,10 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 max-h-[600px] overflow-auto" align="start">
+              <PopoverContent
+                className="w-auto p-0 max-h-[600px] overflow-auto"
+                align="start"
+              >
                 <div className="p-0 max-w-[95vw]">
                   {/* Quick Date Presets */}
                   <div className="p-3 border-b bg-muted/30 overflow-y-auto max-h-[200px]">
@@ -584,7 +584,11 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
                         size="sm"
                         onClick={() => {
                           const today = new Date();
-                          const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                          const firstDayOfMonth = new Date(
+                            today.getFullYear(),
+                            today.getMonth(),
+                            1
+                          );
                           setDateRange({ from: firstDayOfMonth, to: today });
                           setIsDatePickerOpen(false);
                           setPagination({ ...pagination, pageIndex: 0 });
@@ -598,9 +602,20 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
                         size="sm"
                         onClick={() => {
                           const today = new Date();
-                          const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
-                          const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-                          setDateRange({ from: lastMonthStart, to: lastMonthEnd });
+                          const lastMonthEnd = new Date(
+                            today.getFullYear(),
+                            today.getMonth(),
+                            0
+                          );
+                          const lastMonthStart = new Date(
+                            today.getFullYear(),
+                            today.getMonth() - 1,
+                            1
+                          );
+                          setDateRange({
+                            from: lastMonthStart,
+                            to: lastMonthEnd,
+                          });
                           setIsDatePickerOpen(false);
                           setPagination({ ...pagination, pageIndex: 0 });
                         }}
@@ -618,51 +633,58 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
                     </h4>
                     <div className="overflow-x-auto">
                       <Calendar
-                      mode="range"
-                      defaultMonth={dateRange?.from || new Date()}
-                      selected={dateRange}
-                      onSelect={(range) => {
-                        // Handle date range selection properly
-                        if (!range) {
-                          setDateRange(undefined);
-                          return;
-                        }
-                        
-                        // If there's already a complete range and user clicks a new date, start fresh
-                        if (dateRange?.from && dateRange?.to && range?.from && range?.to) {
-                          const isSameDate = range.from.getTime() === range.to.getTime();
-                          
-                          if (isSameDate) {
-                            // User clicked a single date - start new range selection
-                            setDateRange({ from: range.from, to: undefined });
+                        mode="range"
+                        defaultMonth={dateRange?.from || new Date()}
+                        selected={dateRange}
+                        onSelect={(range) => {
+                          // Handle date range selection properly
+                          if (!range) {
+                            setDateRange(undefined);
                             return;
                           }
-                        }
-                        
-                        // Check if from and to are the same date (first click)
-                        if (range?.from && range?.to) {
-                          const isSameDate = range.from.getTime() === range.to.getTime();
-                          
-                          if (isSameDate) {
-                            // Single click - only set the start date
-                            setDateRange({ from: range.from, to: undefined });
-                            return;
-                          } else {
-                            // Two different dates selected - complete range
-                            setDateRange(range);
+
+                          // If there's already a complete range and user clicks a new date, start fresh
+                          if (
+                            dateRange?.from &&
+                            dateRange?.to &&
+                            range?.from &&
+                            range?.to
+                          ) {
+                            const isSameDate =
+                              range.from.getTime() === range.to.getTime();
+
+                            if (isSameDate) {
+                              // User clicked a single date - start new range selection
+                              setDateRange({ from: range.from, to: undefined });
+                              return;
+                            }
                           }
-                        } else if (range?.from && !range?.to) {
-                          // Only from is set
-                          setDateRange({ from: range.from, to: undefined });
-                        }
-                      }}
-                      numberOfMonths={2}
-                      modifiers={{
-                        today: new Date(),
-                      }}
-                      modifiersClassNames={{
-                        today: "bg-accent/50 font-bold underline",
-                      }}
+
+                          // Check if from and to are the same date (first click)
+                          if (range?.from && range?.to) {
+                            const isSameDate =
+                              range.from.getTime() === range.to.getTime();
+
+                            if (isSameDate) {
+                              // Single click - only set the start date
+                              setDateRange({ from: range.from, to: undefined });
+                              return;
+                            } else {
+                              // Two different dates selected - complete range
+                              setDateRange(range);
+                            }
+                          } else if (range?.from && !range?.to) {
+                            // Only from is set
+                            setDateRange({ from: range.from, to: undefined });
+                          }
+                        }}
+                        numberOfMonths={2}
+                        modifiers={{
+                          today: new Date(),
+                        }}
+                        modifiersClassNames={{
+                          today: "bg-accent/50 font-bold underline",
+                        }}
                       />
                     </div>
                     {dateRange?.from && !dateRange?.to && (
@@ -689,7 +711,8 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
                               Range Selected
                             </div>
                             <div className="text-green-600/80 dark:text-green-400/80">
-                              {format(dateRange.from, "MMM dd")} - {format(dateRange.to, "MMM dd, yyyy")}
+                              {format(dateRange.from, "MMM dd")} -{" "}
+                              {format(dateRange.to, "MMM dd, yyyy")}
                             </div>
                           </div>
                         </div>
@@ -754,7 +777,8 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
               {dateRange?.from && dateRange?.to && (
                 <Badge variant="secondary" className="gap-1">
                   <CalendarIcon className="h-3 w-3" />
-                  {format(dateRange.from, "MMM dd")} - {format(dateRange.to, "MMM dd, yyyy")}
+                  {format(dateRange.from, "MMM dd")} -{" "}
+                  {format(dateRange.to, "MMM dd, yyyy")}
                 </Badge>
               )}
               <span className="text-muted-foreground ml-2">
@@ -763,13 +787,15 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
             </div>
           </div>
         )}
-        
+
         {/* Date Selection Helper Message */}
         {dateRange?.from && !dateRange?.to && (
           <div className="flex items-center gap-2 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
             <AlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
             <div className="text-sm text-orange-800 dark:text-orange-300">
-              <strong>Date selection in progress:</strong> Start date selected ({format(dateRange.from, "MMM dd, yyyy")}). Please select an end date to apply the date filter.
+              <strong>Date selection in progress:</strong> Start date selected (
+              {format(dateRange.from, "MMM dd, yyyy")}). Please select an end
+              date to apply the date filter.
             </div>
             <Button
               variant="ghost"
@@ -833,12 +859,13 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <XCircle className="h-5 w-5 text-red-600" />
-              Reject Print Request
+              <AlertCircle className="h-5 w-5 text-orange-600" />
+              Reset Print Status
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to reject this print request? This will mark
-              the card as not printed and remove the printer assignment.
+              Are you sure you want to reset this print status back to PENDING?
+              This will remove the printer assignment and allow the card to be
+              printed again.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -846,9 +873,9 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
             <AlertDialogAction
               onClick={handleRejectConfirm}
               disabled={isRejecting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-orange-600 text-white hover:bg-orange-700"
             >
-              {isRejecting ? "Rejecting..." : "Reject Print"}
+              {isRejecting ? "Resetting..." : "Reset to Pending"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

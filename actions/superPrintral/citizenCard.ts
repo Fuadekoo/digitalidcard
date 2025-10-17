@@ -35,11 +35,13 @@ export async function getCitizenCard({
     if (search && search.trim() !== "") {
       andConditions.push({
         OR: [
-          { orderNumber: { contains: search, mode: 'insensitive' } },
-          { citizen: { firstName: { contains: search, mode: 'insensitive' } } },
-          { citizen: { lastName: { contains: search, mode: 'insensitive' } } },
-          { citizen: { middleName: { contains: search, mode: 'insensitive' } } },
-          { citizen: { phone: { contains: search, mode: 'insensitive' } } },
+          { orderNumber: { contains: search, mode: "insensitive" } },
+          { citizen: { firstName: { contains: search, mode: "insensitive" } } },
+          { citizen: { lastName: { contains: search, mode: "insensitive" } } },
+          {
+            citizen: { middleName: { contains: search, mode: "insensitive" } },
+          },
+          { citizen: { phone: { contains: search, mode: "insensitive" } } },
         ],
       });
     }
@@ -130,10 +132,10 @@ export async function getFilteredCitizenCardByDate({
     if (startDate && endDate) {
       const startDateTime = new Date(startDate);
       startDateTime.setHours(0, 0, 0, 0); // Start of day
-      
+
       const endDateTime = new Date(endDate);
       endDateTime.setHours(23, 59, 59, 999); // End of day
-      
+
       andConditions.push({
         createdAt: {
           gte: startDateTime,
@@ -141,7 +143,7 @@ export async function getFilteredCitizenCardByDate({
         },
       });
     }
-    
+
     // Add station filter if provided
     if (stationId) {
       andConditions.push({ stationId: stationId });
@@ -151,11 +153,13 @@ export async function getFilteredCitizenCardByDate({
     if (search && search.trim() !== "") {
       andConditions.push({
         OR: [
-          { orderNumber: { contains: search, mode: 'insensitive' } },
-          { citizen: { firstName: { contains: search, mode: 'insensitive' } } },
-          { citizen: { lastName: { contains: search, mode: 'insensitive' } } },
-          { citizen: { middleName: { contains: search, mode: 'insensitive' } } },
-          { citizen: { phone: { contains: search, mode: 'insensitive' } } },
+          { orderNumber: { contains: search, mode: "insensitive" } },
+          { citizen: { firstName: { contains: search, mode: "insensitive" } } },
+          { citizen: { lastName: { contains: search, mode: "insensitive" } } },
+          {
+            citizen: { middleName: { contains: search, mode: "insensitive" } },
+          },
+          { citizen: { phone: { contains: search, mode: "insensitive" } } },
         ],
       });
     }
@@ -234,7 +238,7 @@ export async function aproveCitizenCard(id: string) {
 
     // Super printer marks the card as printed
     const citizenCard = await prisma.order.update({
-      where: { id, orderStatus: "APPROVED", isPrinted: "PENDING" },
+      where: { id, orderStatus: "APPROVED" },
       data: {
         isPrinted: "APPROVED",
         printerId: adminId, // Assign the super printer as the printer
@@ -258,23 +262,23 @@ export async function rejectCitizenCard(id: string) {
     const adminId = session?.user?.id;
     if (!adminId) throw new Error("unauthenticated");
 
-    // Super printer marks the card as not printed (reject printing)
+    // Super printer resets the card back to pending state
     const citizenCard = await prisma.order.update({
-      where: { id, orderStatus: "APPROVED", isPrinted: "PENDING" },
+      where: { id, orderStatus: "APPROVED" },
       data: {
-        isPrinted: "REJECTED",
+        isPrinted: "PENDING", // Reset back to PENDING so it can be printed again
         printerId: null, // Remove printer assignment
       },
     });
 
     return {
       status: true,
-      message: "Print request rejected successfully",
+      message: "Print status reset to pending successfully",
       data: citizenCard,
     };
   } catch (error) {
     console.log(error);
-    return { status: false, message: "Failed to reject print request" };
+    return { status: false, message: "Failed to reset print status" };
   }
 }
 
@@ -293,19 +297,19 @@ export async function getCitizenCardByStation({
 
     // Build where condition dynamically
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const andConditions: any[] = [
-      { stationId: stationId },
-    ];
+    const andConditions: any[] = [{ stationId: stationId }];
 
     // Add search filter if search term is provided
     if (search && search.trim() !== "") {
       andConditions.push({
         OR: [
-          { orderNumber: { contains: search, mode: 'insensitive' } },
-          { citizen: { firstName: { contains: search, mode: 'insensitive' } } },
-          { citizen: { lastName: { contains: search, mode: 'insensitive' } } },
-          { citizen: { middleName: { contains: search, mode: 'insensitive' } } },
-          { citizen: { phone: { contains: search, mode: 'insensitive' } } },
+          { orderNumber: { contains: search, mode: "insensitive" } },
+          { citizen: { firstName: { contains: search, mode: "insensitive" } } },
+          { citizen: { lastName: { contains: search, mode: "insensitive" } } },
+          {
+            citizen: { middleName: { contains: search, mode: "insensitive" } },
+          },
+          { citizen: { phone: { contains: search, mode: "insensitive" } } },
         ],
       });
     }
