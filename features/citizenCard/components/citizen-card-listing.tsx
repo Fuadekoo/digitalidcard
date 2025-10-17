@@ -68,7 +68,6 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import type { DateRange } from "react-day-picker";
-import { status } from "@prisma/client";
 
 // Citizen Card data type
 export type CitizenCard = {
@@ -76,7 +75,7 @@ export type CitizenCard = {
   orderNumber: string;
   orderStatus: string;
   orderType: string;
-  isPrinted: status;
+  isPrinted: "PENDING" | "APPROVED" | "REJECTED";
   createdAt: Date;
   citizen: {
     id: string;
@@ -201,7 +200,7 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
     }
   );
 
-  // Reject citizen card mutation
+  // Reset print status mutation
   const [rejectMutation, isRejecting] = useMutation(
     async (orderId: string) => {
       const result = await rejectCitizenCard(orderId);
@@ -209,12 +208,12 @@ export default function CitizenCardListingPage({ lang }: { lang: string }) {
     },
     (result) => {
       if (result.status) {
-        toast.success("Print request rejected successfully!");
+        toast.success("Print status reset to pending successfully!");
         refresh();
         setRejectDialogOpen(false);
         setSelectedOrderId(null);
       } else {
-        toast.error(result.message || "Failed to reject print request");
+        toast.error(result.message || "Failed to reset print status");
       }
     }
   );

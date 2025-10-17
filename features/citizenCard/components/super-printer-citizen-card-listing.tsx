@@ -246,7 +246,7 @@ export default function SuperPrinterCitizenCardListingPage({
     }
   );
 
-  // Reject citizen card mutation
+  // Reset print status mutation
   const [rejectMutation, isRejecting] = useMutation(
     async (orderId: string) => {
       const result = await rejectCitizenCard(orderId);
@@ -254,12 +254,12 @@ export default function SuperPrinterCitizenCardListingPage({
     },
     (result) => {
       if (result.status) {
-        toast.success("Print request rejected successfully!");
+        toast.success("Print status reset to pending successfully!");
         refresh();
         setRejectDialogOpen(false);
         setSelectedOrderId(null);
       } else {
-        toast.error(result.message || "Failed to reject print request");
+        toast.error(result.message || "Failed to reset print status");
       }
     }
   );

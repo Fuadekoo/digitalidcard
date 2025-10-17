@@ -91,8 +91,8 @@ export async function getCitizenCard({
 
     return { list, totalData };
   } catch (error) {
-    console.log(error);
-    throw new Error("Failed to fetch citizen cards");
+    console.error("Error in getCitizenCard:", error);
+    return { list: [], totalData: 0 };
   }
 }
 
@@ -206,8 +206,14 @@ export async function getFilteredCitizenCardByDate({
       dateRange: startDate && endDate ? { startDate, endDate } : null,
     };
   } catch (error) {
-    console.log(error);
-    throw new Error("Failed to fetch citizen cards");
+    console.error("Error in getFilteredCitizenCardByDate:", error);
+    return {
+      list: [],
+      totalData: 0,
+      currentPage: 1,
+      totalPages: 0,
+      dateRange: null,
+    };
   }
 }
 
