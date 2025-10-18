@@ -3,7 +3,7 @@ import prisma from "@/lib/db";
 import { auth } from "@/auth";
 import { Filter } from "@/lib/definition";
 import { sorting } from "@/lib/utils";
-import { MutationState } from "@/lib/definitions";
+// import { MutationState } from "@/lib/definitions";
 
 export async function getCitizenCard({
   search,

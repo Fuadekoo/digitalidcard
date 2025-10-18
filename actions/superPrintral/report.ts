@@ -31,6 +31,7 @@ export async function getSuperPrinterReport({
     const endDateTime = new Date(endDate);
     endDateTime.setHours(23, 59, 59, 999);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dateFilter: any = {
       createdAt: {
         gte: startDateTime,
@@ -74,10 +75,10 @@ export async function getSuperPrinterReport({
     // Get print statistics
     const [totalPrinted, notPrinted] = await Promise.all([
       prisma.order.count({
-        where: { ...dateFilter, isPrinted: true },
+        where: { ...dateFilter, isPrinted: "APPROVED" },
       }),
       prisma.order.count({
-        where: { ...dateFilter, orderStatus: "APPROVED", isPrinted: false },
+        where: { ...dateFilter, orderStatus: "APPROVED", isPrinted: "PENDING" },
       }),
     ]);
 
@@ -86,7 +87,7 @@ export async function getSuperPrinterReport({
       where: {
         ...dateFilter,
         printerId: adminId,
-        isPrinted: true,
+        isPrinted: "APPROVED",
       },
     });
 
@@ -111,7 +112,7 @@ export async function getSuperPrinterReport({
 
           const [total, printed] = await Promise.all([
             prisma.order.count({ where: stationFilter }),
-            prisma.order.count({ where: { ...stationFilter, isPrinted: true } }),
+            prisma.order.count({ where: { ...stationFilter, isPrinted: "APPROVED" } }),
           ]);
 
           return {
