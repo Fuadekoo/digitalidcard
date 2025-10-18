@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { BirthDatePicker } from "@/components/birth-date-picker";
 
 interface CitizenEditPageProps {
   citizenId: string;
@@ -291,14 +292,25 @@ export default function CitizenEditPage({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="dateOfBirth">Date of Birth *</Label>
-                <Input
-                  id="dateOfBirth"
-                  type="date"
-                  value={formData.dateOfBirth}
-                  onChange={(e) =>
-                    handleInputChange("dateOfBirth", e.target.value)
+                <BirthDatePicker
+                  value={
+                    formData.dateOfBirth
+                      ? new Date(formData.dateOfBirth)
+                      : undefined
                   }
-                  required
+                  onChange={(date) => {
+                    if (date) {
+                      handleInputChange(
+                        "dateOfBirth",
+                        date.toISOString().split("T")[0]
+                      );
+                    } else {
+                      handleInputChange("dateOfBirth", "");
+                    }
+                  }}
+                  placeholder="Pick birth date"
+                  fromYear={1900}
+                  toYear={new Date().getFullYear()}
                 />
               </div>
             </div>
