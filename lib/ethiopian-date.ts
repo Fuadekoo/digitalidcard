@@ -34,7 +34,7 @@ export function gregorianToEthiopian(date: Date): EthiopianDate {
   const day = date.getDate();
 
   // Ethiopian calendar starts on September 11 (or 12 in leap years)
-  let jdn = toJulianDay(year, month, day);
+  const jdn = toJulianDay(year, month, day);
 
   // Calculate Ethiopian date from Julian Day Number
   const ethYear = Math.floor((jdn - 1723856) / 365.25);
@@ -66,9 +66,9 @@ export function gregorianToEthiopian(date: Date): EthiopianDate {
  * Convert date to Julian Day Number
  */
 function toJulianDay(year: number, month: number, day: number): number {
-  let a = Math.floor((14 - month) / 12);
-  let y = year + 4800 - a;
-  let m = month + 12 * a - 3;
+  const a = Math.floor((14 - month) / 12);
+  const y = year + 4800 - a;
+  const m = month + 12 * a - 3;
 
   return (
     day +

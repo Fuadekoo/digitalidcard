@@ -135,17 +135,18 @@ export default function CameraCapture({
           }
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error accessing camera:", error);
 
       // Check if permission was denied
+      const errorName = error instanceof Error ? error.name : "";
       if (
-        error.name === "NotAllowedError" ||
-        error.name === "PermissionDeniedError"
+        errorName === "NotAllowedError" ||
+        errorName === "PermissionDeniedError"
       ) {
         setPermissionDenied(true);
         toast.error("Camera permission denied. Please allow camera access.");
-      } else if (error.name === "NotFoundError") {
+      } else if (errorName === "NotFoundError") {
         toast.error("No camera found on this device.");
         setPermissionDenied(true);
       } else {
@@ -280,7 +281,7 @@ export default function CameraCapture({
                       <p className="text-sm">
                         Camera access was denied. Click the button on the right
                         to request permission again. When prompted, click
-                        "Allow" to grant camera access.
+                        &quot;Allow&quot; to grant camera access.
                       </p>
                     </AlertDescription>
                   </Alert>
