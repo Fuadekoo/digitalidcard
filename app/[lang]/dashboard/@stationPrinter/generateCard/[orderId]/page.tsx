@@ -243,7 +243,7 @@ export default function GenerateCardPage({ params }: PageProps) {
 
   return (
     <div
-      className={`container mx-auto p-6 max-w-6xl ${
+      className={`container mx-auto p-6 max-w-6xl overflow-auto ${
         isPrintMode ? "print-only-cards" : ""
       }`}
     >
@@ -601,10 +601,9 @@ function IdCard({
               </div>
 
               {/* CENTER TEXT — ABSOLUTELY CENTERED */}
-              <div className="scale-50 bg-red-500 absolute left-1/2 -translate-x-1/2 text-center">
+              <div className="scale-50 absolute left-1/2 -translate-x-1/2 text-center">
                 <h2 className="text-[5px] font-bold">
-                  {/* {station?.afanOromoName || "Station Name"} */}
-                  abdulkarim
+                  {station?.afanOromoName || "Station Name"}
                 </h2>
                 <h2 className="text-[5px] font-bold">
                   {station?.amharicName || "የጣቢያ ስም"}
