@@ -318,11 +318,17 @@ export default function GenerateCardPage({ params }: PageProps) {
           citizen={citizen}
           station={station}
           ethiopianCreatedAt={validCardData.ethiopianCreatedAt}
+          isPrintMode={isPrintMode}
         />
       </div>
 
       {/* Print Styles */}
       <style jsx global>{`
+        /* Print preview flip styles */
+        .print-preview-flip .id-card-container {
+          transform: rotateY(180deg);
+        }
+
         @media print {
           * {
             -webkit-print-color-adjust: exact !important;
@@ -353,9 +359,10 @@ export default function GenerateCardPage({ params }: PageProps) {
           html,
           body {
             margin: 0 !important;
-            padding: 15mm 10mm !important; /* Add padding to compensate for margin removal */
+            padding: 5mm !important; /* Reduced padding to prevent clipping of flipped content */
             background: white !important;
             font-size: 12px !important;
+            overflow: visible !important;
           }
 
           /* Show only the print container */
@@ -370,24 +377,33 @@ export default function GenerateCardPage({ params }: PageProps) {
 
           .print-container {
             position: absolute !important;
-            left: 10mm !important; /* Align with body padding */
-            top: 15mm !important; /* Align with body padding */
-            width: 190mm !important; /* A4 width (210mm) - 2*10mm padding */
+            left: 50% !important; /* Center the container */
+            top: 30mm !important; /* Reduced top margin to minimize paper waste */
+            transform: translateX(
+              -50%
+            ) !important; /* Center horizontally only */
+            width: 200mm !important; /* Increased width to accommodate flipped content */
             height: auto !important;
             margin: 0 !important;
             padding: 0 !important;
             background: white !important;
+            overflow: visible !important;
           }
 
           .id-card-container {
             display: flex !important;
-            justify-content: flex-start !important;
-            align-items: flex-start !important;
+            justify-content: center !important; /* Center the cards */
+            align-items: center !important;
             gap: 8mm !important;
-            width: auto !important; /* Let it be defined by content */
+            width: 100% !important; /* Full width of container */
             margin: 0 !important;
             padding: 0 !important;
             page-break-inside: avoid !important;
+            transform: rotateY(
+              180deg
+            ) !important; /* Flip horizontally for PVC card printing */
+            overflow: visible !important;
+            position: relative !important;
           }
 
           .id-card-wrapper {
@@ -431,6 +447,13 @@ export default function GenerateCardPage({ params }: PageProps) {
           /* Allow overflow for barcode/signature visibility */
           #back {
             overflow: visible !important;
+          }
+
+          /* Ensure flipped content is fully visible */
+          #front,
+          #back {
+            overflow: visible !important;
+            position: relative !important;
           }
 
           #back > div {
@@ -514,6 +537,11 @@ export default function GenerateCardPage({ params }: PageProps) {
           opacity: 0.3;
           pointer-events: none;
         }
+
+        /* Apply flip in print preview mode */
+        .print-only-cards .id-card-container {
+          transform: rotateY(180deg);
+        }
       `}</style>
     </div>
   );
@@ -524,12 +552,14 @@ function IdCard({
   citizen,
   station,
   ethiopianCreatedAt,
+  isPrintMode,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   citizen: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   station: any;
   ethiopianCreatedAt?: string;
+  isPrintMode: boolean;
 }) {
   const formatImageUrl = (fileName: string | null | undefined): string => {
     // Use a transparent pixel as a placeholder to avoid showing a broken image icon
@@ -566,7 +596,9 @@ function IdCard({
 
   return (
     <div
-      className="id-card-container flex gap-4 flex-nowrap"
+      className={`id-card-container flex gap-4 flex-nowrap ${
+        isPrintMode ? "print-preview-flip" : ""
+      }`}
       id="id-cards-print"
       style={{ flexWrap: "nowrap" }}
     >
