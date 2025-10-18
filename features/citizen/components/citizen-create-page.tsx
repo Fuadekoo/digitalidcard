@@ -32,13 +32,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import Image from "next/image";
 import CameraCapture from "@/components/camera-capture";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { format } from "date-fns";
+import { BirthDatePicker } from "@/components/birth-date-picker";
 import { cn } from "@/lib/utils";
 
 interface CitizenFormData {
@@ -537,46 +531,26 @@ export default function CitizenCreatePage({ lang }: CitizenCreatePageProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="dateOfBirth">Date of Birth *</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !formData.dateOfBirth && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.dateOfBirth ? (
-                        format(new Date(formData.dateOfBirth), "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={
-                        formData.dateOfBirth
-                          ? new Date(formData.dateOfBirth)
-                          : undefined
-                      }
-                      onSelect={(date) => {
-                        if (date) {
-                          handleInputChange(
-                            "dateOfBirth",
-                            format(date, "yyyy-MM-dd")
-                          );
-                        }
-                      }}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <BirthDatePicker
+                  value={
+                    formData.dateOfBirth
+                      ? new Date(formData.dateOfBirth)
+                      : undefined
+                  }
+                  onChange={(date) => {
+                    if (date) {
+                      handleInputChange(
+                        "dateOfBirth",
+                        date.toISOString().split("T")[0]
+                      );
+                    } else {
+                      handleInputChange("dateOfBirth", "");
+                    }
+                  }}
+                  placeholder="Pick birth date"
+                  fromYear={1900}
+                  toYear={new Date().getFullYear()}
+                />
               </div>
             </div>
 

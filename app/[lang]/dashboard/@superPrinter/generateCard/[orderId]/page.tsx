@@ -232,6 +232,7 @@ export default function GenerateCardPage({ params }: PageProps) {
     orderNumber: string;
     orderStatus: string;
     orderType: string;
+    ethiopianCreatedAt?: string;
     citizen: {
       id: string;
       registralNo: string;
@@ -333,7 +334,11 @@ export default function GenerateCardPage({ params }: PageProps) {
 
       {/* ID Card Preview */}
       <div className="print-container" style={{ maxWidth: "210mm" }}>
-        <IdCard citizen={citizen} station={station} />
+        <IdCard
+          citizen={citizen}
+          station={station}
+          ethiopianCreatedAt={validCardData.ethiopianCreatedAt}
+        />
       </div>
 
       {/* Print Styles */}
@@ -559,9 +564,10 @@ interface IdCardProps {
     stampPhoto: string | null;
     stationAdminName: string;
   };
+  ethiopianCreatedAt?: string;
 }
 
-function IdCard({ citizen, station }: IdCardProps) {
+function IdCard({ citizen, station, ethiopianCreatedAt }: IdCardProps) {
   const formatImageUrl = (fileName: string | null | undefined): string => {
     // Use a transparent pixel as a placeholder to avoid showing a broken image icon
     if (!fileName)
@@ -741,7 +747,7 @@ function IdCard({ citizen, station }: IdCardProps) {
                 <p className="text-xs mb-1" style={{ fontSize: "9px" }}>
                   Guyyaa Kenname/የተሰጠበት ቀን:
                   <br />
-                  <strong>12/12/2022</strong>
+                  <strong>{ethiopianCreatedAt || "N/A"}</strong>
                 </p>
                 <p className="text-xs" style={{ fontSize: "9px" }}>
                   Guyyaa dhumatu/የሚያበቃበት ቀን:
