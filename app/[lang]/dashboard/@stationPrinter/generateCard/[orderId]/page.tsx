@@ -237,6 +237,7 @@ export default function GenerateCardPage({ params }: PageProps) {
     citizen: NonNullable<any>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     station: NonNullable<any>;
+    ethiopianCreatedAt?: string;
   };
   const { citizen, station } = validCardData;
 
@@ -313,7 +314,11 @@ export default function GenerateCardPage({ params }: PageProps) {
 
       {/* ID Card Preview */}
       <div className="print-container" style={{ maxWidth: "210mm" }}>
-        <IdCard citizen={citizen} station={station} />
+        <IdCard
+          citizen={citizen}
+          station={station}
+          ethiopianCreatedAt={validCardData.ethiopianCreatedAt}
+        />
       </div>
 
       {/* Print Styles */}
@@ -427,7 +432,7 @@ export default function GenerateCardPage({ params }: PageProps) {
           #back {
             overflow: visible !important;
           }
-          
+
           #back > div {
             padding: 2mm !important;
           }
@@ -518,11 +523,13 @@ export default function GenerateCardPage({ params }: PageProps) {
 function IdCard({
   citizen,
   station,
+  ethiopianCreatedAt,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   citizen: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   station: any;
+  ethiopianCreatedAt?: string;
 }) {
   const formatImageUrl = (fileName: string | null | undefined): string => {
     // Use a transparent pixel as a placeholder to avoid showing a broken image icon
@@ -713,7 +720,7 @@ function IdCard({
                 <p className="text-xs mb-1" style={{ fontSize: "9px" }}>
                   Guyyaa Kenname/የተሰጠበት ቀን:
                   <br />
-                  <strong>12/12/2022</strong>
+                  <strong>{ethiopianCreatedAt || "N/A"}</strong>
                 </p>
                 <p className="text-xs" style={{ fontSize: "9px" }}>
                   Guyyaa dhumatu/የሚያበቃበት ቀን:

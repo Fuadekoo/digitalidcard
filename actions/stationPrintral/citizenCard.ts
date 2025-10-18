@@ -282,8 +282,6 @@ export async function getCardData(orderId: string) {
         orderNumber: true,
         orderStatus: true,
         orderType: true,
-        // paymentMethod: true,
-        // amount: true,
         createdAt: true,
         citizen: {
           select: {
@@ -316,7 +314,21 @@ export async function getCardData(orderId: string) {
         },
       },
     });
-    return orderData;
+
+    if (!orderData) {
+      return { status: false, message: "Order not found" };
+    }
+
+    // Convert only createdAt to Ethiopian calendar
+    const { formatEthiopianDate } = await import("@/lib/ethiopian-date");
+    const ethiopianCreatedAt = formatEthiopianDate(
+      new Date(orderData.createdAt)
+    );
+
+    return {
+      ...orderData,
+      ethiopianCreatedAt, // dd/mm/yyyy format in Ethiopian calendar
+    };
   } catch (error) {
     console.log(error);
     return { status: false, message: "Failed to get citizen card data" };
