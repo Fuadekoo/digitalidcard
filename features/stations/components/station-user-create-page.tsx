@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import useMutation from "@/hooks/useMutation";
 import { ArrowLeft, UserPlus } from "lucide-react";
 import Link from "next/link";
@@ -39,6 +39,7 @@ export default function StationUserCreatePage({
 }: StationUserCreatePageProps) {
   const { data: session } = useSession();
   const router = useRouter();
+  const { lang } = useParams<{ lang: string }>();
   const [formData, setFormData] = useState<UserFormData>({
     username: "",
     password: "",
@@ -67,7 +68,7 @@ export default function StationUserCreatePage({
     (result: any) => {
       if (result.status) {
         toast.success("User created successfully!");
-        router.push(`/dashboard/station/${stationId}/stationUser`);
+        router.push(`/${lang}/dashboard/station/${stationId}/stationUser`);
       } else {
         toast.error(result.message || "Failed to create user");
       }
@@ -140,14 +141,14 @@ export default function StationUserCreatePage({
   if (!stationData?.data) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-center space-y-4">
-          <div className="text-destructive text-lg font-semibold">
-            Station Not Found
-          </div>
-          <p className="text-muted-foreground">
-            The station you're trying to add a user to doesn't exist.
-          </p>
-          <Link href="/en/dashboard/station">
+          <div className="text-center space-y-4">
+            <div className="text-destructive text-lg font-semibold">
+              Station Not Found
+            </div>
+            <p className="text-muted-foreground">
+              The station you&apos;re trying to add a user to doesn&apos;t exist.
+            </p>
+          <Link href={`/${lang}/dashboard/station`}>
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Stations
@@ -259,7 +260,7 @@ export default function StationUserCreatePage({
               <Button type="submit" disabled={isCreating} className="flex-1">
                 {isCreating ? "Creating..." : "Create User"}
               </Button>
-              <Link href={`/dashboard/station/${stationId}/stationUser`}>
+              <Link href={`/${lang}/dashboard/station/${stationId}/stationUser`}>
                 <Button type="button" variant="outline">
                   Cancel
                 </Button>

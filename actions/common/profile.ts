@@ -105,7 +105,7 @@ export async function updateUserProfile(data: {
       },
     });
 
-    revalidatePath("/dashboard/profile");
+    revalidatePath("/en/dashboard/profile");
 
     return {
       success: true,

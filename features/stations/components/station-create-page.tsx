@@ -13,7 +13,6 @@ import {
   ArrowLeft,
   Save,
   Building2,
-  FileText,
   Activity,
   AlertCircle,
   Upload,
@@ -21,10 +20,11 @@ import {
   ImageIcon,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface StationCreatePageProps {}
 
 interface StationFormData {
@@ -57,6 +57,7 @@ const formatImageUrl = (url: string | null | undefined): string => {
 export default function StationCreatePage({}: StationCreatePageProps) {
   const { data: session } = useSession();
   const router = useRouter();
+  const { lang } = useParams<{ lang: string }>();
   const isSuperAdmin = session?.user?.role === "superAdmin";
 
   // Form state
@@ -83,15 +84,16 @@ export default function StationCreatePage({}: StationCreatePageProps) {
 
   // Stable success callback
   const onSuccess = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (result: any) => {
       if (result.status) {
         toast.success("Station created successfully!");
-        router.push(`/dashboard/station/${result.data?.id || ""}`);
+        router.push(`/${lang}/dashboard/station/${result.data?.id || ""}`);
       } else {
         toast.error(result.message || "Failed to create station");
       }
     },
-    [router]
+    [router, lang]
   );
 
   // Mutation hook for creating station
@@ -266,10 +268,10 @@ export default function StationCreatePage({}: StationCreatePageProps) {
           <AlertCircle className="h-12 w-12 mx-auto text-destructive mb-4" />
           <h3 className="text-lg font-semibold">Access Denied</h3>
           <p className="text-muted-foreground">
-            You don't have permission to create stations. Super admin role
+            You don&apos;t have permission to create stations. Super admin role
             required.
           </p>
-          <Link href="/en/dashboard/station" className="mt-4 inline-block">
+          <Link href={`/${lang}/dashboard/station`} className="mt-4 inline-block">
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Stations
@@ -285,7 +287,7 @@ export default function StationCreatePage({}: StationCreatePageProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/en/dashboard/station">
+          <Link href={`/${lang}/dashboard/station`}>
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Stations
@@ -571,7 +573,7 @@ export default function StationCreatePage({}: StationCreatePageProps) {
 
         {/* Action Buttons */}
         <div className="flex items-center justify-end gap-4">
-          <Link href="/dashboard/station">
+          <Link href={`/${lang}/dashboard/station`}>
             <Button variant="outline" type="button">
               Cancel
             </Button>

@@ -273,7 +273,10 @@ export default function TrackOrderDetailsPage({ params }: PageProps) {
           </p>
           <div className="space-x-4">
             <Button
-              onClick={() => router.push("/en/dashboard/trackOrder")}
+              onClick={async () => {
+                const resolvedParams = await params;
+                router.push(`/${resolvedParams.lang}/dashboard/trackOrder`);
+              }}
               variant="outline"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -313,7 +316,10 @@ export default function TrackOrderDetailsPage({ params }: PageProps) {
         <div className="flex items-center gap-4">
           <Button
             variant="outline"
-            onClick={() => router.push("/en/dashboard/trackOrder")}
+            onClick={async () => {
+              const resolvedParams = await params;
+              router.push(`/${resolvedParams.lang}/dashboard/trackOrder`);
+            }}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Search

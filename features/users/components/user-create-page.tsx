@@ -19,23 +19,21 @@ import {
 import { Separator } from "@/components/ui/separator";
 import {
   StationSelector,
-  type Station,
 } from "@/components/ui/station-selector";
 import {
   ArrowLeft,
   Save,
   User,
   Shield,
-  Phone,
-  Key,
   Activity,
   AlertCircle,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface UserCreatePageProps {}
 
 interface UserFormData {
@@ -50,6 +48,7 @@ interface UserFormData {
 export default function UserCreatePage({}: UserCreatePageProps) {
   const { data: session } = useSession();
   const router = useRouter();
+  const { lang } = useParams<{ lang: string }>();
   const isSuperAdmin = session?.user?.role === "superAdmin";
 
   // Fetch stations data
@@ -67,6 +66,7 @@ export default function UserCreatePage({}: UserCreatePageProps) {
 
   // Stable mutation function
   const mutationFn = useCallback(async (data: UserFormData) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { confirmPassword, ...userData } = data;
     const result = await createUser(userData);
     return result;
@@ -74,15 +74,16 @@ export default function UserCreatePage({}: UserCreatePageProps) {
 
   // Stable success callback
   const onSuccess = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (result: any) => {
       if (result.status) {
         toast.success("User created successfully!");
-        router.push(`/dashboard/user/${result.data?.id || ""}`);
+        router.push(`/${lang}/dashboard/user/${result.data?.id || ""}`);
       } else {
         toast.error(result.message || "Failed to create user");
       }
     },
-    [router]
+    [router, lang]
   );
 
   // Mutation hook for creating user
@@ -137,10 +138,10 @@ export default function UserCreatePage({}: UserCreatePageProps) {
           <AlertCircle className="h-12 w-12 mx-auto text-destructive mb-4" />
           <h3 className="text-lg font-semibold">Access Denied</h3>
           <p className="text-muted-foreground">
-            You don't have permission to create users. Super admin role
+            You don&apos;t have permission to create users. Super admin role
             required.
           </p>
-          <Link href="/dashboard/user" className="mt-4 inline-block">
+          <Link href={`/${lang}/dashboard/user`} className="mt-4 inline-block">
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Users
@@ -156,7 +157,7 @@ export default function UserCreatePage({}: UserCreatePageProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/user">
+          <Link href={`/${lang}/dashboard/user`}>
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Users
@@ -294,7 +295,7 @@ export default function UserCreatePage({}: UserCreatePageProps) {
 
         {/* Action Buttons */}
         <div className="flex items-center justify-end gap-4">
-          <Link href="/dashboard/user">
+          <Link href={`/${lang}/dashboard/user`}>
             <Button variant="outline" type="button">
               Cancel
             </Button>

@@ -19,19 +19,16 @@ import {
 import { Separator } from "@/components/ui/separator";
 import {
   StationSelector,
-  type Station,
 } from "@/components/ui/station-selector";
 import {
   ArrowLeft,
   Save,
   User,
-  Shield,
-  Phone,
   Activity,
   AlertCircle,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -50,6 +47,7 @@ interface UserFormData {
 export default function UserEditPage({ userId }: UserEditPageProps) {
   const { data: session } = useSession();
   const router = useRouter();
+  const { lang } = useParams<{ lang: string }>();
   const isSuperAdmin = session?.user?.role === "superAdmin";
 
   // Create stable parameters for useData
@@ -86,15 +84,16 @@ export default function UserEditPage({ userId }: UserEditPageProps) {
 
   // Stable success callback
   const onSuccess = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (result: any) => {
       if (result.status) {
         toast.success("User updated successfully!");
-        router.push(`/dashboard/user/${userId}`);
+        router.push(`/${lang}/dashboard/user/${userId}`);
       } else {
         toast.error(result.message || "Failed to update user");
       }
     },
-    [router, userId]
+    [router, userId, lang]
   );
 
   // Mutation hook for updating user
@@ -103,6 +102,7 @@ export default function UserEditPage({ userId }: UserEditPageProps) {
   // Update form data when user data is loaded
   useEffect(() => {
     if (userData && userData.data) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const user = userData.data as any;
       console.log("User data loaded:", user); // Debug log
 
@@ -169,9 +169,9 @@ export default function UserEditPage({ userId }: UserEditPageProps) {
           <AlertCircle className="h-12 w-12 mx-auto text-destructive mb-4" />
           <h3 className="text-lg font-semibold">Access Denied</h3>
           <p className="text-muted-foreground">
-            You don't have permission to edit users. Super admin role required.
+            You don&apos;t have permission to edit users. Super admin role required.
           </p>
-          <Link href="/dashboard/user" className="mt-4 inline-block">
+          <Link href={`/${lang}/dashboard/user`} className="mt-4 inline-block">
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Users
@@ -203,10 +203,10 @@ export default function UserEditPage({ userId }: UserEditPageProps) {
           <AlertCircle className="h-12 w-12 mx-auto text-destructive mb-4" />
           <h3 className="text-lg font-semibold">User Not Found</h3>
           <p className="text-muted-foreground">
-            The user you're looking for doesn't exist or you don't have
+            The user you&apos;re looking for doesn&apos;t exist or you don&apos;t have
             permission to view it.
           </p>
-          <Link href="/dashboard/user" className="mt-4 inline-block">
+          <Link href={`/${lang}/dashboard/user`} className="mt-4 inline-block">
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Users
@@ -222,7 +222,7 @@ export default function UserEditPage({ userId }: UserEditPageProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/user">
+          <Link href={`/${lang}/dashboard/user`}>
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Users
@@ -300,7 +300,7 @@ export default function UserEditPage({ userId }: UserEditPageProps) {
                 {/* Debug info - remove this later */}
                 {process.env.NODE_ENV === "development" && (
                   <div className="text-xs text-muted-foreground">
-                    Current role value: "{formData.role}"
+                    Current role value: &quot;{formData.role}&quot;
                   </div>
                 )}
                 <Select
@@ -352,7 +352,7 @@ export default function UserEditPage({ userId }: UserEditPageProps) {
 
         {/* Action Buttons */}
         <div className="flex items-center justify-end gap-4">
-          <Link href={`/dashboard/user/${userId}`}>
+          <Link href={`/${lang}/dashboard/user/${userId}`}>
             <Button variant="outline" type="button">
               Cancel
             </Button>

@@ -55,7 +55,7 @@ export default function StationViewPage({ stationId }: StationViewPageProps) {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Link href="/en/dashboard/station">
+          <Link href={`/${lang}/dashboard/station`}>
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Stations
@@ -93,7 +93,7 @@ export default function StationViewPage({ stationId }: StationViewPageProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/en/dashboard/station">
+          <Link href={`/${lang}/dashboard/station`}>
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Stations
@@ -255,7 +255,7 @@ export default function StationViewPage({ stationId }: StationViewPageProps) {
             <CardContent className="space-y-2">
               {isSuperAdmin ? (
                 <>
-                  <Link href={`/dashboard/station/${stationId}/stationUser`}>
+                  <Link href={`/${lang}/dashboard/station/${stationId}/stationUser`}>
                     <Button variant="outline" className="w-full justify-start">
                       <Users className="mr-2 h-4 w-4" />
                       Manage Users

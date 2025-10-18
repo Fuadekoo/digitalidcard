@@ -23,7 +23,7 @@ export async function logout() {
   try {
     await signOut({
       redirect: false,
-      redirectTo: "/login",
+      redirectTo: "/en/login",
     });
     return { status: true, message: "successfully logout" };
   } catch {

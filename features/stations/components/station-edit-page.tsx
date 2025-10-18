@@ -9,12 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import {
   ArrowLeft,
   Save,
   Building2,
-  FileText,
   Activity,
   AlertCircle,
   Upload,
@@ -100,6 +98,7 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
 
   // Stable success callback
   const onSuccess = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (result: any) => {
       if (result.status) {
         toast.success("Station updated successfully!");
@@ -108,7 +107,7 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
         toast.error(result.message || "Failed to update station");
       }
     },
-    [router, stationId]
+    [router, stationId, lang]
   );
 
   // Mutation hook for updating station
@@ -120,6 +119,7 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
   // Update form data when station data is loaded
   useEffect(() => {
     if (stationData && stationData.data) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const station = stationData.data as any;
       setFormData({
         code: station.code || "",
@@ -317,10 +317,10 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
           <AlertCircle className="h-12 w-12 mx-auto text-destructive mb-4" />
           <h3 className="text-lg font-semibold">Station Not Found</h3>
           <p className="text-muted-foreground">
-            The station you're looking for doesn't exist or you don't have
+            The station you&apos;re looking for doesn&apos;t exist or you don&apos;t have
             permission to view it.
           </p>
-          <Link href="/en/dashboard/station" className="mt-4 inline-block">
+          <Link href={`/${lang}/dashboard/station`} className="mt-4 inline-block">
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Stations
@@ -336,7 +336,7 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href={`/en/dashboard/station/${stationId}`}>
+          <Link href={`/${lang}/dashboard/station/${stationId}`}>
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Station
@@ -623,7 +623,7 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
 
         {/* Action Buttons */}
         <div className="flex items-center justify-end gap-4">
-          <Link href={`/dashboard/station/${stationId}`}>
+          <Link href={`/${lang}/dashboard/station/${stationId}`}>
             <Button variant="outline" type="button">
               Cancel
             </Button>

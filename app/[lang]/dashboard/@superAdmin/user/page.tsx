@@ -13,7 +13,13 @@ export const metadata = {
   title: "Dashboard: Users",
 };
 
-export default function Page() {
+type PageProps = {
+  params: Promise<{ lang: string }>;
+};
+
+export default async function Page({ params }: PageProps) {
+  const { lang } = await params;
+  
   return (
     <PageContainer scrollable={false}>
       <div className="flex flex-1 flex-col space-y-4">
@@ -23,7 +29,7 @@ export default function Page() {
             description="Manage system users and their permissions."
           />
           <Link
-            href="/dashboard/user/new"
+            href={`/${lang}/dashboard/user/new`}
             className={cn(buttonVariants(), "text-xs md:text-sm")}
           >
             <Plus className="mr-2 h-4 w-4" />

@@ -117,8 +117,9 @@ export default function TrackOrderPage({ params }: PageProps) {
     }
   };
 
-  const handleViewDetails = (orderId: string) => {
-    router.push(`/en/dashboard/trackOrder/${orderId}`);
+  const handleViewDetails = async (orderId: string) => {
+    const resolvedParams = await params;
+    router.push(`/${resolvedParams.lang}/dashboard/trackOrder/${orderId}`);
   };
 
   return (

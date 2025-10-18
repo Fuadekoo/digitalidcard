@@ -37,6 +37,7 @@ import {
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 // Station User data type
 export type StationUser = {
@@ -59,6 +60,7 @@ export default function StationUserListing({
   stationId,
 }: StationUserListingProps) {
   const { data: session } = useSession();
+  const { lang } = useParams<{ lang: string }>();
   const [globalFilter, setGlobalFilter] = useState("");
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -93,6 +95,7 @@ export default function StationUserListing({
     if (!data?.list) {
       return [];
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return data.list.map((user: any) => ({
       ...user,
     }));
@@ -227,13 +230,13 @@ export default function StationUserListing({
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href={`/dashboard/user/${user.id}`}>
+                  <Link href={`/${lang}/dashboard/user/${user.id}`}>
                     <Eye className="mr-2 h-4 w-4" />
                     View Details
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={`/dashboard/user/${user.id}/edit`}>
+                  <Link href={`/${lang}/dashboard/user/${user.id}/edit`}>
                     <User className="mr-2 h-4 w-4" />
                     Edit User
                   </Link>
@@ -244,7 +247,7 @@ export default function StationUserListing({
         },
       },
     ],
-    []
+    [lang]
   );
 
   // Table configuration
@@ -400,9 +403,9 @@ export default function StationUserListing({
               </div>
               <h3 className="text-lg font-semibold mb-2">No Users Found</h3>
               <p className="text-sm text-muted-foreground text-center mb-6 max-w-md">
-                This station doesn't have any users yet. Add a new user to get started with managing station personnel.
+                This station doesn&apos;t have any users yet. Add a new user to get started with managing station personnel.
               </p>
-              <Link href={`/dashboard/station/${stationId}/user/new`}>
+              <Link href={`/${lang}/dashboard/station/${stationId}/user/new`}>
                 <Button>
                   <User className="mr-2 h-4 w-4" />
                   Add First User

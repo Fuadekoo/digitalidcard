@@ -15,10 +15,12 @@ export const metadata = {
 };
 
 type pageProps = {
+  params: Promise<{ lang: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export default async function Page(props: pageProps) {
+  const params = await props.params;
   const searchParams = await props.searchParams;
   // Allow nested RSCs to access the search params (in a type-safe way)
   searchParamsCache.parse(searchParams);
@@ -35,7 +37,7 @@ export default async function Page(props: pageProps) {
             description="Manage all stations in the system"
           />
           <Link
-            href="/en/dashboard/station/new"
+            href={`/${params.lang}/dashboard/station/new`}
             className={cn(buttonVariants(), "text-xs md:text-sm")}
           >
             <Plus className="mr-2 h-4 w-4" /> Add New

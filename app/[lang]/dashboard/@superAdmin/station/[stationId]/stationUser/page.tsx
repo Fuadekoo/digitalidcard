@@ -14,7 +14,7 @@ export const metadata = {
 };
 
 type pageProps = {
-  params: Promise<{ stationId: string }>;
+  params: Promise<{ lang: string; stationId: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
@@ -31,7 +31,7 @@ export default async function Page(props: pageProps) {
             description="Manage users for this station and their permissions."
           />
           <Link
-            href={`/dashboard/station/${params.stationId}/user/new`}
+            href={`/${params.lang}/dashboard/station/${params.stationId}/user/new`}
             className={cn(buttonVariants(), "text-xs md:text-sm")}
           >
             <Plus className="mr-2 h-4 w-4" />

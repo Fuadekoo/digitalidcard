@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useParams } from "next/navigation";
 
 interface StationUserViewPageProps {
   userId: string;
@@ -29,6 +30,7 @@ interface StationUserViewPageProps {
 
 export default function StationUserViewPage({ userId, stationId }: StationUserViewPageProps) {
   const { data: session } = useSession();
+  const { lang } = useParams<{ lang: string }>();
   const isSuperAdmin = session?.user?.role === "superAdmin";
 
   // For now, we'll create a mock user data since we don't have a getSingleUser function
@@ -50,7 +52,7 @@ export default function StationUserViewPage({ userId, stationId }: StationUserVi
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href={`/dashboard/station/${stationId}/stationUser`}>
+          <Link href={`/${lang}/dashboard/station/${stationId}/stationUser`}>
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Users

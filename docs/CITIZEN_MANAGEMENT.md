@@ -160,7 +160,7 @@ Comprehensive citizen management system for Station Admins with verification, vi
 
 ### Accessing the Page
 
-Navigate to: `/dashboard/citizenManagement`
+Navigate to: `/en/dashboard/citizenManagement`
 
 ### Search
 

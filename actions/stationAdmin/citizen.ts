@@ -216,7 +216,7 @@ export async function verifyCitizen(id: string) {
       data: { isVerified: "APPROVED" },
     });
 
-    revalidatePath("/dashboard/citizenManagement");
+    revalidatePath("/en/dashboard/citizenManagement");
     return { status: true, message: "Citizen verified successfully", citizen };
   } catch (error) {
     console.error("Failed to verify citizen:", error);
@@ -272,7 +272,7 @@ export async function deleteCitizen(id: string) {
       where: { id },
     });
 
-    revalidatePath("/dashboard/citizenManagement");
+    revalidatePath("/en/dashboard/citizenManagement");
     return { status: true, message: "Citizen deleted successfully" };
   } catch (error) {
     console.error("Failed to delete citizen:", error);

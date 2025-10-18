@@ -571,9 +571,10 @@ export default function StationRegistrarDashboard({ params }: PageProps) {
                   <div
                     key={order.id}
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                    onClick={() =>
-                      router.push(`/en/dashboard/trackOrder/${order.id}`)
-                    }
+                    onClick={async () => {
+                      const resolvedParams = await params;
+                      router.push(`/${resolvedParams.lang}/dashboard/trackOrder/${order.id}`);
+                    }}
                   >
                     <div className="flex items-center gap-4">
                       <div className="p-2 bg-blue-100 rounded-lg">

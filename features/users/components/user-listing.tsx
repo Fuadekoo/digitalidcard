@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { useData } from "@/hooks/useData";
 import { getUser } from "@/actions/superAdmin/user";
 import { type ColumnDef } from "@tanstack/react-table";
 import {
@@ -38,6 +37,7 @@ import {
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import useMutation from "@/hooks/useMutation";
 import {
   blockUser,
@@ -61,6 +61,7 @@ export type User = {
 // Main User Listing Component
 export default function UserListingPage() {
   const { data: session } = useSession();
+  const { lang } = useParams<{ lang: string }>();
   const [globalFilter, setGlobalFilter] = useState("");
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -82,6 +83,7 @@ export default function UserListingPage() {
   );
 
   // Data fetching
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -92,7 +94,6 @@ export default function UserListingPage() {
       setData(result);
     } catch (error) {
       console.error("Error fetching user data:", error);
-      toast.error("Failed to load users");
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +111,8 @@ export default function UserListingPage() {
       const result = await blockUser(userId);
       return result;
     },
-    (result) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (result: any) => {
       if (result.status) {
         toast.success("User blocked successfully!");
         refresh();
@@ -126,7 +128,8 @@ export default function UserListingPage() {
       const result = await unblockUser(userId);
       return result;
     },
-    (result) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (result: any) => {
       if (result.status) {
         toast.success("User unblocked successfully!");
         refresh();
@@ -142,7 +145,8 @@ export default function UserListingPage() {
       const result = await resetUserPassword(userId);
       return result;
     },
-    (result) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (result: any) => {
       if (result.status) {
         toast.success("Password reset successfully! New password: 123456");
       } else {
@@ -292,13 +296,13 @@ export default function UserListingPage() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href={`/dashboard/user/${user.id}`}>
+                  <Link href={`/${lang}/dashboard/user/${user.id}`}>
                     <Eye className="mr-2 h-4 w-4" />
                     View Details
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={`/dashboard/user/${user.id}/edit`}>
+                  <Link href={`/${lang}/dashboard/user/${user.id}/edit`}>
                     <Edit className="mr-2 h-4 w-4" />
                     Edit User
                   </Link>
@@ -331,7 +335,7 @@ export default function UserListingPage() {
         },
       },
     ],
-    [handleBlockUser, handleUnblockUser, handleResetPassword]
+    [handleBlockUser, handleUnblockUser, handleResetPassword, lang]
   );
 
   // Transform data to match User type
@@ -339,6 +343,7 @@ export default function UserListingPage() {
     if (!data?.list) {
       return [];
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return data.list.map((user: any) => ({
       ...user,
       stationId: user.stationId ?? undefined,

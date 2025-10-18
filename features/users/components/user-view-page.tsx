@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React from "react";
 import { useData } from "@/hooks/useData";
 import useMutation from "@/hooks/useMutation";
 import {
@@ -28,7 +28,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -38,7 +38,7 @@ interface UserViewPageProps {
 
 export default function UserViewPage({ userId }: UserViewPageProps) {
   const { data: session } = useSession();
-  const router = useRouter();
+  const { lang } = useParams<{ lang: string }>();
   const isSuperAdmin = session?.user?.role === "superAdmin";
 
   // Create stable parameters for useData
@@ -115,9 +115,9 @@ export default function UserViewPage({ userId }: UserViewPageProps) {
           <AlertCircle className="h-12 w-12 mx-auto text-destructive mb-4" />
           <h3 className="text-lg font-semibold">Access Denied</h3>
           <p className="text-muted-foreground">
-            You don't have permission to view users. Super admin role required.
+            You don&apos;t have permission to view users. Super admin role required.
           </p>
-          <Link href="/dashboard/user" className="mt-4 inline-block">
+          <Link href={`/${lang}/dashboard/user`} className="mt-4 inline-block">
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Users
@@ -129,7 +129,7 @@ export default function UserViewPage({ userId }: UserViewPageProps) {
   }
 
   if (isLoading) {
-    return (
+    return ( 
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <Activity className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
@@ -149,10 +149,10 @@ export default function UserViewPage({ userId }: UserViewPageProps) {
           <AlertCircle className="h-12 w-12 mx-auto text-destructive mb-4" />
           <h3 className="text-lg font-semibold">User Not Found</h3>
           <p className="text-muted-foreground">
-            The user you're looking for doesn't exist or you don't have
+            The user you&apos;re looking for doesn&apos;t exist or you don&apos;t have
             permission to view it.
           </p>
-          <Link href="/dashboard/user" className="mt-4 inline-block">
+          <Link href={`/${lang}/dashboard/user`} className="mt-4 inline-block">
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Users
@@ -163,6 +163,7 @@ export default function UserViewPage({ userId }: UserViewPageProps) {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const user = userData.data as any;
   const isActive = user.status === "ACTIVE" && user.isActive;
 
@@ -171,7 +172,7 @@ export default function UserViewPage({ userId }: UserViewPageProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/user">
+          <Link href={`/${lang}/dashboard/user`}>
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Users
@@ -185,7 +186,7 @@ export default function UserViewPage({ userId }: UserViewPageProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Link href={`/dashboard/user/${userId}/edit`}>
+          <Link href={`/${lang}/dashboard/user/${userId}/edit`}>
             <Button variant="outline" size="sm">
               <Edit className="mr-2 h-4 w-4" />
               Edit User
