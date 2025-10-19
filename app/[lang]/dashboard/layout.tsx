@@ -38,16 +38,20 @@ export default async function Layout({
 
   const data = await prisma.user.findFirst({
     where: { id: session.user.id },
-    select: { status: true, role: true },
+    select: { status: true, role: true, isActive: true },
   });
 
-  if (!data || data.status !== "ACTIVE") {
+  if (!data || data.status !== "ACTIVE" || !data.isActive) {
     return (
       <div className="grid place-content-center gap-5">
         <div className="p-10 bg-danger/10 border border-danger-300 rounded-xl text-danger-600">
-          <p className="text-2xl first-letter:font-bold">Account Inactive!</p>
+          <p className="text-2xl first-letter:font-bold">
+            {!data?.isActive ? "Account Blocked!" : "Account Inactive!"}
+          </p>
           <p className="text-sm">
-            Your account is not active. Please contact an administrator.
+            {!data?.isActive
+              ? "Your account has been blocked. Please contact an administrator to unblock your account."
+              : "Your account is not active. Please contact an administrator."}
           </p>
         </div>
         <Logout />

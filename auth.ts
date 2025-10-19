@@ -70,10 +70,14 @@ const authConfig = {
         );
         const user = await prisma.user.findFirst({
           where: { username },
-          select: { id: true, role: true, password: true },
+          select: { id: true, role: true, password: true, isActive: true },
         });
         if (!user) throw new CustomError("Invalid Username");
         if (!user.password) throw new CustomError("Password Not Set");
+        if (!user.isActive)
+          throw new CustomError(
+            "Account Blocked - Your account has been blocked. Please contact administrator."
+          );
         if (!(await bcryptjs.compare(password, user.password)))
           throw new CustomError("Invalid Password");
         return { id: user.id, role: user.role };

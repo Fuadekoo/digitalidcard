@@ -44,6 +44,16 @@ import {
   unblockUser,
   resetUserPassword,
 } from "@/actions/superAdmin/user";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // User data type
 export type User = {
@@ -67,6 +77,9 @@ export default function UserListingPage() {
     pageIndex: 0,
     pageSize: 10,
   });
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
+  const [unblockDialogOpen, setUnblockDialogOpen] = useState(false);
+  const [userToBlock, setUserToBlock] = useState<string | null>(null);
 
   // Check if user is super admin
   const isSuperAdmin = session?.user?.role === "superAdmin";
@@ -156,11 +169,29 @@ export default function UserListingPage() {
   );
 
   const handleBlockUser = (userId: string) => {
-    blockUserMutation(userId);
+    setUserToBlock(userId);
+    setBlockDialogOpen(true);
   };
 
   const handleUnblockUser = (userId: string) => {
-    unblockUserMutation(userId);
+    setUserToBlock(userId);
+    setUnblockDialogOpen(true);
+  };
+
+  const handleBlockConfirm = () => {
+    if (userToBlock) {
+      blockUserMutation(userToBlock);
+      setBlockDialogOpen(false);
+      setUserToBlock(null);
+    }
+  };
+
+  const handleUnblockConfirm = () => {
+    if (userToBlock) {
+      unblockUserMutation(userToBlock);
+      setUnblockDialogOpen(false);
+      setUserToBlock(null);
+    }
   };
 
   const handleResetPassword = (userId: string) => {
@@ -243,21 +274,25 @@ export default function UserListingPage() {
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: "Account Status",
         cell: ({ row }) => {
           const status = row.getValue("status") as string;
           const isActive = row.original.isActive;
-          return (
-            <div className="flex items-center gap-2">
-              <Badge
-                variant={
-                  status === "ACTIVE" && isActive ? "default" : "destructive"
-                }
-              >
-                {status === "ACTIVE" && isActive ? "Active" : "Blocked"}
+
+          if (status === "ACTIVE" && isActive) {
+            return (
+              <Badge className="bg-green-100 text-green-800 border-green-200 hover:bg-green-200">
+                <UserCheck className="h-3 w-3 mr-1" />✅ ACTIVE
               </Badge>
-            </div>
-          );
+            );
+          } else {
+            return (
+              <Badge className="bg-red-100 text-red-800 border-red-200 hover:bg-red-200">
+                <UserX className="h-3 w-3 mr-1" />
+                🚫 BLOCKED
+              </Badge>
+            );
+          }
         },
       },
       {
@@ -394,20 +429,75 @@ export default function UserListingPage() {
   }
 
   return (
-    <DataTable
-      table={table}
-      actionBar={
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary">
-            {table.getFilteredSelectedRowModel().rows.length} selected
-          </Badge>
-          <Button variant="outline" size="sm">
-            Export Selected
-          </Button>
-        </div>
-      }
-    >
-      <DataTableToolbar table={table} />
-    </DataTable>
+    <>
+      <DataTable
+        table={table}
+        actionBar={
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary">
+              {table.getFilteredSelectedRowModel().rows.length} selected
+            </Badge>
+            <Button variant="outline" size="sm">
+              Export Selected
+            </Button>
+          </div>
+        }
+      >
+        <DataTableToolbar table={table} />
+      </DataTable>
+
+      {/* Block User Confirmation Dialog */}
+      <AlertDialog open={blockDialogOpen} onOpenChange={setBlockDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <UserX className="h-5 w-5 text-red-600" />
+              Block User Account
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to block this user? The user will be
+              immediately logged out and will not be able to login until
+              unblocked. This action can be reversed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBlockConfirm}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              <UserX className="mr-2 h-4 w-4" />
+              Block User
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Unblock User Confirmation Dialog */}
+      <AlertDialog open={unblockDialogOpen} onOpenChange={setUnblockDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <UserCheck className="h-5 w-5 text-green-600" />
+              Unblock User Account
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to unblock this user? The user will be able
+              to login and access the system again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleUnblockConfirm}
+              className="bg-green-600 text-white hover:bg-green-700"
+            >
+              <UserCheck className="mr-2 h-4 w-4" />
+              Unblock User
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

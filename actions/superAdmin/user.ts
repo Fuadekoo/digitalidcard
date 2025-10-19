@@ -129,9 +129,17 @@ export async function blockUser(id: string): Promise<MutationState> {
   try {
     const user = await prisma.user.update({
       where: { id },
-      data: { status: "INACTIVE" },
+      data: {
+        isActive: false,
+        status: "INACTIVE",
+        updatedAt: new Date(),
+      },
     });
-    return { status: true, message: "User blocked successfully", data: user };
+    return {
+      status: true,
+      message: "User blocked successfully. They will not be able to login.",
+      data: user,
+    };
   } catch {
     return { status: false, message: "Failed to block user" };
   }
@@ -141,9 +149,17 @@ export async function unblockUser(id: string): Promise<MutationState> {
   try {
     const user = await prisma.user.update({
       where: { id },
-      data: { status: "ACTIVE" },
+      data: {
+        isActive: true,
+        status: "ACTIVE",
+        updatedAt: new Date(),
+      },
     });
-    return { status: true, message: "User unblocked successfully", data: user };
+    return {
+      status: true,
+      message: "User unblocked successfully. They can now login.",
+      data: user,
+    };
   } catch {
     return { status: false, message: "Failed to unblock user" };
   }
