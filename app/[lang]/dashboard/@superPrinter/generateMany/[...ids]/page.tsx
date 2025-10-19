@@ -398,9 +398,23 @@ export default function Page({ params }: PageProps) {
         <div className="flex items-center gap-2">
           <Badge variant="default">{data?.length || 0} Cards</Badge>
           {data && data.length > 0 && (
-            <Badge variant="outline">
-              Status: {data[0]?.isPrinted || "PENDING"}
-            </Badge>
+            <>
+              <Badge variant="outline">
+                Print: {data[0]?.isPrinted || "PENDING"}
+              </Badge>
+              <Badge
+                variant="outline"
+                className={`${
+                  data[0]?.isAccepted === "APPROVED"
+                    ? "bg-green-100 text-green-800 border-green-200"
+                    : data[0]?.isAccepted === "REJECTED"
+                    ? "bg-red-100 text-red-800 border-red-200"
+                    : "bg-yellow-100 text-yellow-800 border-yellow-200"
+                }`}
+              >
+                Verify: {data[0]?.isAccepted || "PENDING"}
+              </Badge>
+            </>
           )}
         </div>
       </div>
@@ -449,6 +463,45 @@ export default function Page({ params }: PageProps) {
           {isRejecting ? "Rejecting..." : `Reject ${orderIds.length} Orders`}
         </Button>
       </div>
+
+      {/* Verification Status Overview */}
+      {data && data.length > 0 && (
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+            <CheckCircle className="h-5 w-5" />
+            Verification Status Overview
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            {data.map((order: any, index: number) => (
+              <div key={order.id} className="bg-white p-3 rounded-lg border">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700">
+                    {order.citizenLabel}
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className={`text-xs ${
+                      order.isAccepted === "APPROVED"
+                        ? "bg-green-100 text-green-800 border-green-200"
+                        : order.isAccepted === "REJECTED"
+                        ? "bg-red-100 text-red-800 border-red-200"
+                        : "bg-yellow-100 text-yellow-800 border-yellow-200"
+                    }`}
+                  >
+                    {order.isAccepted || "PENDING"}
+                  </Badge>
+                </div>
+                <div className="text-xs text-gray-500">
+                  {order.citizen.firstName} {order.citizen.lastName}
+                </div>
+                <div className="text-xs text-gray-400 mt-1">
+                  Order: {order.orderNumber}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Multi ID Card Preview */}
       <div className="print-container" style={{ maxWidth: "210mm" }}>
@@ -852,6 +905,7 @@ function MultiIdCards({ data, isPrintMode }: MultiIdCardsProps) {
             ethiopianCreatedAt={order.ethiopianCreatedAt}
             citizenNumber={order.citizenNumber}
             citizenLabel={order.citizenLabel}
+            isAccepted={order.isAccepted}
             isPrintMode={isPrintMode}
           />
         </div>
@@ -888,6 +942,7 @@ interface IdCardProps {
   ethiopianCreatedAt?: string;
   citizenNumber?: number;
   citizenLabel?: string;
+  isAccepted?: string;
   isPrintMode: boolean;
 }
 
@@ -897,6 +952,7 @@ function IdCard({
   ethiopianCreatedAt,
   citizenNumber,
   citizenLabel,
+  isAccepted,
   isPrintMode,
 }: IdCardProps) {
   const formatImageUrl = (fileName: string | null | undefined): string => {
@@ -931,234 +987,267 @@ function IdCard({
   };
 
   return (
-    <div className="flex gap-1 flex-nowrap" style={{ flexWrap: "nowrap" }}>
-      {/* Front Side */}
-      <div className="id-card-wrapper">
-        <div
-          id="front"
-          className="relative bg-white rounded-lg overflow-hidden id-card"
-          style={{ width: "85.6mm", height: "53.98mm", borderRadius: "3.18mm" }}
-        >
-          {/* Background Image */}
-          <Image
-            src="/frontside.png"
-            alt="Front Background"
-            fill
-            className="object-cover"
-            priority
-          />
+    <div className="space-y-2">
+      {/* Verification Status Indicator */}
+      {!isPrintMode && (
+        <div className="flex items-center justify-center">
+          <Badge
+            variant="outline"
+            className={`text-xs px-3 py-1 ${
+              isAccepted === "APPROVED"
+                ? "bg-green-100 text-green-800 border-green-200"
+                : isAccepted === "REJECTED"
+                ? "bg-red-100 text-red-800 border-red-200"
+                : "bg-yellow-100 text-yellow-800 border-yellow-200"
+            }`}
+          >
+            {isAccepted === "APPROVED"
+              ? "✅ VERIFIED"
+              : isAccepted === "REJECTED"
+              ? "❌ REJECTED"
+              : "⏳ PENDING VERIFICATION"}
+          </Badge>
+        </div>
+      )}
 
-          {/* Content Overlay */}
-          <div className="relative z-10 p-1">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-0">
-              <Image
-                src="/oflag.png"
-                alt="Oromia Flag"
-                width={48}
-                height={30}
-              />
-              <div className="text-center">
-                <h2 className="text-[10px] font-bold">
-                  {station?.afanOromoName || "Station Name"}
-                </h2>
-                <h2 className="text-[10px] font-bold">
-                  {station?.amharicName || "የጣቢያ ስም"}
-                </h2>
-              </div>
-              <Image
-                src="/ethflag.png"
-                alt="Ethiopian Flag"
-                width={48}
-                height={30}
-              />
-            </div>
+      <div className="flex gap-1 flex-nowrap" style={{ flexWrap: "nowrap" }}>
+        {/* Front Side */}
+        <div className="id-card-wrapper">
+          <div
+            id="front"
+            className="relative bg-white rounded-lg overflow-hidden id-card"
+            style={{
+              width: "85.6mm",
+              height: "53.98mm",
+              borderRadius: "3.18mm",
+            }}
+          >
+            {/* Background Image */}
+            <Image
+              src="/frontside.png"
+              alt="Front Background"
+              fill
+              className="object-cover"
+              priority
+            />
 
-            {/* Divider */}
-            <hr className="my-2 border-t-2 border-gray-400" />
-
-            {/* Profile and Info */}
-            <div className="flex gap-4">
-              <div className="flex-shrink-0">
+            {/* Content Overlay */}
+            <div className="relative z-10 p-1">
+              {/* Header */}
+              <div className="flex justify-between items-center mb-0">
                 <Image
-                  src={profileImgSrc}
-                  alt="Profile"
-                  width={96}
-                  height={120}
-                  className="profile-photo h-24 w-24 border-2 border-gray-300 rounded object-cover"
-                  onError={() => handleImageError(setProfileImgSrc)}
-                  unoptimized
+                  src="/oflag.png"
+                  alt="Oromia Flag"
+                  width={48}
+                  height={30}
                 />
-                <div className="mt-1">
-                  <p className="text-xs" style={{ fontSize: "10px" }}>
-                    L.G/መ.ቁ: {citizen.registralNo}
+                <div className="text-center">
+                  <h2 className="text-[10px] font-bold">
+                    {station?.afanOromoName || "Station Name"}
+                  </h2>
+                  <h2 className="text-[10px] font-bold">
+                    {station?.amharicName || "የጣቢያ ስም"}
+                  </h2>
+                </div>
+                <Image
+                  src="/ethflag.png"
+                  alt="Ethiopian Flag"
+                  width={48}
+                  height={30}
+                />
+              </div>
+
+              {/* Divider */}
+              <hr className="my-2 border-t-2 border-gray-400" />
+
+              {/* Profile and Info */}
+              <div className="flex gap-4">
+                <div className="flex-shrink-0">
+                  <Image
+                    src={profileImgSrc}
+                    alt="Profile"
+                    width={96}
+                    height={120}
+                    className="profile-photo h-24 w-24 border-2 border-gray-300 rounded object-cover"
+                    onError={() => handleImageError(setProfileImgSrc)}
+                    unoptimized
+                  />
+                  <div className="mt-1">
+                    <p className="text-xs" style={{ fontSize: "10px" }}>
+                      L.G/መ.ቁ: {citizen.registralNo}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex-1 space-y-1">
+                  <p className="text-xs" style={{ fontSize: "9px" }}>
+                    Maqaa Guutuu/ሙሉ ስም:
+                    <br />
+                    <strong>
+                      {citizen.firstName} {citizen.middleName}{" "}
+                      {citizen.lastName}
+                    </strong>
+                  </p>
+                  <p className="text-xs" style={{ fontSize: "9px" }}>
+                    Saalaa/ጾታ: <strong>{citizen.gender}</strong>
+                  </p>
+                  <p className="text-xs" style={{ fontSize: "9px" }}>
+                    Bara dhalootaa/የትውልድ ዘመን:
+                    <br />
+                    <strong>
+                      {citizen.dateOfBirth
+                        ? format(new Date(citizen.dateOfBirth), "dd/MM/yyyy")
+                        : "N/A"}{" "}
+                      EC
+                    </strong>
+                  </p>
+                  <p className="text-xs" style={{ fontSize: "9px" }}>
+                    Bakka Dhaloota/የትውልድ ቦታ:
+                    <br />
+                    <strong>{citizen.placeOfBirth}</strong>
+                  </p>
+                  <p className="text-xs" style={{ fontSize: "9px" }}>
+                    Hojii/ሥራ: <strong>{citizen.occupation}</strong>
                   </p>
                 </div>
               </div>
 
-              <div className="flex-1 space-y-1">
-                <p className="text-xs" style={{ fontSize: "9px" }}>
-                  Maqaa Guutuu/ሙሉ ስም:
-                  <br />
-                  <strong>
-                    {citizen.firstName} {citizen.middleName} {citizen.lastName}
-                  </strong>
-                </p>
-                <p className="text-xs" style={{ fontSize: "9px" }}>
-                  Saalaa/ጾታ: <strong>{citizen.gender}</strong>
-                </p>
-                <p className="text-xs" style={{ fontSize: "9px" }}>
-                  Bara dhalootaa/የትውልድ ዘመን:
-                  <br />
-                  <strong>
-                    {citizen.dateOfBirth
-                      ? format(new Date(citizen.dateOfBirth), "dd/MM/yyyy")
-                      : "N/A"}{" "}
-                    EC
-                  </strong>
-                </p>
-                <p className="text-xs" style={{ fontSize: "9px" }}>
-                  Bakka Dhaloota/የትውልድ ቦታ:
-                  <br />
-                  <strong>{citizen.placeOfBirth}</strong>
-                </p>
-                <p className="text-xs" style={{ fontSize: "9px" }}>
-                  Hojii/ሥራ: <strong>{citizen.occupation}</strong>
-                </p>
-              </div>
+              {/* Stamp */}
+              {station?.stampPhoto && (
+                <div className="absolute bottom-1 right-1">
+                  <Image
+                    src={stampImgSrc}
+                    alt="Official Stamp"
+                    width={75}
+                    height={75}
+                    className="object-contain"
+                    onError={() => handleImageError(setStampImgSrc)}
+                    unoptimized
+                  />
+                </div>
+              )}
             </div>
-
-            {/* Stamp */}
-            {station?.stampPhoto && (
-              <div className="absolute bottom-1 right-1">
-                <Image
-                  src={stampImgSrc}
-                  alt="Official Stamp"
-                  width={75}
-                  height={75}
-                  className="object-contain"
-                  onError={() => handleImageError(setStampImgSrc)}
-                  unoptimized
-                />
-              </div>
-            )}
           </div>
         </div>
-      </div>
 
-      {/* Back Side */}
-      <div className="id-card-wrapper">
-        <div
-          id="back"
-          className="relative bg-white rounded-lg overflow-hidden id-card"
-          style={{ width: "85.6mm", height: "53.98mm", borderRadius: "3.18mm" }}
-        >
-          {/* Background Image */}
-          <Image
-            src="/Backside.png"
-            alt="Back Background"
-            fill
-            className="object-cover"
-            priority
-          />
+        {/* Back Side */}
+        <div className="id-card-wrapper">
+          <div
+            id="back"
+            className="relative bg-white rounded-lg overflow-hidden id-card"
+            style={{
+              width: "85.6mm",
+              height: "53.98mm",
+              borderRadius: "3.18mm",
+            }}
+          >
+            {/* Background Image */}
+            <Image
+              src="/Backside.png"
+              alt="Back Background"
+              fill
+              className="object-cover"
+              priority
+            />
 
-          {/* Content Overlay */}
-          <div className="relative z-10 p-2">
-            <div
-              className="flex justify-between items-start mb-2"
-              style={{ alignItems: "center" }}
-            >
-              <div style={{ flex: 1 }}>
-                <p className="text-xs mb-1" style={{ fontSize: "9px" }}>
-                  Guyyaa Kenname/የተሰጠበት ቀን:
-                  <br />
-                  <strong>{ethiopianCreatedAt || "N/A"}</strong>
+            {/* Content Overlay */}
+            <div className="relative z-10 p-2">
+              <div
+                className="flex justify-between items-start mb-2"
+                style={{ alignItems: "center" }}
+              >
+                <div style={{ flex: 1 }}>
+                  <p className="text-xs mb-1" style={{ fontSize: "9px" }}>
+                    Guyyaa Kenname/የተሰጠበት ቀን:
+                    <br />
+                    <strong>{ethiopianCreatedAt || "N/A"}</strong>
+                  </p>
+                  <p className="text-xs" style={{ fontSize: "9px" }}>
+                    Guyyaa dhumatu/የሚያበቃበት ቀን:
+                    <br />
+                    <strong>12/12/2022</strong>
+                  </p>
+                </div>
+                <div
+                  style={{
+                    width: "36mm",
+                    minWidth: "36mm",
+                    marginLeft: "6mm",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    zIndex: 50,
+                  }}
+                >
+                  {citizen.barcode && (
+                    <div
+                      style={{
+                        width: "34mm",
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                      }}
+                    >
+                      <QRCodeSVG
+                        value={citizen.barcode}
+                        size={70}
+                        level="M"
+                        includeMargin={false}
+                        bgColor="transparent"
+                        fgColor="#000000"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-1 mb-2">
+                <p className="text-xs" style={{ fontSize: "9px" }}>
+                  Bilbila Jirata/የነዋሪው ሰልክ: <strong>{citizen.phone}</strong>
                 </p>
                 <p className="text-xs" style={{ fontSize: "9px" }}>
-                  Guyyaa dhumatu/የሚያበቃበት ቀን:
-                  <br />
-                  <strong>12/12/2022</strong>
+                  Wamama yeroo Rakoo/የአደጋ ጊዜ ተጠሪ:{" "}
+                  <strong>{citizen.emergencyContact}</strong>
+                </p>
+                <p className="text-xs" style={{ fontSize: "9px" }}>
+                  Firumma/ግንኙነት: <strong>{citizen.relationship}</strong>
+                </p>
+                <p className="text-xs" style={{ fontSize: "9px" }}>
+                  Phone/ስልክ: <strong>{citizen.emergencyPhone}</strong>
                 </p>
               </div>
-              <div
-                style={{
-                  width: "36mm",
-                  minWidth: "36mm",
-                  marginLeft: "6mm",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  zIndex: 50,
-                }}
-              >
-                {citizen.barcode && (
-                  <div
-                    style={{
-                      width: "34mm",
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      alignItems: "center",
-                    }}
-                  >
-                    <QRCodeSVG
-                      value={citizen.barcode}
-                      size={70}
-                      level="M"
-                      includeMargin={false}
-                      bgColor="transparent"
-                      fgColor="#000000"
-                    />
-                  </div>
-                )}
+
+              <div className="space-y-1">
+                <p className="text-xs" style={{ fontSize: "8px" }}>
+                  Yoo hatame ykn bade bulchiinsa qunnamuun kaardii bade
+                  hatattamaan gabaasaa.
+                </p>
+                <p className="text-xs" style={{ fontSize: "8px" }}>
+                  ከተሰረቀ ወይም ከጠፋ እባክዎን አስተዳደሩን ያነጋግሩ እና የጠፋውን ካርድ ወዲያውኑ ያሳውቁ።
+                </p>
+                <p
+                  className="text-xs font-semibold"
+                  style={{ fontSize: "9px", marginTop: "4px" }}
+                >
+                  {station?.stationAdminName || "Station Administrator"}
+                </p>
               </div>
-            </div>
 
-            <div className="space-y-1 mb-2">
-              <p className="text-xs" style={{ fontSize: "9px" }}>
-                Bilbila Jirata/የነዋሪው ሰልክ: <strong>{citizen.phone}</strong>
-              </p>
-              <p className="text-xs" style={{ fontSize: "9px" }}>
-                Wamama yeroo Rakoo/የአደጋ ጊዜ ተጠሪ:{" "}
-                <strong>{citizen.emergencyContact}</strong>
-              </p>
-              <p className="text-xs" style={{ fontSize: "9px" }}>
-                Firumma/ግንኙነት: <strong>{citizen.relationship}</strong>
-              </p>
-              <p className="text-xs" style={{ fontSize: "9px" }}>
-                Phone/ስልክ: <strong>{citizen.emergencyPhone}</strong>
-              </p>
+              {/* Signature Image */}
+              {station?.signPhoto && (
+                <div className="absolute bottom-1 right-1 p-1">
+                  <Image
+                    src={signImgSrc}
+                    alt="Official Signature"
+                    width={70}
+                    height={35}
+                    className="object-contain"
+                    onError={() => handleImageError(setSignImgSrc)}
+                    unoptimized
+                  />
+                </div>
+              )}
             </div>
-
-            <div className="space-y-1">
-              <p className="text-xs" style={{ fontSize: "8px" }}>
-                Yoo hatame ykn bade bulchiinsa qunnamuun kaardii bade
-                hatattamaan gabaasaa.
-              </p>
-              <p className="text-xs" style={{ fontSize: "8px" }}>
-                ከተሰረቀ ወይም ከጠፋ እባክዎን አስተዳደሩን ያነጋግሩ እና የጠፋውን ካርድ ወዲያውኑ ያሳውቁ።
-              </p>
-              <p
-                className="text-xs font-semibold"
-                style={{ fontSize: "9px", marginTop: "4px" }}
-              >
-                {station?.stationAdminName || "Station Administrator"}
-              </p>
-            </div>
-
-            {/* Signature Image */}
-            {station?.signPhoto && (
-              <div className="absolute bottom-1 right-1 p-1">
-                <Image
-                  src={signImgSrc}
-                  alt="Official Signature"
-                  width={70}
-                  height={35}
-                  className="object-contain"
-                  onError={() => handleImageError(setSignImgSrc)}
-                  unoptimized
-                />
-              </div>
-            )}
           </div>
         </div>
       </div>

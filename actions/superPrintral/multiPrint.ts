@@ -32,6 +32,7 @@ export async function getMultipleCardData(orderIds: string[]) {
         orderStatus: true,
         orderType: true,
         isPrinted: true,
+        isAccepted: true,
         createdAt: true,
         citizen: {
           select: {
