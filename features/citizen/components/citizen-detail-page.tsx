@@ -242,9 +242,26 @@ export default function CitizenDetailPage({
               {citizenData.firstName} {citizenData.middleName}{" "}
               {citizenData.lastName}
             </h1>
-            <p className="text-muted-foreground">
-              Registration No: {citizenData.registralNo}
-            </p>
+            <div className="flex items-center gap-3 mt-1">
+              <p className="text-muted-foreground">
+                Registration No: {citizenData.registralNo}
+              </p>
+              <Badge
+                className={`${
+                  citizenData.isVerified === "APPROVED"
+                    ? "bg-green-100 text-green-800 border-green-200"
+                    : citizenData.isVerified === "REJECTED"
+                    ? "bg-red-100 text-red-800 border-red-200"
+                    : "bg-yellow-100 text-yellow-800 border-yellow-200"
+                }`}
+              >
+                {citizenData.isVerified === "APPROVED"
+                  ? "✅ APPROVED"
+                  : citizenData.isVerified === "REJECTED"
+                  ? "❌ REJECTED"
+                  : "⏳ PENDING"}
+              </Badge>
+            </div>
           </div>
         </div>
         <Link href={`/${lang}/dashboard/citizen/${citizenId}/edit`}>

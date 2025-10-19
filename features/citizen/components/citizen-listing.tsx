@@ -38,7 +38,11 @@ import {
 import { toast } from "sonner";
 import Link from "next/link";
 import useMutation from "@/hooks/useMutation";
-import { deleteCitizen } from "@/actions/stationRegistral/citizen";
+import {
+  deleteCitizen,
+  verifyCitizen,
+  unVerifyCitizen,
+} from "@/actions/stationRegistral/citizen";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,7 +63,7 @@ export type Citizen = {
   lastName: string;
   gender: string;
   phone: string;
-  isVerified: boolean;
+  isVerified: string;
   createdAt: Date;
 };
 
@@ -72,6 +76,9 @@ export default function CitizenListingPage({ lang }: { lang: string }) {
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [citizenToDelete, setCitizenToDelete] = useState<string | null>(null);
+  const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [citizenToVerify, setCitizenToVerify] = useState<string | null>(null);
 
   // Memoize query parameters
   const queryParams = React.useMemo(
@@ -113,6 +120,44 @@ export default function CitizenListingPage({ lang }: { lang: string }) {
   const handleDeleteConfirm = () => {
     if (citizenToDelete) {
       deleteCitizenMutation(citizenToDelete);
+    }
+  };
+
+  const handleVerifyClick = (citizenId: string) => {
+    setCitizenToVerify(citizenId);
+    setVerifyDialogOpen(true);
+  };
+
+  const handleRejectClick = (citizenId: string) => {
+    setCitizenToVerify(citizenId);
+    setRejectDialogOpen(true);
+  };
+
+  const handleVerifyConfirm = async () => {
+    if (citizenToVerify) {
+      const result = await verifyCitizen(citizenToVerify);
+      if (result.status) {
+        toast.success("Citizen approved successfully!");
+        refresh();
+        setVerifyDialogOpen(false);
+        setCitizenToVerify(null);
+      } else {
+        toast.error(result.message || "Failed to approve citizen");
+      }
+    }
+  };
+
+  const handleRejectConfirm = async () => {
+    if (citizenToVerify) {
+      const result = await unVerifyCitizen(citizenToVerify);
+      if (result.status) {
+        toast.success("Citizen rejected successfully!");
+        refresh();
+        setRejectDialogOpen(false);
+        setCitizenToVerify(null);
+      } else {
+        toast.error(result.message || "Failed to reject citizen");
+      }
     }
   };
 
@@ -196,20 +241,27 @@ export default function CitizenListingPage({ lang }: { lang: string }) {
         header: "Verification Status",
         cell: ({ row }) => {
           const citizen = row.original;
-          return citizen.isVerified ? (
-            <Badge className="bg-green-500 hover:bg-green-600 text-white">
-              <ShieldCheck className="h-3 w-3 mr-1" />
-              Verified
-            </Badge>
-          ) : (
-            <Badge
-              variant="outline"
-              className="text-orange-600 border-orange-600"
-            >
-              <ShieldX className="h-3 w-3 mr-1" />
-              Pending Verification
-            </Badge>
-          );
+          const status = citizen.isVerified || "PENDING";
+
+          if (status === "APPROVED") {
+            return (
+              <Badge className="bg-green-100 text-green-800 border-green-200 hover:bg-green-200">
+                <ShieldCheck className="h-3 w-3 mr-1" />✅ APPROVED
+              </Badge>
+            );
+          } else if (status === "REJECTED") {
+            return (
+              <Badge className="bg-red-100 text-red-800 border-red-200 hover:bg-red-200">
+                <ShieldX className="h-3 w-3 mr-1" />❌ REJECTED
+              </Badge>
+            );
+          } else {
+            return (
+              <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200">
+                <ShieldX className="h-3 w-3 mr-1" />⏳ PENDING
+              </Badge>
+            );
+          }
         },
       },
       {
@@ -259,6 +311,25 @@ export default function CitizenListingPage({ lang }: { lang: string }) {
                     Edit Citizen
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {citizen.isVerified !== "APPROVED" && (
+                  <DropdownMenuItem
+                    onClick={() => handleVerifyClick(citizen.id)}
+                    className="text-green-600"
+                  >
+                    <ShieldCheck className="mr-2 h-4 w-4" />
+                    Approve Citizen
+                  </DropdownMenuItem>
+                )}
+                {citizen.isVerified !== "REJECTED" && (
+                  <DropdownMenuItem
+                    onClick={() => handleRejectClick(citizen.id)}
+                    className="text-red-600"
+                  >
+                    <ShieldX className="mr-2 h-4 w-4" />
+                    Reject Citizen
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => handleDeleteClick(citizen.id)}
@@ -488,6 +559,58 @@ export default function CitizenListingPage({ lang }: { lang: string }) {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Approve Confirmation Dialog */}
+      <AlertDialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-green-600" />
+              Approve Citizen
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to approve this citizen? This will allow
+              them to create orders for ID cards.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleVerifyConfirm}
+              className="bg-green-600 text-white hover:bg-green-700"
+            >
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              Approve Citizen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reject Confirmation Dialog */}
+      <AlertDialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <ShieldX className="h-5 w-5 text-red-600" />
+              Reject Citizen
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to reject this citizen? They will not be
+              able to create orders for ID cards.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRejectConfirm}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              <ShieldX className="mr-2 h-4 w-4" />
+              Reject Citizen
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

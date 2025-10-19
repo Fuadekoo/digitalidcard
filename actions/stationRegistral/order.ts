@@ -301,6 +301,16 @@ export async function createOrder(data: {
       where: { id: data.citizenId, stationId: stationId.stationId },
     });
     if (!citizen) throw new Error("citizen not found");
+
+    // Check if citizen is approved for order creation
+    if (citizen.isVerified !== "APPROVED") {
+      return {
+        status: false,
+        message:
+          "Only approved citizens can create orders. Please approve the citizen first.",
+      };
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: adminId, stationId: stationId.stationId },
     });
@@ -481,8 +491,10 @@ export async function MyStationCitizen() {
     });
     if (!stationId?.stationId) throw new Error("station not found");
     const citizen = await prisma.citizen.findMany({
-      where: { stationId: stationId.stationId },
-
+      where: {
+        stationId: stationId.stationId,
+        isVerified: "APPROVED", // Only return approved citizens for order creation
+      },
       select: {
         id: true,
         registralNo: true,
@@ -490,6 +502,8 @@ export async function MyStationCitizen() {
         middleName: true,
         lastName: true,
         phone: true,
+        gender: true,
+        isVerified: true,
       },
     });
     return {

@@ -18,6 +18,7 @@ interface Citizen {
   registralNo: string;
   phone: string;
   gender: string;
+  isVerified?: string;
 }
 
 interface CitizenSelectorProps {
@@ -201,9 +202,16 @@ export function CitizenSelector({
                           <span>Reg: {citizen.registralNo}</span>
                         </div>
                       </div>
-                      <Badge variant="outline" className="text-xs">
-                        {citizen.gender}
-                      </Badge>
+                      <div className="flex flex-col gap-1 items-end">
+                        <Badge variant="outline" className="text-xs">
+                          {citizen.gender}
+                        </Badge>
+                        {citizen.isVerified && (
+                          <Badge className="bg-green-100 text-green-800 border-green-200 text-xs">
+                            ✅ APPROVED
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -212,8 +220,12 @@ export function CitizenSelector({
                   <User className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
                   <p className="text-sm text-muted-foreground">
                     {searchQuery
-                      ? "No citizens found matching your search"
-                      : "No citizens available"}
+                      ? "No approved citizens found matching your search"
+                      : "No approved citizens available for order creation"}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Only approved citizens can create orders. Please approve
+                    citizens first.
                   </p>
                 </div>
               )}
