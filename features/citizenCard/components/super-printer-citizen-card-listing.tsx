@@ -19,6 +19,7 @@ import { DataTable } from "@/components/ui/table/data-table";
 import { DataTableToolbar } from "@/components/ui/table/data-table-toolbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   MoreHorizontal,
   Eye,
@@ -37,7 +38,9 @@ import {
   Filter,
   Building2,
   Globe,
+  PrinterIcon,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -159,6 +162,7 @@ export default function SuperPrinterCitizenCardListingPage({
 }: {
   lang: string;
 }) {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -172,6 +176,7 @@ export default function SuperPrinterCitizenCardListingPage({
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
 
   // Fetch stations on component mount
   useEffect(() => {
@@ -286,6 +291,31 @@ export default function SuperPrinterCitizenCardListingPage({
     }
   };
 
+  // Multi-select handlers
+  const handleSelectOrder = (orderId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedOrderIds((prev) => [...prev, orderId]);
+    } else {
+      setSelectedOrderIds((prev) => prev.filter((id) => id !== orderId));
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allIds = transformedData.map((order) => order.id);
+      setSelectedOrderIds(allIds);
+    } else {
+      setSelectedOrderIds([]);
+    }
+  };
+
+  const handleMultiPrint = () => {
+    if (selectedOrderIds.length > 0) {
+      const idsPath = selectedOrderIds.join("/");
+      router.push(`/${lang}/dashboard/generateMany/${idsPath}`);
+    }
+  };
+
   // Transform data to match SuperPrinterCitizenCard type
   const transformedData = React.useMemo(() => {
     if (!data?.list) {
@@ -300,6 +330,32 @@ export default function SuperPrinterCitizenCardListingPage({
   // Table columns definition
   const columns: ColumnDef<SuperPrinterCitizenCard>[] = React.useMemo(
     () => [
+      {
+        id: "select",
+        header: ({ table }) => (
+          <Checkbox
+            checked={
+              table.getRowModel().rows.length > 0 &&
+              table
+                .getRowModel()
+                .rows.every((row) => selectedOrderIds.includes(row.original.id))
+            }
+            onCheckedChange={(checked) => handleSelectAll(!!checked)}
+            aria-label="Select all"
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={selectedOrderIds.includes(row.original.id)}
+            onCheckedChange={(checked) =>
+              handleSelectOrder(row.original.id, !!checked)
+            }
+            aria-label="Select row"
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+      },
       {
         accessorKey: "orderNumber",
         header: "Order Details",
@@ -489,7 +545,7 @@ export default function SuperPrinterCitizenCardListingPage({
         },
       },
     ],
-    [lang]
+    [lang, selectedOrderIds]
   );
 
   // Table configuration
@@ -522,6 +578,39 @@ export default function SuperPrinterCitizenCardListingPage({
 
   return (
     <>
+      {/* Multi Print Button */}
+      {selectedOrderIds.length > 0 && (
+        <div className="mb-3 p-4 bg-primary/10 border-2 border-primary rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="h-5 w-5 text-primary" />
+              <div>
+                <h3 className="font-semibold text-sm">
+                  {selectedOrderIds.length} Order
+                  {selectedOrderIds.length > 1 ? "s" : ""} Selected
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Ready to print multiple citizen cards
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedOrderIds([])}
+              >
+                Clear Selection
+              </Button>
+              <Button onClick={handleMultiPrint} className="gap-2">
+                <PrinterIcon className="h-4 w-4" />
+                Multi Print ({selectedOrderIds.length})
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Search and Filter Controls */}
       <div className="flex flex-col gap-3 mb-3">
         {/* Top Filter Row */}
@@ -951,8 +1040,11 @@ export default function SuperPrinterCitizenCardListingPage({
                 All Stations
               </Badge>
             )}
-            <Badge variant="outline">
-              ✅ {table.getFilteredSelectedRowModel().rows.length} Selected
+            <Badge
+              variant={selectedOrderIds.length > 0 ? "default" : "outline"}
+              className={selectedOrderIds.length > 0 ? "bg-primary" : ""}
+            >
+              ✅ {selectedOrderIds.length} Selected
             </Badge>
           </div>
         }
