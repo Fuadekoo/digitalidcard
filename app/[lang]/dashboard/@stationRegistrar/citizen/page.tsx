@@ -8,6 +8,8 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import PageContainer from "@/components/layout/page-container";
+import CitizenRegistrationFormDownload from "@/components/citizen-registration-form-download";
+import CitizenRegistrationFormPreview from "@/components/citizen-registration-form-preview";
 
 export const metadata = {
   title: "Dashboard: Citizens",
@@ -27,13 +29,17 @@ export default async function Page({ params }: PageProps) {
             title="Citizens"
             description="Manage citizen registrations and information."
           />
-          <Link
-            href={`/${lang}/dashboard/citizen/new`}
-            className={cn(buttonVariants(), "text-xs md:text-sm")}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Register New Citizen
-          </Link>
+          <div className="flex items-center gap-2">
+            <CitizenRegistrationFormPreview />
+            <CitizenRegistrationFormDownload />
+            <Link
+              href={`/${lang}/dashboard/citizen/new`}
+              className={cn(buttonVariants(), "text-xs md:text-sm")}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Register New Citizen
+            </Link>
+          </div>
         </div>
         <Separator />
         <Suspense
