@@ -1,8 +1,13 @@
-import { redirect } from "next/navigation";
-import React from "react";
+"use client";
+
+import React, { useEffect } from "react";
+import { LoadingSpinner } from "@/components/ui/spinner";
 
 export default function Page() {
-  redirect("/en");
+  useEffect(() => {
+    // Redirect to /en on client side
+    window.location.href = "/en";
+  }, []);
 
-  return <div></div>;
+  return <LoadingSpinner message="Redirecting..." />;
 }
