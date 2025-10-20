@@ -69,24 +69,20 @@ export default function CitizenRegistrationFormDownload() {
       const textColor = [31, 41, 55]; // Dark gray
       const lightGray = [229, 231, 235];
 
-      // Add header background
+      // Compact header background
       doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.rect(0, 0, pageWidth, 35, "F");
-
-      // Add station logo/emblem area (placeholder)
-      doc.setFillColor(255, 255, 255);
-      doc.circle(pageWidth / 2, 17.5, 12, "F");
+      doc.rect(0, 0, pageWidth, 20, "F");
 
       // Station information header
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(16);
+      doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
-      doc.text("CITIZEN REGISTRATION FORM", pageWidth / 2, 42, {
+      doc.text("CITIZEN REGISTRATION FORM", pageWidth / 2, 13, {
         align: "center",
       });
 
-      // Try to render station info with Amharic text using html2canvas
-      let yPosition = 88;
+      // Compact station info with Amharic text using html2canvas
+      let yPosition = 50;
 
       try {
         // Create hidden HTML element for station info with Amharic text
@@ -94,18 +90,18 @@ export default function CitizenRegistrationFormDownload() {
         stationInfoDiv.style.position = "absolute";
         stationInfoDiv.style.left = "-9999px";
         stationInfoDiv.style.top = "0";
-        stationInfoDiv.style.width = `${contentWidth * 3.78}px`; // Convert mm to px (1mm ≈ 3.78px)
+        stationInfoDiv.style.width = `${contentWidth * 3.78}px`;
         stationInfoDiv.style.backgroundColor = "#e5e7eb";
-        stationInfoDiv.style.padding = "15px";
-        stationInfoDiv.style.borderRadius = "8px";
+        stationInfoDiv.style.padding = "8px 10px";
+        stationInfoDiv.style.borderRadius = "4px";
         stationInfoDiv.style.fontFamily = "Arial, sans-serif";
         stationInfoDiv.innerHTML = `
-          <div style="font-size: 14px; font-weight: bold; margin-bottom: 8px; color: #1f2937;">
+          <div style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #1f2937;">
             Station Information:
           </div>
-          <div style="font-size: 12px; color: #1f2937; line-height: 1.8;">
+          <div style="font-size: 12px; color: #1f2937; line-height: 1.6;">
             <div><strong>Station Code:</strong> ${stationData.code}</div>
-            <div><strong>Station Name (Amharic):</strong> ${stationData.amharicName}</div>
+            <div><strong>Station Name (አማርኛ):</strong> ${stationData.amharicName}</div>
             <div><strong>Station Name (Afan Oromo):</strong> ${stationData.afanOromoName}</div>
             <div><strong>Station Admin:</strong> ${stationData.stationAdminName}</div>
           </div>
@@ -128,274 +124,232 @@ export default function CitizenRegistrationFormDownload() {
         // Add the image to PDF
         const imgWidth = contentWidth;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        doc.addImage(imgData, "PNG", margin, 50, imgWidth, imgHeight);
+        doc.addImage(imgData, "PNG", margin, 25, imgWidth, imgHeight);
 
-        yPosition = 50 + imgHeight + 5;
+        yPosition = 25 + imgHeight + 2;
       } catch (htmlError) {
         console.warn(
           "html2canvas failed, using fallback text rendering:",
           htmlError
         );
 
-        // Fallback: Use basic text rendering
+        // Fallback: Text rendering with larger font
         doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
-        doc.roundedRect(margin, 50, contentWidth, 30, 2, 2, "F");
+        doc.roundedRect(margin, 25, contentWidth, 25, 2, 2, "F");
 
         doc.setTextColor(textColor[0], textColor[1], textColor[2]);
         doc.setFontSize(10);
         doc.setFont("helvetica", "bold");
-        doc.text("Station Information:", margin + 5, 57);
+        doc.text("Station Information:", margin + 3, 31);
 
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(9);
-        doc.text(`Station Code: ${stationData.code}`, margin + 5, 63);
+        doc.setFontSize(12);
+        doc.text(`Station Code: ${stationData.code}`, margin + 3, 37);
         doc.text(
-          `Station Name (Amharic): ${stationData.amharicName}`,
-          margin + 5,
-          68
+          `Station Name (አማርኛ): ${stationData.amharicName}`,
+          margin + 3,
+          42
         );
         doc.text(
           `Station Name (Afan Oromo): ${stationData.afanOromoName}`,
-          margin + 5,
-          73
-        );
-        doc.text(
-          `Station Admin: ${stationData.stationAdminName}`,
-          margin + 5,
-          78
+          margin + 3,
+          47
         );
 
-        yPosition = 88;
+        yPosition = 52;
       }
 
-      // Instructions
-      doc.setFontSize(9);
+      // Instructions (compact)
+      doc.setFontSize(7);
       doc.setFont("helvetica", "italic");
       doc.setTextColor(100, 100, 100);
       doc.text(
-        "Please fill out all required fields clearly and completely. Use CAPITAL LETTERS.",
+        "Fill all fields clearly. Use CAPITAL LETTERS.",
         margin,
+        yPosition
+      );
+      yPosition += 5;
+
+      // Section 1: Personal Information with Photo
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.rect(margin, yPosition, contentWidth, 5, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.text("1. PERSONAL INFORMATION", margin + 2, yPosition + 3.5);
+      yPosition += 8;
+
+      // Photo placeholder on the right
+      const photoX = margin + contentWidth - 32;
+      const photoY = yPosition;
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.rect(photoX, photoY, 30, 40);
+      doc.setFontSize(7);
+      doc.setTextColor(150, 150, 150);
+      doc.text("PHOTO", photoX + 15, photoY + 18, { align: "center" });
+      doc.text("3x4 cm", photoX + 15, photoY + 23, { align: "center" });
+      doc.setFontSize(6);
+      doc.text("Attach Here", photoX + 15, photoY + 28, { align: "center" });
+
+      // Form fields (with larger font)
+      const contentWithPhoto = contentWidth - 35; // Space for photo
+
+      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+
+      // First Name
+      doc.text("First Name / Maqaa Duraa:", margin, yPosition);
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin + 70, yPosition, margin + contentWithPhoto, yPosition);
+      yPosition += 10;
+
+      // Middle Name
+      doc.text("Middle Name / Maqaa Abbaa:", margin, yPosition);
+      doc.line(margin + 75, yPosition, margin + contentWithPhoto, yPosition);
+      yPosition += 10;
+
+      // Last Name
+      doc.text("Last Name / Maqaa Maatii:", margin, yPosition);
+      doc.line(margin + 70, yPosition, margin + contentWithPhoto, yPosition);
+      yPosition += 10;
+
+      // Gender with checkboxes
+      doc.text("Gender / Saalaa:", margin, yPosition);
+      const genderX = margin + 55;
+      // Male checkbox
+      doc.rect(genderX, yPosition - 3, 3, 3);
+      doc.setFontSize(10);
+      doc.text("Male", genderX + 5, yPosition);
+      // Female checkbox
+      doc.rect(genderX + 30, yPosition - 3, 3, 3);
+      doc.text("Female", genderX + 35, yPosition);
+      // Other checkbox
+      doc.rect(genderX + 65, yPosition - 3, 3, 3);
+      doc.text("Other", genderX + 70, yPosition);
+      yPosition += 10;
+
+      doc.setFontSize(12);
+      // Date of Birth
+      doc.text("Date of Birth / Guyyaa Dhaloota:", margin, yPosition);
+      doc.line(margin + 85, yPosition, margin + contentWithPhoto, yPosition);
+      yPosition += 10;
+
+      // Place of Birth
+      doc.text("Place of Birth / Bakka Dhaloota:", margin, yPosition);
+      doc.line(margin + 85, yPosition, margin + contentWithPhoto, yPosition);
+      yPosition += 10;
+
+      // Occupation
+      doc.text("Occupation / Hojii:", margin, yPosition);
+      doc.line(margin + 60, yPosition, margin + contentWithPhoto, yPosition);
+      yPosition += 8;
+
+      // Section 2: Contact Information
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.rect(margin, yPosition, contentWidth, 5, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.text("2. CONTACT INFORMATION", margin + 2, yPosition + 3.5);
+      yPosition += 8;
+
+      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+
+      // Phone Number
+      doc.text("Phone Number / Lakkoofsa Bilbilaa:", margin, yPosition);
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin + 90, yPosition, margin + contentWidth, yPosition);
+      yPosition += 10;
+
+      // Alternative Phone
+      doc.text("Alternative Phone:", margin, yPosition);
+      doc.line(margin + 55, yPosition, margin + contentWidth, yPosition);
+      yPosition += 10;
+
+      // Current Address
+      doc.text("Current Address / Teessoo:", margin, yPosition);
+      doc.line(margin + 75, yPosition, margin + contentWidth, yPosition);
+      yPosition += 8;
+
+      // Section 3: Emergency Contact (compact)
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.rect(margin, yPosition, contentWidth, 5, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.text("3. EMERGENCY CONTACT", margin + 2, yPosition + 3.5);
+      yPosition += 8;
+
+      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+
+      // Emergency Contact Name
+      doc.text("Emergency Contact / Nama Bilbifamu:", margin, yPosition);
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin + 100, yPosition, margin + contentWidth, yPosition);
+      yPosition += 10;
+
+      // Relationship
+      doc.text("Relationship / Firumaa:", margin, yPosition);
+      doc.line(margin + 70, yPosition, margin + contentWidth, yPosition);
+      yPosition += 10;
+
+      // Emergency Phone
+      doc.text("Emergency Phone / Bilbilaa:", margin, yPosition);
+      doc.line(margin + 80, yPosition, margin + contentWidth, yPosition);
+      yPosition += 8;
+
+      // Signature fields (removed declaration)
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+      doc.text("Signature:", margin, yPosition);
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin + 32, yPosition, margin + 90, yPosition);
+      doc.text("Date:", margin + 100, yPosition);
+      doc.line(margin + 118, yPosition, margin + contentWidth, yPosition);
+      yPosition += 10;
+
+      // Office use only section (on same page)
+      doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
+      doc.roundedRect(margin, yPosition, contentWidth, 28, 2, 2, "F");
+
+      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.text("FOR OFFICE USE ONLY", margin + 3, yPosition + 5);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      yPosition += 10;
+
+      doc.text("Registration No:", margin + 3, yPosition);
+      doc.line(
+        margin + 45,
+        yPosition,
+        margin + contentWidth / 2 - 2,
+        yPosition
+      );
+      doc.text("Date:", margin + contentWidth / 2 + 5, yPosition);
+      doc.line(
+        margin + contentWidth / 2 + 20,
+        yPosition,
+        margin + contentWidth - 3,
         yPosition
       );
       yPosition += 8;
 
-      // Section 1: Personal Information
-      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.rect(margin, yPosition, contentWidth, 7, "F");
-      doc.setTextColor(255, 255, 255);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-      doc.text("1. PERSONAL INFORMATION", margin + 3, yPosition + 5);
-      yPosition += 12;
-
-      // Form fields
-      const fields = [
-        { label: "First Name / Maqaa Duraa:", width: contentWidth / 2 - 2 },
-        { label: "Middle Name / Maqaa Abbaa:", width: contentWidth / 2 - 2 },
-        { label: "Last Name / Maqaa Maatii:", width: contentWidth },
-        {
-          label: "Gender / Saalaa (Male/Female/Other):",
-          width: contentWidth / 2 - 2,
-        },
-        {
-          label: "Date of Birth / Guyyaa Dhaloota:",
-          width: contentWidth / 2 - 2,
-        },
-        { label: "Place of Birth / Bakka Dhaloota:", width: contentWidth },
-        { label: "Occupation / Hojii:", width: contentWidth },
-      ];
-
-      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-
-      fields.forEach((field, index) => {
-        const isHalfWidth = field.width < contentWidth;
-        const xPos =
-          isHalfWidth && index % 2 === 1
-            ? margin + contentWidth / 2 + 2
-            : margin;
-
-        doc.text(field.label, xPos, yPosition);
-        doc.setDrawColor(200, 200, 200);
-        doc.line(xPos, yPosition + 2, xPos + field.width, yPosition + 2);
-
-        if (!isHalfWidth || index % 2 === 1) {
-          yPosition += 10;
-        }
-      });
-
-      yPosition += 5;
-
-      // Section 2: Contact Information
-      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.rect(margin, yPosition, contentWidth, 7, "F");
-      doc.setTextColor(255, 255, 255);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-      doc.text("2. CONTACT INFORMATION", margin + 3, yPosition + 5);
-      yPosition += 12;
-
-      const contactFields = [
-        {
-          label: "Phone Number / Lakkoofsa Bilbilaa:",
-          width: contentWidth / 2 - 2,
-        },
-        { label: "Alternative Phone:", width: contentWidth / 2 - 2 },
-        { label: "Current Address / Teessoo:", width: contentWidth },
-      ];
-
-      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-
-      contactFields.forEach((field, index) => {
-        const isHalfWidth = field.width < contentWidth;
-        const xPos =
-          isHalfWidth && index % 2 === 1
-            ? margin + contentWidth / 2 + 2
-            : margin;
-
-        doc.text(field.label, xPos, yPosition);
-        doc.setDrawColor(200, 200, 200);
-        doc.line(xPos, yPosition + 2, xPos + field.width, yPosition + 2);
-
-        if (!isHalfWidth || index % 2 === 1) {
-          yPosition += 10;
-        }
-      });
-
-      yPosition += 5;
-
-      // Section 3: Emergency Contact
-      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.rect(margin, yPosition, contentWidth, 7, "F");
-      doc.setTextColor(255, 255, 255);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-      doc.text("3. EMERGENCY CONTACT INFORMATION", margin + 3, yPosition + 5);
-      yPosition += 12;
-
-      const emergencyFields = [
-        {
-          label: "Emergency Contact Name / Maqaa Nama Bilbifamu:",
-          width: contentWidth,
-        },
-        { label: "Relationship / Firumaa:", width: contentWidth / 2 - 2 },
-        { label: "Emergency Phone / Bilbilaa:", width: contentWidth / 2 - 2 },
-      ];
-
-      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-
-      emergencyFields.forEach((field, index) => {
-        const isHalfWidth = field.width < contentWidth;
-        const xPos =
-          isHalfWidth && index % 2 === 1
-            ? margin + contentWidth / 2 + 2
-            : margin;
-
-        doc.text(field.label, xPos, yPosition);
-        doc.setDrawColor(200, 200, 200);
-        doc.line(xPos, yPosition + 2, xPos + field.width, yPosition + 2);
-
-        if (!isHalfWidth || index % 2 === 1) {
-          yPosition += 10;
-        }
-      });
-
-      yPosition += 10;
-
-      // Photo placeholder
-      doc.setDrawColor(200, 200, 200);
-      doc.setLineWidth(0.5);
-      doc.rect(margin, yPosition, 35, 45);
-      doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text("Attach Photo", margin + 17.5, yPosition + 22.5, {
-        align: "center",
-      });
-      doc.text("3x4 cm", margin + 17.5, yPosition + 27, { align: "center" });
-
-      // Declaration
-      yPosition += 50;
-      doc.setFontSize(9);
-      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-      doc.setFont("helvetica", "bold");
-      doc.text("Declaration / Labsii:", margin, yPosition);
-      yPosition += 5;
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
-      const declaration =
-        "I declare that the information provided above is true and correct to the best of my knowledge.";
-      const declarationAmharic =
-        "ከላይ የተሰጠው መረጃ በእውቀቴ መሠረት እውነተኛ እና ትክክል መሆኑን አረጋግጣለሁ።";
-
-      doc.text(declaration, margin, yPosition, { maxWidth: contentWidth });
+      doc.text("Registered By:", margin + 3, yPosition);
+      doc.line(margin + 40, yPosition, margin + contentWidth - 3, yPosition);
       yPosition += 8;
-      doc.text(declarationAmharic, margin, yPosition, {
-        maxWidth: contentWidth,
-      });
-      yPosition += 10;
 
-      // Signature fields
-      const signatureY = yPosition + 5;
-      doc.text("Applicant Signature:", margin, signatureY);
-      doc.line(margin + 40, signatureY, margin + 90, signatureY);
-
-      doc.text("Date:", margin + 100, signatureY);
-      doc.line(margin + 115, signatureY, margin + contentWidth, signatureY);
-
-      // Footer
-      doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
-      doc.rect(0, pageHeight - 20, pageWidth, 20, "F");
-      doc.setFontSize(7);
-      doc.setTextColor(100, 100, 100);
-      doc.text(
-        `Station Admin: ${
-          stationData.stationAdminName
-        } | Generated: ${new Date().toLocaleDateString()}`,
-        pageWidth / 2,
-        pageHeight - 10,
-        { align: "center" }
-      );
-
-      // Office use only section
-      doc.addPage();
-
-      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.rect(0, 0, pageWidth, 15, "F");
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.text("FOR OFFICE USE ONLY", pageWidth / 2, 10, { align: "center" });
-
-      yPosition = 25;
-
-      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-      doc.setFontSize(10);
-      doc.text("Registration Number / Lakkoofsa Galmee:", margin, yPosition);
-      doc.setDrawColor(200, 200, 200);
-      doc.line(margin, yPosition + 2, margin + contentWidth, yPosition + 2);
-      yPosition += 15;
-
-      doc.text("Registered By / Kan Galmeesse:", margin, yPosition);
-      doc.line(margin, yPosition + 2, margin + contentWidth, yPosition + 2);
-      yPosition += 15;
-
-      doc.text("Registration Date / Guyyaa Galmee:", margin, yPosition);
-      doc.line(margin, yPosition + 2, margin + contentWidth, yPosition + 2);
-      yPosition += 15;
-
-      doc.text("Verification Status / Haala Mirkaneessa:", margin, yPosition);
-      doc.line(margin, yPosition + 2, margin + contentWidth, yPosition + 2);
-      yPosition += 15;
-
-      doc.text("Notes / Yaadannoo:", margin, yPosition);
-      yPosition += 5;
-      doc.rect(margin, yPosition, contentWidth, 40);
+      doc.text("Verification Status:", margin + 3, yPosition);
+      doc.line(margin + 48, yPosition, margin + contentWidth - 3, yPosition);
 
       // Save the PDF
       const fileName = `Citizen_Registration_Form_${
