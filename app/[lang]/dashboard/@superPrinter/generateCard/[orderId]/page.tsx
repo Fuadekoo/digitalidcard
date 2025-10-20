@@ -675,7 +675,7 @@ function IdCard({
             </div>
 
             {/* Divider */}
-            <hr className="my-2 border-t-2 border-gray-400" />
+            <hr className="my-1 border-t-2 border-gray-400" />
 
             {/* Profile and Info */}
             <div className="flex gap-4">

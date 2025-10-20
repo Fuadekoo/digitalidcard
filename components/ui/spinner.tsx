@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { lineSpinner } from "ldrs";
 
 interface SpinnerProps {
@@ -18,9 +18,14 @@ export function Spinner({
   color = "currentColor",
   className = "",
 }: SpinnerProps) {
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    setMounted(true);
     lineSpinner.register();
   }, []);
+
+  if (!mounted) return null;
 
   return (
     <div className={className}>

@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { LoadingSpinner } from "@/components/ui/spinner";
+import dynamic from "next/dynamic";
+
+// Import LoadingSpinner only on client side to avoid HTMLElement error
+const LoadingSpinner = dynamic(
+  () => import("@/components/ui/spinner").then((mod) => mod.LoadingSpinner),
+  { ssr: false }
+);
 
 export default function Page() {
   useEffect(() => {

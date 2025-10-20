@@ -41,7 +41,7 @@ export async function getDashboardData(selectedYear?: number) {
       WHERE "stationId" = ${stationId.stationId}
       ORDER BY year DESC
     `;
-    
+
     const availableYears = yearData.map((y) => Number(y.year));
     const currentYear = selectedYear || new Date().getFullYear();
 
@@ -77,48 +77,52 @@ export async function getDashboardData(selectedYear?: number) {
 
     // Get this month's statistics
     const currentMonth = new Date().getMonth() + 1;
-    const [thisMonthOrders, thisMonthPending, thisMonthApproved, thisMonthRejected] =
-      await Promise.all([
-        prisma.order.count({
-          where: {
-            stationId: stationId.stationId,
-            createdAt: {
-              gte: new Date(currentYear, currentMonth - 1, 1),
-              lt: new Date(currentYear, currentMonth, 1),
-            },
+    const [
+      thisMonthOrders,
+      thisMonthPending,
+      thisMonthApproved,
+      thisMonthRejected,
+    ] = await Promise.all([
+      prisma.order.count({
+        where: {
+          stationId: stationId.stationId,
+          createdAt: {
+            gte: new Date(currentYear, currentMonth - 1, 1),
+            lt: new Date(currentYear, currentMonth, 1),
           },
-        }),
-        prisma.order.count({
-          where: {
-            stationId: stationId.stationId,
-            orderStatus: "PENDING",
-            createdAt: {
-              gte: new Date(currentYear, currentMonth - 1, 1),
-              lt: new Date(currentYear, currentMonth, 1),
-            },
+        },
+      }),
+      prisma.order.count({
+        where: {
+          stationId: stationId.stationId,
+          orderStatus: "PENDING",
+          createdAt: {
+            gte: new Date(currentYear, currentMonth - 1, 1),
+            lt: new Date(currentYear, currentMonth, 1),
           },
-        }),
-        prisma.order.count({
-          where: {
-            stationId: stationId.stationId,
-            orderStatus: "APPROVED",
-            createdAt: {
-              gte: new Date(currentYear, currentMonth - 1, 1),
-              lt: new Date(currentYear, currentMonth, 1),
-            },
+        },
+      }),
+      prisma.order.count({
+        where: {
+          stationId: stationId.stationId,
+          orderStatus: "APPROVED",
+          createdAt: {
+            gte: new Date(currentYear, currentMonth - 1, 1),
+            lt: new Date(currentYear, currentMonth, 1),
           },
-        }),
-        prisma.order.count({
-          where: {
-            stationId: stationId.stationId,
-            orderStatus: "REJECTED",
-            createdAt: {
-              gte: new Date(currentYear, currentMonth - 1, 1),
-              lt: new Date(currentYear, currentMonth, 1),
-            },
+        },
+      }),
+      prisma.order.count({
+        where: {
+          stationId: stationId.stationId,
+          orderStatus: "REJECTED",
+          createdAt: {
+            gte: new Date(currentYear, currentMonth - 1, 1),
+            lt: new Date(currentYear, currentMonth, 1),
           },
-        }),
-      ]);
+        },
+      }),
+    ]);
 
     // Get recent orders
     const recentOrders = await prisma.order.findMany({
@@ -144,19 +148,37 @@ export async function getDashboardData(selectedYear?: number) {
 
     // Format monthly data for charts
     const monthNames = [
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ];
 
     const chartData = monthNames.map((name, index) => {
       const monthNum = index + 1;
-      const monthData = monthlyOrders.filter((m) => Number(m.month) === monthNum);
-      
+      const monthData = monthlyOrders.filter(
+        (m) => Number(m.month) === monthNum
+      );
+
       return {
         month: name,
-        pending: Number(monthData.find((m) => m.status === "PENDING")?.count || 0),
-        approved: Number(monthData.find((m) => m.status === "APPROVED")?.count || 0),
-        rejected: Number(monthData.find((m) => m.status === "REJECTED")?.count || 0),
+        pending: Number(
+          monthData.find((m) => m.status === "PENDING")?.count || 0
+        ),
+        approved: Number(
+          monthData.find((m) => m.status === "APPROVED")?.count || 0
+        ),
+        rejected: Number(
+          monthData.find((m) => m.status === "REJECTED")?.count || 0
+        ),
         total: monthData.reduce((sum, m) => sum + Number(m.count), 0),
       };
     });
@@ -164,11 +186,17 @@ export async function getDashboardData(selectedYear?: number) {
     // Format monthly data by order type for charts
     const chartDataByType = monthNames.map((name, index) => {
       const monthNum = index + 1;
-      const monthData = monthlyOrdersByType.filter((m) => Number(m.month) === monthNum);
-      
-      const urgent = Number(monthData.find((m) => m.type === "URGENT")?.count || 0);
-      const normal = Number(monthData.find((m) => m.type === "NORMAL")?.count || 0);
-      
+      const monthData = monthlyOrdersByType.filter(
+        (m) => Number(m.month) === monthNum
+      );
+
+      const urgent = Number(
+        monthData.find((m) => m.type === "URGENT")?.count || 0
+      );
+      const normal = Number(
+        monthData.find((m) => m.type === "NORMAL")?.count || 0
+      );
+
       return {
         month: name,
         urgent,
