@@ -30,9 +30,47 @@ interface PageProps {
   params: Promise<{ lang: string; ids: string[] }>;
 }
 
+interface OrderData {
+  id: string;
+  createdAt: Date;
+  orderNumber: string;
+  orderType: string;
+  orderStatus: string;
+  isPrinted: string;
+  isAccepted: string;
+  citizenNumber: number;
+  citizenLabel: string;
+  ethiopianCreatedAt: string;
+  citizen: {
+    id: string;
+    registralNo: string;
+    firstName: string;
+    middleName: string | null;
+    lastName: string;
+    phone: string;
+    profilePhoto: string | null;
+    occupation: string | null;
+    dateOfBirth: Date;
+    gender: string;
+    barcode: string;
+    placeOfBirth: string;
+    emergencyContact: string | null;
+    emergencyPhone: string | null;
+    relationship: string | null;
+  };
+  station: {
+    id: string;
+    afanOromoName: string | null;
+    amharicName: string | null;
+    signPhoto: string | null;
+    stampPhoto: string | null;
+    stationAdminName: string | null;
+  };
+}
+
 export default function Page({ params }: PageProps) {
   const [orderIds, setOrderIds] = useState<string[]>([]);
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<OrderData[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
@@ -98,7 +136,7 @@ export default function Page({ params }: PageProps) {
           // Print data to console one by one
           console.log("=== Multi-Print Data ===");
           console.log(`Total Citizens: ${result.totalCount}`);
-          result.data.forEach((order: any, index: number) => {
+          result.data.forEach((order: OrderData) => {
             console.log(`\n--- ${order.citizenLabel} ---`);
             console.log(`Citizen Number: ${order.citizenNumber}`);
             console.log(`Order ID: ${order.id}`);
@@ -472,7 +510,7 @@ export default function Page({ params }: PageProps) {
             Verification Status Overview
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            {data.map((order: any, index: number) => (
+            {data.map((order: OrderData) => (
               <div key={order.id} className="bg-white p-3 rounded-lg border">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-700">
@@ -868,7 +906,7 @@ export default function Page({ params }: PageProps) {
 
 // MultiIdCards component for displaying multiple ID cards
 interface MultiIdCardsProps {
-  data: any[];
+  data: OrderData[];
   isPrintMode: boolean;
 }
 
@@ -897,7 +935,7 @@ function MultiIdCards({ data, isPrintMode }: MultiIdCardsProps) {
         gap: "8mm",
       }}
     >
-      {data.slice(0, 4).map((order: any, index: number) => (
+      {data.slice(0, 4).map((order: OrderData) => (
         <div key={order.id} className="id-card-wrapper">
           <IdCard
             citizen={order.citizen}

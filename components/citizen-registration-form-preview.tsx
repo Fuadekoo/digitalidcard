@@ -50,7 +50,7 @@ export default function CitizenRegistrationFormPreview() {
                   1
                 </Badge>
                 <p>
-                  Click the <strong>"Download Registration Form"</strong> button
+                  Click the <strong>&quot;Download Registration Form&quot;</strong> button
                   to get the PDF
                 </p>
               </div>
@@ -82,7 +82,7 @@ export default function CitizenRegistrationFormPreview() {
                 </Badge>
                 <p>
                   You enter the information into the system using{" "}
-                  <strong>"Register New Citizen"</strong>
+                  <strong>&quot;Register New Citizen&quot;</strong>
                 </p>
               </div>
             </CardContent>
