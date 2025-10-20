@@ -584,6 +584,34 @@ function IdCard({
     );
   };
 
+  // Calculate expiration date (Ethiopian created date + 1 year)
+  const calculateEthiopianExpirationDate = (
+    ethiopianDate: string | undefined
+  ): string => {
+    if (!ethiopianDate) return "N/A";
+    try {
+      // Parse Ethiopian date format: dd/mm/yyyy
+      const parts = ethiopianDate.split("/");
+      if (parts.length !== 3) return "N/A";
+
+      const day = parts[0];
+      const month = parts[1];
+      const year = parseInt(parts[2], 10);
+
+      // Add 1 year
+      const expirationYear = year + 1;
+
+      // Return formatted expiration date
+      return `${day}/${month}/${expirationYear}`;
+    } catch (error) {
+      console.error("Error calculating expiration date:", error);
+      return "N/A";
+    }
+  };
+
+  const ethiopianExpirationDate =
+    calculateEthiopianExpirationDate(ethiopianCreatedAt);
+
   return (
     <div
       className={`id-card-container flex gap-4 flex-nowrap ${
@@ -746,7 +774,7 @@ function IdCard({
                 <p className="text-xs" style={{ fontSize: "9px" }}>
                   Guyyaa dhumatu/የሚያበቃበት ቀን:
                   <br />
-                  <strong>12/12/2022</strong>
+                  <strong>{ethiopianExpirationDate}</strong>
                 </p>
               </div>
               <div

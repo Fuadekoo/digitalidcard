@@ -429,6 +429,7 @@ export async function getCardData(orderId: string) {
         },
       },
     });
+    console.log("orderData>>>", orderData);
     return orderData;
   } catch (error) {
     console.log(error);

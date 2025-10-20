@@ -10,15 +10,30 @@ export async function getMultipleCardData(orderIds: string[]) {
       return { status: false, message: "Unauthenticated" };
     }
 
+    // Verify user is a station printer
+    const user = await prisma.user.findUnique({
+      where: { id: userId, role: "stationPrinter" },
+    });
+
+    if (!user || !user.stationId) {
+      return {
+        status: false,
+        message: "Unauthorized - Station Printer access required",
+      };
+    }
+
     const ordersData = await prisma.order.findMany({
       where: {
         id: { in: orderIds },
+        stationId: user.stationId, // Only orders from their station
       },
       select: {
         id: true,
         orderNumber: true,
         orderStatus: true,
         orderType: true,
+        isPrinted: true,
+        isAccepted: true,
         createdAt: true,
         citizen: {
           select: {
@@ -83,17 +98,23 @@ export async function multiPrint(ids: string[]) {
     const adminId = session?.user?.id;
     if (!adminId) throw new Error("unauthenticated");
 
-    const stationId = await prisma.user.findUnique({
+    // Verify user is a station printer
+    const user = await prisma.user.findUnique({
       where: { id: adminId, role: "stationPrinter" },
-      select: { stationId: true },
     });
-    if (!stationId?.stationId) throw new Error("station not found");
 
-    // Mark multiple orders as printed
+    if (!user || !user.stationId) {
+      return {
+        status: false,
+        message: "Unauthorized - Station Printer access required",
+      };
+    }
+
+    // Mark multiple orders as printed (station printer can only print from their station)
     const updatedOrders = await prisma.order.updateMany({
       where: {
         id: { in: ids },
-        stationId: stationId.stationId,
+        stationId: user.stationId, // Only orders from their station
       },
       data: {
         isPrinted: "APPROVED",
@@ -113,5 +134,97 @@ export async function multiPrint(ids: string[]) {
   } catch (error) {
     console.log(error);
     return { status: false, message: "Failed to print many orders" };
+  }
+}
+
+// Multi-approve orders
+export async function multiApprove(ids: string[]) {
+  try {
+    const session = await auth();
+    const adminId = session?.user?.id;
+    if (!adminId) throw new Error("unauthenticated");
+
+    // Verify user is a station printer
+    const user = await prisma.user.findUnique({
+      where: { id: adminId, role: "stationPrinter" },
+    });
+
+    if (!user || !user.stationId) {
+      return {
+        status: false,
+        message: "Unauthorized - Station Printer access required",
+      };
+    }
+
+    // Update multiple orders to APPROVED (only from their station)
+    const result = await prisma.order.updateMany({
+      where: {
+        id: { in: ids },
+        stationId: user.stationId, // Only orders from their station
+      },
+      data: {
+        isPrinted: "APPROVED",
+        printerId: adminId,
+        updatedAt: new Date(),
+      },
+    });
+
+    return {
+      status: true,
+      message: `Successfully approved ${result.count} orders`,
+      count: result.count,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: false,
+      message: "Failed to approve orders",
+    };
+  }
+}
+
+// Multi-reject orders
+export async function multiReject(ids: string[]) {
+  try {
+    const session = await auth();
+    const adminId = session?.user?.id;
+    if (!adminId) throw new Error("unauthenticated");
+
+    // Verify user is a station printer
+    const user = await prisma.user.findUnique({
+      where: { id: adminId, role: "stationPrinter" },
+    });
+
+    if (!user || !user.stationId) {
+      return {
+        status: false,
+        message: "Unauthorized - Station Printer access required",
+      };
+    }
+
+    // Update multiple orders to REJECTED (only from their station)
+    const result = await prisma.order.updateMany({
+      where: {
+        id: { in: ids },
+        stationId: user.stationId, // Only orders from their station
+      },
+      data: {
+        isPrinted: "REJECTED",
+        printerId: adminId,
+        updatedAt: new Date(),
+      },
+    });
+
+    return {
+      status: true,
+      message: `Successfully rejected ${result.count} orders`,
+      count: result.count,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: false,
+      message: "Failed to reject orders",
+    };
   }
 }
