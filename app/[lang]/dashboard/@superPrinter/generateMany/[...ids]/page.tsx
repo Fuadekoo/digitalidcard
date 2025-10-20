@@ -461,14 +461,14 @@ export default function Page({ params }: PageProps) {
 
       {/* Action Buttons */}
       <div className="flex gap-4 mb-6 no-print">
-        <Button
+        {/* <Button
           onClick={generatePDF}
           disabled={isGeneratingPDF}
           className="bg-green-600 hover:bg-green-700"
         >
           <Download className="mr-2 h-4 w-4" />
           {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
-        </Button>
+        </Button> */}
         <Button onClick={printIdCards} variant="outline" disabled={isPrinting}>
           <Printer className="mr-2 h-4 w-4" />
           {isPrinting ? "Printing..." : "Print Cards"}
@@ -480,10 +480,7 @@ export default function Page({ params }: PageProps) {
         >
           {isPrintMode ? "Exit Print Mode" : "Print Preview"}
         </Button>
-      </div>
 
-      {/* Order Status Buttons */}
-      <div className="flex gap-4 mb-6 no-print">
         <Button
           onClick={handleApproveOrders}
           disabled={isApproving || isRejecting}
@@ -502,8 +499,9 @@ export default function Page({ params }: PageProps) {
         </Button>
       </div>
 
+
       {/* Verification Status Overview */}
-      {data && data.length > 0 && (
+      {/* {data && data.length > 0 && (
         <div className="mb-6 p-4 bg-gray-50 rounded-lg">
           <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
             <CheckCircle className="h-5 w-5" />
@@ -539,7 +537,7 @@ export default function Page({ params }: PageProps) {
             ))}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Multi ID Card Preview */}
       <div className="print-container " style={{ maxWidth: "210mm" }}>
@@ -609,7 +607,7 @@ export default function Page({ params }: PageProps) {
             height: auto !important;
             margin: 0 !important;
             padding: 0 !important;
-            background: red !important;
+            // background: red !important;
             overflow: visible !important;
           }
 
