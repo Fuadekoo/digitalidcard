@@ -429,7 +429,7 @@ export default function Page({ params }: PageProps) {
             </h1>
             <p className="text-muted-foreground">
               Printing {data?.length || 0} citizen card
-              {data?.length > 1 ? "s" : ""} on A4 paper
+              {(data?.length ?? 0) > 1 ? "s" : ""} on A4 paper
             </p>
           </div>
         </div>
@@ -543,7 +543,7 @@ export default function Page({ params }: PageProps) {
 
       {/* Multi ID Card Preview */}
       <div className="print-container" style={{ maxWidth: "210mm" }}>
-        <MultiIdCards data={data} isPrintMode={isPrintMode} />
+        <MultiIdCards data={data || []} isPrintMode={isPrintMode} />
       </div>
 
       {/* Print Styles */}
@@ -957,25 +957,25 @@ interface IdCardProps {
   citizen: {
     registralNo: string;
     firstName: string;
-    middleName?: string;
+    middleName: string | null;
     lastName: string;
     gender: string;
     dateOfBirth: Date;
     placeOfBirth: string;
-    occupation: string;
+    occupation: string | null;
     phone: string;
-    emergencyContact: string;
-    emergencyPhone: string;
-    relationship: string;
+    emergencyContact: string | null;
+    emergencyPhone: string | null;
+    relationship: string | null;
     profilePhoto: string | null;
     barcode: string;
   };
   station: {
-    afanOromoName: string;
-    amharicName: string;
+    afanOromoName: string | null;
+    amharicName: string | null;
     signPhoto: string | null;
     stampPhoto: string | null;
-    stationAdminName: string;
+    stationAdminName: string | null;
   };
   ethiopianCreatedAt?: string;
   citizenNumber?: number;
