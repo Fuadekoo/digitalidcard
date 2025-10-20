@@ -542,7 +542,7 @@ export default function Page({ params }: PageProps) {
       )}
 
       {/* Multi ID Card Preview */}
-      <div className="print-container" style={{ maxWidth: "210mm" }}>
+      <div className="print-container " style={{ maxWidth: "210mm" }}>
         <MultiIdCards data={data || []} isPrintMode={isPrintMode} />
       </div>
 
@@ -600,6 +600,7 @@ export default function Page({ params }: PageProps) {
           }
 
           .print-container {
+            // background-color: red !important;
             position: absolute !important;
             left: 50% !important;
             top: 10mm !important;
@@ -608,7 +609,7 @@ export default function Page({ params }: PageProps) {
             height: auto !important;
             margin: 0 !important;
             padding: 0 !important;
-            background: white !important;
+            background: red !important;
             overflow: visible !important;
           }
 
@@ -930,13 +931,16 @@ function MultiIdCards({ data, isPrintMode }: MultiIdCardsProps) {
         isPrintMode ? "print-preview-flip" : ""
       }`}
       id="multi-id-cards-print"
-      style={{
-        maxWidth: "200mm",
-        gap: "8mm",
-      }}
+      // style={{
+      //   maxWidth: "200mm",
+      //   gap: "8mm",
+      // }}
     >
       {data.slice(0, 4).map((order: OrderData) => (
-        <div key={order.id} className="id-card-wrapper">
+        <div
+          key={order.id}
+          className="id-card-wrapper- px-10 grid grid-cols-2 gap-5 "
+        >
           <IdCard
             citizen={order.citizen}
             station={order.station}
