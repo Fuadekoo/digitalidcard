@@ -11,6 +11,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { InlineSpinner } from "@/components/ui/spinner";
 import {
   BarChart,
   Bar,
@@ -52,14 +53,7 @@ export default function SuperPrinterDashboardPage() {
   );
 
   if (isLoading || !dashboardData) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center gap-2">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <div className="text-muted-foreground">Loading dashboard...</div>
-        </div>
-      </div>
-    );
+    return <InlineSpinner message="Loading dashboard..." />;
   }
 
   if (!dashboardData.status || !dashboardData.data) {

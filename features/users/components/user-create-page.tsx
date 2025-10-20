@@ -17,9 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import {
-  StationSelector,
-} from "@/components/ui/station-selector";
+import { StationSelector } from "@/components/ui/station-selector";
 import {
   ArrowLeft,
   Save,
@@ -32,6 +30,7 @@ import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import { ButtonSpinner } from "@/components/ui/spinner";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface UserCreatePageProps {}
@@ -303,8 +302,8 @@ export default function UserCreatePage({}: UserCreatePageProps) {
           <Button type="submit" disabled={isCreating}>
             {isCreating ? (
               <>
-                <Activity className="mr-2 h-4 w-4 animate-spin" />
-                Creating...
+                <ButtonSpinner size={16} />
+                <span className="ml-2">Creating...</span>
               </>
             ) : (
               <>

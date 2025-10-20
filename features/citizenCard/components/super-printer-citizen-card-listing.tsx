@@ -52,6 +52,7 @@ import {
 import { toast } from "sonner";
 import Link from "next/link";
 import useMutation from "@/hooks/useMutation";
+import { InlineSpinner } from "@/components/ui/spinner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -566,14 +567,7 @@ export default function SuperPrinterCitizenCardListingPage({
 
   // Show loading only if we're actually loading and have no data
   if (isLoading && !data) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center gap-2">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <div className="text-muted-foreground">Loading citizen cards...</div>
-        </div>
-      </div>
-    );
+    return <InlineSpinner message="Loading citizen cards..." />;
   }
 
   return (

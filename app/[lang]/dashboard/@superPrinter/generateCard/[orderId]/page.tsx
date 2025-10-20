@@ -11,6 +11,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { QRCodeSVG } from "qrcode.react";
 import { format } from "date-fns";
+import { InlineSpinner } from "@/components/ui/spinner";
 
 // Dynamic imports for client-side only libraries
 // const Barcode = dynamic(() => import("react-barcode"), { ssr: false });
@@ -189,22 +190,11 @@ export default function GenerateCardPage({ params }: PageProps) {
   };
 
   if (!resolvedParams) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <InlineSpinner message="Loading..." />;
   }
 
   if (isLoading || (!cardData && orderId)) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center gap-2">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <div className="text-muted-foreground">Loading card data...</div>
-        </div>
-      </div>
-    );
+    return <InlineSpinner message="Loading card data..." />;
   }
 
   if (!cardData || !("citizen" in cardData) || !cardData.citizen) {

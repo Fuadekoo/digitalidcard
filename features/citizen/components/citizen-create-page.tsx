@@ -34,6 +34,7 @@ import Image from "next/image";
 import CameraCapture from "@/components/camera-capture";
 import { BirthDatePicker } from "@/components/birth-date-picker";
 import { cn } from "@/lib/utils";
+import { ButtonSpinner } from "@/components/ui/spinner";
 
 interface CitizenFormData {
   registralNo: string;
@@ -415,8 +416,8 @@ export default function CitizenCreatePage({ lang }: CitizenCreatePageProps) {
           <Button onClick={handleFinalSubmit} disabled={isCreating} size="lg">
             {isCreating ? (
               <>
-                <Activity className="mr-2 h-5 w-5 animate-spin" />
-                Registering...
+                <ButtonSpinner size={20} />
+                <span className="ml-2">Registering...</span>
               </>
             ) : (
               <>

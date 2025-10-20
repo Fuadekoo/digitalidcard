@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ButtonSpinner } from "@/components/ui/spinner";
 
 interface CameraDevice {
   deviceId: string;
@@ -310,8 +311,8 @@ export default function CameraCapture({
               >
                 {isRetrying ? (
                   <>
-                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                    Retrying...
+                    <ButtonSpinner size={16} />
+                    <span className="ml-2">Retrying...</span>
                   </>
                 ) : (
                   <>

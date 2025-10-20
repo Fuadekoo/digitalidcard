@@ -7,6 +7,7 @@ import { getStationForForm } from "@/actions/stationRegistral/downloadForm";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { ButtonSpinner } from "@/components/ui/spinner";
 
 interface StationData {
   code: string;
@@ -371,8 +372,8 @@ export default function CitizenRegistrationFormDownload() {
   if (isLoading) {
     return (
       <Button disabled variant="outline" size="sm">
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Loading...
+        <ButtonSpinner size={16} />
+        <span className="ml-2">Loading...</span>
       </Button>
     );
   }
@@ -387,8 +388,8 @@ export default function CitizenRegistrationFormDownload() {
     >
       {isGenerating ? (
         <>
-          <Loader2 className="h-4 w-4 animate-spin" />
-          Generating PDF...
+          <ButtonSpinner size={16} />
+          <span className="ml-2">Generating PDF...</span>
         </>
       ) : (
         <>

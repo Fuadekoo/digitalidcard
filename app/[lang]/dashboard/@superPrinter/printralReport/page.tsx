@@ -31,6 +31,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { StationSelector, type Station } from "@/components/ui/station-selector";
+import { InlineSpinner } from "@/components/ui/spinner";
 import {
   Table,
   TableBody,
@@ -440,12 +441,7 @@ export default function SuperPrinterReportPage() {
 
       {/* Loading State */}
       {isLoading && reportGenerated && (
-        <div className="flex items-center justify-center h-64">
-          <div className="flex flex-col items-center gap-2">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <div className="text-muted-foreground">Generating report...</div>
-          </div>
-        </div>
+        <InlineSpinner message="Generating report..." />
       )}
 
       {/* Report Content */}

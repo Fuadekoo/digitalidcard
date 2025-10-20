@@ -33,6 +33,7 @@ import { toast } from "sonner";
 import useMutation from "@/hooks/useMutation";
 import { createOrder } from "@/actions/stationRegistral/order";
 import { CitizenSelector } from "@/components/ui/citizen-selector";
+import { ButtonSpinner } from "@/components/ui/spinner";
 
 interface CreateOrderDialogProps {
   lang: string;
@@ -273,8 +274,8 @@ export function CreateOrderDialog({
         >
           {isCreating ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating...
+              <ButtonSpinner size={16} />
+              <span className="ml-2">Creating...</span>
             </>
           ) : (
             <>

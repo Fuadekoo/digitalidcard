@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { MyStationCitizen } from "@/actions/stationRegistral/order";
 import useMutation from "@/hooks/useMutation";
 import { toast } from "sonner";
+import { Spinner, ButtonSpinner } from "@/components/ui/spinner";
 
 interface Citizen {
   id: string;
@@ -173,7 +174,7 @@ export function CitizenSelector({
             <div className="max-h-60 overflow-y-auto">
               {isLoading || isLoadLoading ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <Spinner size={24} />
                   <span className="ml-2 text-sm text-muted-foreground">
                     Loading citizens...
                   </span>
@@ -245,8 +246,8 @@ export function CitizenSelector({
               >
                 {isLoading || isLoadLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                    Loading...
+                    <ButtonSpinner size={12} />
+                    <span className="ml-2">Loading...</span>
                   </>
                 ) : (
                   <>

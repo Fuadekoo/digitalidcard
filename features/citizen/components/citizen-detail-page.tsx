@@ -28,6 +28,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import Image from "next/image";
 import CameraCapture from "@/components/camera-capture";
+import { InlineSpinner } from "@/components/ui/spinner";
 
 interface CitizenDetailPageProps {
   citizenId: string;
@@ -156,17 +157,7 @@ export default function CitizenDetailPage({
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <Activity className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
-          <h3 className="text-lg font-semibold">Loading Citizen Data...</h3>
-          <p className="text-muted-foreground">
-            Please wait while we fetch the citizen information.
-          </p>
-        </div>
-      </div>
-    );
+    return <InlineSpinner message="Loading Citizen Data..." />;
   }
 
   if (!citizenData) {

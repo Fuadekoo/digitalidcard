@@ -28,6 +28,7 @@ import {
   Activity,
   AlertCircle,
 } from "lucide-react";
+import { InlineSpinner, ButtonSpinner } from "@/components/ui/spinner";
 import Link from "next/link";
 import { toast } from "sonner";
 import { BirthDatePicker } from "@/components/birth-date-picker";
@@ -155,17 +156,7 @@ export default function CitizenEditPage({
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <Activity className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
-          <h3 className="text-lg font-semibold">Loading Citizen Data...</h3>
-          <p className="text-muted-foreground">
-            Please wait while we fetch the citizen information.
-          </p>
-        </div>
-      </div>
-    );
+    return <InlineSpinner message="Loading Citizen Data..." />;
   }
 
   if (!citizenData) {
@@ -428,8 +419,8 @@ export default function CitizenEditPage({
           <Button type="submit" disabled={isUpdating}>
             {isUpdating ? (
               <>
-                <Activity className="mr-2 h-4 w-4 animate-spin" />
-                Updating...
+                <ButtonSpinner size={16} />
+                <span className="ml-2">Updating...</span>
               </>
             ) : (
               <>

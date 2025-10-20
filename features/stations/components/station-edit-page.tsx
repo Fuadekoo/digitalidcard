@@ -23,6 +23,7 @@ import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import { InlineSpinner, ButtonSpinner } from "@/components/ui/spinner";
 
 interface StationEditPageProps {
   stationId: string;
@@ -81,8 +82,10 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
   });
 
   // Upload progress states
-  const [stampUploadProgress, setStampUploadProgress] = useState<UploadProgress | null>(null);
-  const [signUploadProgress, setSignUploadProgress] = useState<UploadProgress | null>(null);
+  const [stampUploadProgress, setStampUploadProgress] =
+    useState<UploadProgress | null>(null);
+  const [signUploadProgress, setSignUploadProgress] =
+    useState<UploadProgress | null>(null);
   const [isUploadingStamp, setIsUploadingStamp] = useState(false);
   const [isUploadingSign, setIsUploadingSign] = useState(false);
   const { lang } = useParams<{ lang: string }>();
@@ -191,7 +194,9 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
   };
 
   // Handle stamp photo upload
-  const handleStampImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleStampImageChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -207,7 +212,11 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
     setStampUploadProgress(newUpload);
 
     try {
-      const serverFilename = await uploadFile(file, newUpload.uuid, setStampUploadProgress);
+      const serverFilename = await uploadFile(
+        file,
+        newUpload.uuid,
+        setStampUploadProgress
+      );
 
       handleInputChange("stampPhoto", serverFilename);
 
@@ -225,7 +234,9 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
   };
 
   // Handle sign photo upload
-  const handleSignImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSignImageChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -241,7 +252,11 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
     setSignUploadProgress(newUpload);
 
     try {
-      const serverFilename = await uploadFile(file, newUpload.uuid, setSignUploadProgress);
+      const serverFilename = await uploadFile(
+        file,
+        newUpload.uuid,
+        setSignUploadProgress
+      );
 
       handleInputChange("signPhoto", serverFilename);
 
@@ -297,17 +312,7 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
   }
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <Activity className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
-          <h3 className="text-lg font-semibold">Loading Station Data...</h3>
-          <p className="text-muted-foreground">
-            Please wait while we fetch the station information.
-          </p>
-        </div>
-      </div>
-    );
+    return <InlineSpinner message="Loading Station Data..." />;
   }
 
   if (!stationData || !stationData.status || !stationData.data) {
@@ -317,10 +322,13 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
           <AlertCircle className="h-12 w-12 mx-auto text-destructive mb-4" />
           <h3 className="text-lg font-semibold">Station Not Found</h3>
           <p className="text-muted-foreground">
-            The station you&apos;re looking for doesn&apos;t exist or you don&apos;t have
-            permission to view it.
+            The station you&apos;re looking for doesn&apos;t exist or you
+            don&apos;t have permission to view it.
           </p>
-          <Link href={`/${lang}/dashboard/station`} className="mt-4 inline-block">
+          <Link
+            href={`/${lang}/dashboard/station`}
+            className="mt-4 inline-block"
+          >
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Stations
@@ -429,7 +437,7 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
                 <Label htmlFor="stampPhoto" className="text-base font-semibold">
                   Stamp Photo
                 </Label>
-                
+
                 {/* Show previous image if exists */}
                 {formData.stampPhoto && !stampUploadProgress && (
                   <div className="mb-4">
@@ -467,7 +475,9 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
                         htmlFor="stampPhoto"
                         className="cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-700"
                       >
-                        {formData.stampPhoto ? "Change stamp photo" : "Click to upload stamp photo"}
+                        {formData.stampPhoto
+                          ? "Change stamp photo"
+                          : "Click to upload stamp photo"}
                       </label>
                       <p className="text-xs text-gray-500 mt-1">
                         PNG, JPG up to 10MB
@@ -499,7 +509,9 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
                               className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                              style={{ width: `${stampUploadProgress.progress}%` }}
+                              style={{
+                                width: `${stampUploadProgress.progress}%`,
+                              }}
                             />
                           </div>
                         </div>
@@ -524,7 +536,7 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
                 <Label htmlFor="signPhoto" className="text-base font-semibold">
                   Signature Photo
                 </Label>
-                
+
                 {/* Show previous image if exists */}
                 {formData.signPhoto && !signUploadProgress && (
                   <div className="mb-4">
@@ -562,7 +574,9 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
                         htmlFor="signPhoto"
                         className="cursor-pointer text-sm font-medium text-green-600 hover:text-green-700"
                       >
-                        {formData.signPhoto ? "Change signature photo" : "Click to upload signature photo"}
+                        {formData.signPhoto
+                          ? "Change signature photo"
+                          : "Click to upload signature photo"}
                       </label>
                       <p className="text-xs text-gray-500 mt-1">
                         PNG, JPG up to 10MB
@@ -594,7 +608,9 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
                               className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                              style={{ width: `${signUploadProgress.progress}%` }}
+                              style={{
+                                width: `${signUploadProgress.progress}%`,
+                              }}
                             />
                           </div>
                         </div>
@@ -616,7 +632,8 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
             </div>
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <AlertCircle className="h-3 w-3" />
-              Upload new photos to replace existing ones, or keep current photos by not uploading.
+              Upload new photos to replace existing ones, or keep current photos
+              by not uploading.
             </p>
           </CardContent>
         </Card>
@@ -631,8 +648,8 @@ export default function StationEditPage({ stationId }: StationEditPageProps) {
           <Button type="submit" disabled={isUpdating}>
             {isUpdating ? (
               <>
-                <Activity className="mr-2 h-4 w-4 animate-spin" />
-                Updating...
+                <ButtonSpinner size={16} />
+                <span className="ml-2">Updating...</span>
               </>
             ) : (
               <>

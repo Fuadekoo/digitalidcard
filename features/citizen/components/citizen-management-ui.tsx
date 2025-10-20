@@ -35,6 +35,7 @@ import {
   Trash2,
   Clock,
 } from "lucide-react";
+import { InlineSpinner } from "@/components/ui/spinner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -477,14 +478,7 @@ export default function CitizenManagementUI({ lang }: { lang: string }) {
 
   // Show loading only if we're actually loading and have no data
   if (isLoading && !data) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center gap-2">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <div className="text-muted-foreground">Loading citizens...</div>
-        </div>
-      </div>
-    );
+    return <InlineSpinner message="Loading citizens..." />;
   }
 
   return (

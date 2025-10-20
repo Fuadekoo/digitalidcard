@@ -23,6 +23,7 @@ import {
 import { toast } from "sonner";
 import useMutation from "@/hooks/useMutation";
 import { updateOrderStatus } from "@/actions/stationRegistral/order";
+import { Spinner, ButtonSpinner } from "@/components/ui/spinner";
 import {
   initializeChapaPayment,
   verifyChapaPayment,
@@ -142,7 +143,7 @@ export function PaymentIntegration({
       case "pending":
         return <Clock className="h-5 w-5 text-yellow-500" />;
       case "processing":
-        return <Loader2 className="h-5 w-5 animate-spin text-blue-500" />;
+        return <Spinner size={20} className="text-blue-500" />;
       case "success":
         return <CheckCircle className="h-5 w-5 text-green-500" />;
       case "failed":
@@ -258,8 +259,8 @@ export function PaymentIntegration({
                 >
                   {isPaymentLoading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Initializing...
+                      <ButtonSpinner size={16} />
+                      <span className="ml-2">Initializing...</span>
                     </>
                   ) : (
                     <>
@@ -274,8 +275,8 @@ export function PaymentIntegration({
                 <Button onClick={handleVerifyPayment} disabled={isVerifying}>
                   {isVerifying ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Verifying...
+                      <ButtonSpinner size={16} />
+                      <span className="ml-2">Verifying...</span>
                     </>
                   ) : (
                     <>

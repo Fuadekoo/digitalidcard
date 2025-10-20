@@ -21,6 +21,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import type { DateRange } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
+import { InlineSpinner } from "@/components/ui/spinner";
 import {
   Popover,
   PopoverContent,
@@ -337,12 +338,7 @@ export default function StationPrinterReportPage() {
 
           {/* Loading State */}
           {isLoading && reportGenerated && (
-        <div className="flex items-center justify-center h-64">
-          <div className="flex flex-col items-center gap-2">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <div className="text-muted-foreground">Generating report...</div>
-          </div>
-        </div>
+        <InlineSpinner message="Generating report..." />
       )}
 
       {/* Report Content */}

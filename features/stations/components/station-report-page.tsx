@@ -24,6 +24,7 @@ import {
 import { useSession } from "next-auth/react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { InlineSpinner, ButtonSpinner } from "@/components/ui/spinner";
 
 interface StationReportPageProps {
   stationId: string;
@@ -84,17 +85,7 @@ export default function StationReportPage({
 
   // Show loading state while data is being fetched
   if (isStationLoading || isUserLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <Activity className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
-          <h3 className="text-lg font-semibold">Loading Report Data...</h3>
-          <p className="text-muted-foreground">
-            Please wait while we fetch the latest information.
-          </p>
-        </div>
-      </div>
-    );
+    return <InlineSpinner message="Loading Report Data..." />;
   }
 
   // Mock data for demonstration - replace with real data from your backend
@@ -234,8 +225,8 @@ export default function StationReportPage({
         >
           {isGeneratingPDF ? (
             <>
-              <Activity className="mr-2 h-4 w-4 animate-spin" />
-              Generating...
+              <ButtonSpinner size={16} />
+              <span className="ml-2">Generating...</span>
             </>
           ) : (
             <>

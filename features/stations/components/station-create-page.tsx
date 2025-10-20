@@ -23,6 +23,7 @@ import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import { ButtonSpinner } from "@/components/ui/spinner";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface StationCreatePageProps {}
@@ -71,8 +72,10 @@ export default function StationCreatePage({}: StationCreatePageProps) {
   });
 
   // Upload progress states
-  const [stampUploadProgress, setStampUploadProgress] = useState<UploadProgress | null>(null);
-  const [signUploadProgress, setSignUploadProgress] = useState<UploadProgress | null>(null);
+  const [stampUploadProgress, setStampUploadProgress] =
+    useState<UploadProgress | null>(null);
+  const [signUploadProgress, setSignUploadProgress] =
+    useState<UploadProgress | null>(null);
   const [isUploadingStamp, setIsUploadingStamp] = useState(false);
   const [isUploadingSign, setIsUploadingSign] = useState(false);
 
@@ -159,7 +162,9 @@ export default function StationCreatePage({}: StationCreatePageProps) {
   };
 
   // Handle stamp photo upload
-  const handleStampImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleStampImageChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -175,7 +180,11 @@ export default function StationCreatePage({}: StationCreatePageProps) {
     setStampUploadProgress(newUpload);
 
     try {
-      const serverFilename = await uploadFile(file, newUpload.uuid, setStampUploadProgress);
+      const serverFilename = await uploadFile(
+        file,
+        newUpload.uuid,
+        setStampUploadProgress
+      );
 
       handleInputChange("stampPhoto", serverFilename);
 
@@ -193,7 +202,9 @@ export default function StationCreatePage({}: StationCreatePageProps) {
   };
 
   // Handle sign photo upload
-  const handleSignImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSignImageChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -209,7 +220,11 @@ export default function StationCreatePage({}: StationCreatePageProps) {
     setSignUploadProgress(newUpload);
 
     try {
-      const serverFilename = await uploadFile(file, newUpload.uuid, setSignUploadProgress);
+      const serverFilename = await uploadFile(
+        file,
+        newUpload.uuid,
+        setSignUploadProgress
+      );
 
       handleInputChange("signPhoto", serverFilename);
 
@@ -271,7 +286,10 @@ export default function StationCreatePage({}: StationCreatePageProps) {
             You don&apos;t have permission to create stations. Super admin role
             required.
           </p>
-          <Link href={`/${lang}/dashboard/station`} className="mt-4 inline-block">
+          <Link
+            href={`/${lang}/dashboard/station`}
+            className="mt-4 inline-block"
+          >
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Stations
@@ -427,7 +445,9 @@ export default function StationCreatePage({}: StationCreatePageProps) {
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
                               className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                              style={{ width: `${stampUploadProgress.progress}%` }}
+                              style={{
+                                width: `${stampUploadProgress.progress}%`,
+                              }}
                             />
                           </div>
                         </div>
@@ -519,7 +539,9 @@ export default function StationCreatePage({}: StationCreatePageProps) {
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
                               className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                              style={{ width: `${signUploadProgress.progress}%` }}
+                              style={{
+                                width: `${signUploadProgress.progress}%`,
+                              }}
                             />
                           </div>
                         </div>
@@ -581,8 +603,8 @@ export default function StationCreatePage({}: StationCreatePageProps) {
           <Button type="submit" disabled={isCreating}>
             {isCreating ? (
               <>
-                <Activity className="mr-2 h-4 w-4 animate-spin" />
-                Creating...
+                <ButtonSpinner size={16} />
+                <span className="ml-2">Creating...</span>
               </>
             ) : (
               <>

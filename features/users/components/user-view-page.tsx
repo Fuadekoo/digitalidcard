@@ -28,6 +28,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { InlineSpinner } from "@/components/ui/spinner";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -115,7 +116,8 @@ export default function UserViewPage({ userId }: UserViewPageProps) {
           <AlertCircle className="h-12 w-12 mx-auto text-destructive mb-4" />
           <h3 className="text-lg font-semibold">Access Denied</h3>
           <p className="text-muted-foreground">
-            You don&apos;t have permission to view users. Super admin role required.
+            You don&apos;t have permission to view users. Super admin role
+            required.
           </p>
           <Link href={`/${lang}/dashboard/user`} className="mt-4 inline-block">
             <Button variant="outline">
@@ -129,17 +131,7 @@ export default function UserViewPage({ userId }: UserViewPageProps) {
   }
 
   if (isLoading) {
-    return ( 
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <Activity className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
-          <h3 className="text-lg font-semibold">Loading User Data...</h3>
-          <p className="text-muted-foreground">
-            Please wait while we fetch the user information.
-          </p>
-        </div>
-      </div>
-    );
+    return <InlineSpinner message="Loading User Data..." />;
   }
 
   if (!userData || !userData.status || !userData.data) {
@@ -149,8 +141,8 @@ export default function UserViewPage({ userId }: UserViewPageProps) {
           <AlertCircle className="h-12 w-12 mx-auto text-destructive mb-4" />
           <h3 className="text-lg font-semibold">User Not Found</h3>
           <p className="text-muted-foreground">
-            The user you&apos;re looking for doesn&apos;t exist or you don&apos;t have
-            permission to view it.
+            The user you&apos;re looking for doesn&apos;t exist or you
+            don&apos;t have permission to view it.
           </p>
           <Link href={`/${lang}/dashboard/user`} className="mt-4 inline-block">
             <Button variant="outline">

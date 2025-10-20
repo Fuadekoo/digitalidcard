@@ -1,16 +1,35 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { User, Lock, Phone, Mail, Building2, Shield, Calendar } from "lucide-react";
-import { getUserProfile, updateUserProfile, changePassword } from "@/actions/common/profile";
+import {
+  User,
+  Lock,
+  Phone,
+  Mail,
+  Building2,
+  Shield,
+  Calendar,
+} from "lucide-react";
+import {
+  getUserProfile,
+  updateUserProfile,
+  changePassword,
+} from "@/actions/common/profile";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { LoadingSpinner } from "@/components/ui/spinner";
 
 type UserProfile = {
   id: string;
@@ -156,14 +175,7 @@ export default function ProfileUI() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen overflow-y-auto">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading profile...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading profile..." />;
   }
 
   if (!profile) {
@@ -182,8 +194,12 @@ export default function ProfileUI() {
     <div className="w-full h-full p-4 md:p-6 space-y-6 overflow-y-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile Settings</h1>
-        <p className="text-gray-600">Manage your account information and security</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Profile Settings
+        </h1>
+        <p className="text-gray-600">
+          Manage your account information and security
+        </p>
       </div>
 
       {/* Profile Overview Card */}
@@ -204,7 +220,9 @@ export default function ProfileUI() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Username</p>
-                <p className="font-semibold text-gray-900">{profile.username}</p>
+                <p className="font-semibold text-gray-900">
+                  {profile.username}
+                </p>
               </div>
             </div>
 
@@ -254,8 +272,9 @@ export default function ProfileUI() {
                 <div>
                   <p className="text-sm text-gray-600">Station</p>
                   <p className="font-semibold text-gray-900">
-                    {profile.stationUser.afanOromoName || profile.stationUser.amharicName} (
-                    {profile.stationUser.code})
+                    {profile.stationUser.afanOromoName ||
+                      profile.stationUser.amharicName}{" "}
+                    ({profile.stationUser.code})
                   </p>
                 </div>
               </div>
