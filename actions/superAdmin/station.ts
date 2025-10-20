@@ -108,8 +108,8 @@ export async function getStation({
     },
   });
 
-  console.log("list", list);
-  console.log("totalData", totalData);
+  // console.log("list", list);
+  // console.log("totalData", totalData);
   return { list, totalData };
 }
 

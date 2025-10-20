@@ -247,8 +247,8 @@ export async function getOrder({ search, currentPage, row, sort }: Filter) {
         ],
       },
     });
-    console.log("search data> ", search);
-    console.log("list data> ", list);
+    // console.log("search data> ", search);
+    // console.log("list data> ", list);
 
     return { list, totalData };
   } catch (error) {

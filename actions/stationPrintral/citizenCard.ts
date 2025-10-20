@@ -197,7 +197,7 @@ export async function getFilteredCitizenCardByDate({
     const totalData = await prisma.order.count({
       where: whereCondition,
     });
-    console.log("hy>>>", list);
+    // console.log("hy>>>", list);
     return {
       list,
       totalData,

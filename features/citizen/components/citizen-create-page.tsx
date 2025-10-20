@@ -105,7 +105,7 @@ export default function CitizenCreatePage({ lang }: CitizenCreatePageProps) {
         toast.success("Citizen created successfully!");
         router.push(`/${lang}/dashboard/citizen`);
       } else {
-        console.log("error >>2>>", result);
+        // console.log("error >>2>>", result);
         toast.error(result.message || "Failed to create citizen");
       }
     }
