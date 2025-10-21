@@ -2,6 +2,7 @@
 
 import { authenticate } from "@/actions/common/authentication";
 import Logo from "@/components/layout/logo";
+import Theme from "@/components/layout/theme";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -43,7 +44,12 @@ export default function Page() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 relative">
+      {/* Theme Toggle - Top Right Corner */}
+      <div className="absolute top-4 right-4 z-50">
+        <Theme />
+      </div>
+
       <Card className="w-full max-w-4xl bg-background/40 backdrop-blur-3xl border border-background/30 overflow-hidden grid md:grid-cols-2">
         <div className="p-5 md:p-10 flex gap-5 flex-col bg-background/50">
           <div className="flex justify-center">
@@ -52,11 +58,11 @@ export default function Page() {
           <div className="flex-1 flex flex-col gap-5 justify-center">
             <form onSubmit={onSubmit} className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-foreground">
                   {lang == "am" ? "መለያ ስም" : "Username"}
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder={lang == "am" ? "መለያ ስም" : "Username"}
                     className="pl-10 w-full"
@@ -71,11 +77,11 @@ export default function Page() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-foreground">
                   {lang == "am" ? "ሚስጥር ቁልፍ" : "Password"}
                 </label>
                 <div className="relative">
-                  <KeyRound className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <KeyRound className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder={lang == "am" ? "ሚስጥር ቁልፍ" : "Password"}
                     className="pl-10 pr-10 w-full"
@@ -88,9 +94,9 @@ export default function Page() {
                     className="absolute right-3 top-1/2 transform -translate-y-1/2"
                   >
                     {hidden ? (
-                      <Eye className="h-4 w-4 text-gray-400" />
+                      <Eye className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
                     ) : (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
+                      <EyeOff className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
                     )}
                   </button>
                 </div>
