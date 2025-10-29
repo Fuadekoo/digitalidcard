@@ -11,8 +11,7 @@ export default function UserLayout({
 }: {
   children: React.ReactNode;
   menu: {
-    english: string;
-    amharic: string;
+    key: string;
     url: string;
     Icon: React.JSX.Element;
   }[][];

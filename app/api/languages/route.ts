@@ -24,6 +24,7 @@ const defaultLanguages: Language[] = [
 ];
 
 // Helper function to read JSON file safely
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function readJsonFile(filePath: string): Promise<any> {
   try {
     const data = await fs.readFile(filePath, "utf8");
@@ -35,6 +36,7 @@ async function readJsonFile(filePath: string): Promise<any> {
 }
 
 // Helper function to write JSON file safely
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function writeJsonFile(filePath: string, data: any): Promise<void> {
   try {
     await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
@@ -45,9 +47,11 @@ async function writeJsonFile(filePath: string, data: any): Promise<void> {
 }
 
 // Helper function to flatten nested translations
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function flattenTranslations(data: any, prefix = ""): TranslationKey[] {
   const result: TranslationKey[] = [];
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const flatten = (obj: any, path: string) => {
     Object.keys(obj).forEach((key) => {
       const newPath = path ? `${path}.${key}` : key;
@@ -170,6 +174,7 @@ export async function PUT(request: NextRequest) {
     await fs.mkdir(LOCALES_DIR, { recursive: true });
 
     // Group translations by language
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const translationsByLang: Record<string, any> = {};
 
     // Initialize with empty objects for each language
@@ -274,7 +279,7 @@ export async function DELETE(request: NextRequest) {
 
     try {
       await fs.unlink(filePath);
-    } catch (error) {
+    } catch {
       // File might not exist, that's okay
       console.log(`File ${filePath} not found, continuing...`);
     }

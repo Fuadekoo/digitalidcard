@@ -5,6 +5,7 @@ import path from "path";
 const LOCALES_DIR = path.join(process.cwd(), "localization", "locales");
 
 // Helper function to read JSON file safely
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function readJsonFile(filePath: string): Promise<any> {
   try {
     const data = await fs.readFile(filePath, "utf8");
@@ -16,6 +17,7 @@ async function readJsonFile(filePath: string): Promise<any> {
 }
 
 // Helper function to write JSON file safely
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function writeJsonFile(filePath: string, data: any): Promise<void> {
   try {
     await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
@@ -28,8 +30,9 @@ async function writeJsonFile(filePath: string, data: any): Promise<void> {
 // GET - Get all translations for a specific language
 export async function GET(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
+  const { lang } = await params;
   try {
     const langCode = params.lang;
     const filePath = path.join(LOCALES_DIR, `${langCode}.json`);
@@ -53,8 +56,9 @@ export async function GET(
 // PUT - Update entire language file
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
+  const { lang } = await params;
   try {
     const langCode = params.lang;
     const translations = await request.json();
@@ -93,8 +97,9 @@ export async function PUT(
 // DELETE - Delete entire language file
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
+  const { lang } = await params;
   try {
     const langCode = params.lang;
 

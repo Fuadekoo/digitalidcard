@@ -5,6 +5,7 @@ import path from "path";
 const LOCALES_DIR = path.join(process.cwd(), "localization", "locales");
 
 // Helper function to read JSON file safely
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function readJsonFile(filePath: string): Promise<any> {
   try {
     const data = await fs.readFile(filePath, "utf8");
@@ -16,6 +17,7 @@ async function readJsonFile(filePath: string): Promise<any> {
 }
 
 // Helper function to write JSON file safely
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function writeJsonFile(filePath: string, data: any): Promise<void> {
   try {
     await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
@@ -26,6 +28,7 @@ async function writeJsonFile(filePath: string, data: any): Promise<void> {
 }
 
 // Helper function to set nested value in object
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function setNestedValue(obj: any, path: string, value: string) {
   const keys = path.split(".");
   let current = obj;
@@ -41,6 +44,7 @@ function setNestedValue(obj: any, path: string, value: string) {
 }
 
 // Helper function to get nested value from object
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getNestedValue(obj: any, path: string): string | undefined {
   const keys = path.split(".");
   let current = obj;
@@ -57,6 +61,7 @@ function getNestedValue(obj: any, path: string): string | undefined {
 }
 
 // Helper function to delete nested value from object
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function deleteNestedValue(obj: any, path: string): boolean {
   const keys = path.split(".");
   let current = obj;
@@ -80,8 +85,9 @@ function deleteNestedValue(obj: any, path: string): boolean {
 // GET - Get specific translation key for a language
 export async function GET(
   request: NextRequest,
-  { params }: { params: { lang: string; key: string } }
+  { params }: { params: Promise<{ lang: string; key: string }> }
 ) {
+  const { lang, key } = await params;
   try {
     const { lang, key } = params;
     const filePath = path.join(LOCALES_DIR, `${lang}.json`);
@@ -111,8 +117,9 @@ export async function GET(
 // PUT - Update specific translation key for a language
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { lang: string; key: string } }
+  { params }: { params: Promise<{ lang: string; key: string }> }
 ) {
+  const { lang, key } = await params;
   try {
     const { lang, key } = params;
     const { value } = await request.json();
@@ -155,8 +162,9 @@ export async function PUT(
 // DELETE - Delete specific translation key from a language
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { lang: string; key: string } }
+  { params }: { params: Promise<{ lang: string; key: string }> }
 ) {
+  const { lang, key } = await params;
   try {
     const { lang, key } = params;
     const filePath = path.join(LOCALES_DIR, `${lang}.json`);
