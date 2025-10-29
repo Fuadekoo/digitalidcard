@@ -81,11 +81,12 @@ export async function PUT(
       translations,
     });
   } catch (error) {
-    console.error(`Error updating ${params.lang} translations:`, error);
+    const { lang: langCode } = await params;
+    console.error(`Error updating ${langCode} translations:`, error);
     return NextResponse.json(
       {
         success: false,
-        message: `Failed to update ${params.lang} translations`,
+        message: `Failed to update ${langCode} translations`,
       },
       { status: 500 }
     );
@@ -122,9 +123,10 @@ export async function DELETE(
       message: `${langCode} language file deleted successfully`,
     });
   } catch (error) {
-    console.error(`Error deleting ${params.lang} language:`, error);
+    const { lang: langCode } = await params;
+    console.error(`Error deleting ${langCode} language:`, error);
     return NextResponse.json(
-      { success: false, message: `Failed to delete ${params.lang} language` },
+      { success: false, message: `Failed to delete ${langCode} language` },
       { status: 500 }
     );
   }
