@@ -87,9 +87,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ lang: string; key: string }> }
 ) {
-  const { lang, key } = await params;
   try {
-    const { lang, key } = params;
+    const { lang, key } = await params;
     const filePath = path.join(LOCALES_DIR, `${lang}.json`);
 
     const translations = await readJsonFile(filePath);
@@ -103,11 +102,11 @@ export async function GET(
       exists: value !== undefined,
     });
   } catch (error) {
-    console.error(`Error fetching ${params.lang}.${params.key}:`, error);
+    console.error("Error fetching translation:", error);
     return NextResponse.json(
       {
         success: false,
-        message: `Failed to load ${params.lang}.${params.key}`,
+        message: "Failed to load translation",
       },
       { status: 500 }
     );
@@ -119,9 +118,8 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ lang: string; key: string }> }
 ) {
-  const { lang, key } = await params;
   try {
-    const { lang, key } = params;
+    const { lang, key } = await params;
     const { value } = await request.json();
 
     if (typeof value !== "string") {
@@ -148,11 +146,11 @@ export async function PUT(
       value,
     });
   } catch (error) {
-    console.error(`Error updating ${params.lang}.${params.key}:`, error);
+    console.error("Error updating translation:", error);
     return NextResponse.json(
       {
         success: false,
-        message: `Failed to update ${params.lang}.${params.key}`,
+        message: "Failed to update translation",
       },
       { status: 500 }
     );
@@ -164,9 +162,8 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ lang: string; key: string }> }
 ) {
-  const { lang, key } = await params;
   try {
-    const { lang, key } = params;
+    const { lang, key } = await params;
     const filePath = path.join(LOCALES_DIR, `${lang}.json`);
 
     const translations = await readJsonFile(filePath);
@@ -186,11 +183,11 @@ export async function DELETE(
       deleted,
     });
   } catch (error) {
-    console.error(`Error deleting ${params.lang}.${params.key}:`, error);
+    console.error("Error deleting translation:", error);
     return NextResponse.json(
       {
         success: false,
-        message: `Failed to delete ${params.lang}.${params.key}`,
+        message: "Failed to delete translation",
       },
       { status: 500 }
     );

@@ -32,9 +32,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ lang: string }> }
 ) {
-  const { lang } = await params;
   try {
-    const langCode = params.lang;
+    const { lang: langCode } = await params;
     const filePath = path.join(LOCALES_DIR, `${langCode}.json`);
 
     const translations = await readJsonFile(filePath);
@@ -45,9 +44,9 @@ export async function GET(
       translations,
     });
   } catch (error) {
-    console.error(`Error fetching ${params.lang} translations:`, error);
+    console.error("Error fetching translations:", error);
     return NextResponse.json(
-      { success: false, message: `Failed to load ${params.lang} translations` },
+      { success: false, message: "Failed to load translations" },
       { status: 500 }
     );
   }
@@ -58,9 +57,8 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ lang: string }> }
 ) {
-  const { lang } = await params;
   try {
-    const langCode = params.lang;
+    const { lang: langCode } = await params;
     const translations = await request.json();
 
     if (typeof translations !== "object" || translations === null) {
@@ -99,9 +97,8 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ lang: string }> }
 ) {
-  const { lang } = await params;
   try {
-    const langCode = params.lang;
+    const { lang: langCode } = await params;
 
     // Don't allow deleting English (default language)
     if (langCode === "en") {
