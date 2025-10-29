@@ -336,18 +336,37 @@ export async function getPaymentStatus(tx_ref: string) {
       };
     }
 
+    const response = await fetch(
+      `https://api.chapa.co/v1/transaction/verify/${tx_ref}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${process.env.CHAPA_TOKEN}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      return {
+        status: false,
+        message: "Failed to get payment status",
+      };
+    }
+
+    const res = await response.json();
+
     return {
-      status: true,
+      status: res.status === "success",
       data: {
         orderId: order.id,
         orderNumber: order.orderNumber,
-        orderStatus: order.orderStatus,
-        amount: order.amount,
+        orderStatus: res.data.status == "success" ? "APPROVED" : "PENDING",
+        amount: res.data.amount,
         citizen: order.citizen,
       },
     };
   } catch (error) {
-    console.error("Get payment status error:", error);
+    console.error("Get payment status error: ", error);
     return {
       status: false,
       message: "Failed to get payment status",
