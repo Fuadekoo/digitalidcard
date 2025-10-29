@@ -3,6 +3,7 @@
 import React, { useState, useCallback } from "react";
 import Image from "next/image";
 import useMutation from "@/hooks/useMutation";
+import useTranslation from "@/hooks/useTranslation";
 import { createStation } from "@/actions/superAdmin/station";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -59,6 +60,7 @@ export default function StationCreatePage({}: StationCreatePageProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const { lang } = useParams<{ lang: string }>();
+  const { t } = useTranslation();
   const isSuperAdmin = session?.user?.role === "superAdmin";
 
   // Form state
@@ -90,10 +92,10 @@ export default function StationCreatePage({}: StationCreatePageProps) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (result: any) => {
       if (result.status) {
-        toast.success("Station created successfully!");
+        toast.success(t("station.createSuccess"));
         router.push(`/${lang}/dashboard/station/${result.data?.id || ""}`);
       } else {
-        toast.error(result.message || "Failed to create station");
+        toast.error(result.message || t("station.createFailed"));
       }
     },
     [router, lang]
@@ -308,13 +310,15 @@ export default function StationCreatePage({}: StationCreatePageProps) {
           <Link href={`/${lang}/dashboard/station`}>
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Stations
+              {t("station.backToStations")}
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold">Create New Station</h1>
+            <h1 className="text-2xl font-bold">
+              {t("station.createNewStation")}
+            </h1>
             <p className="text-muted-foreground">
-              Add a new station to the system with all required information.
+              {t("station.addNewStationDescription")}
             </p>
           </div>
         </div>
@@ -328,60 +332,66 @@ export default function StationCreatePage({}: StationCreatePageProps) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
-              Station Information
+              {t("station.stationInformation")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="code">Station Code *</Label>
+              <Label htmlFor="code">{t("station.stationCode")} *</Label>
               <Input
                 id="code"
                 value={formData.code}
                 onChange={(e) => handleInputChange("code", e.target.value)}
-                placeholder="Enter unique station code"
+                placeholder={t("station.enterUniqueCode")}
                 required
               />
               <p className="text-xs text-muted-foreground">
-                This code must be unique across all stations.
+                {t("station.codeMustBeUnique")}
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="afanOromoName">Afan Oromo Name *</Label>
+                <Label htmlFor="afanOromoName">
+                  {t("station.afanOromoName")} *
+                </Label>
                 <Input
                   id="afanOromoName"
                   value={formData.afanOromoName}
                   onChange={(e) =>
                     handleInputChange("afanOromoName", e.target.value)
                   }
-                  placeholder="Enter Afan Oromo name"
+                  placeholder={t("station.enterAfanOromoName")}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="amharicName">Amharic Name *</Label>
+                <Label htmlFor="amharicName">
+                  {t("station.amharicName")} *
+                </Label>
                 <Input
                   id="amharicName"
                   value={formData.amharicName}
                   onChange={(e) =>
                     handleInputChange("amharicName", e.target.value)
                   }
-                  placeholder="Enter Amharic name"
+                  placeholder={t("station.enterAmharicName")}
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="stationAdminName">Station Admin Name *</Label>
+              <Label htmlFor="stationAdminName">
+                {t("station.stationAdminName")} *
+              </Label>
               <Input
                 id="stationAdminName"
                 value={formData.stationAdminName}
                 onChange={(e) =>
                   handleInputChange("stationAdminName", e.target.value)
                 }
-                placeholder="Enter station admin name"
+                placeholder={t("station.enterAdminName")}
                 required
               />
             </div>
@@ -401,7 +411,7 @@ export default function StationCreatePage({}: StationCreatePageProps) {
               {/* Stamp Photo Upload */}
               <div className="space-y-3">
                 <Label htmlFor="stampPhoto" className="text-base font-semibold">
-                  Stamp Photo
+                  {t("station.stampPhotoLabel")}
                 </Label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 transition-colors">
                   <div className="flex flex-col items-center justify-center space-y-3">
@@ -413,7 +423,7 @@ export default function StationCreatePage({}: StationCreatePageProps) {
                         htmlFor="stampPhoto"
                         className="cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-700"
                       >
-                        Click to upload stamp photo
+                        {t("station.clickToUpload")}
                       </label>
                       <p className="text-xs text-gray-500 mt-1">
                         PNG, JPG up to 10MB
@@ -468,7 +478,7 @@ export default function StationCreatePage({}: StationCreatePageProps) {
                   {formData.stampPhoto && (
                     <div className="mt-4">
                       <p className="text-sm font-medium text-gray-700 mb-2">
-                        Current Stamp:
+                        {t("station.currentPhoto")}
                       </p>
                       <div className="relative inline-block">
                         <Image
@@ -495,7 +505,7 @@ export default function StationCreatePage({}: StationCreatePageProps) {
               {/* Sign Photo Upload */}
               <div className="space-y-3">
                 <Label htmlFor="signPhoto" className="text-base font-semibold">
-                  Signature Photo
+                  {t("station.signPhotoLabel")}
                 </Label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-green-500 transition-colors">
                   <div className="flex flex-col items-center justify-center space-y-3">
@@ -507,7 +517,7 @@ export default function StationCreatePage({}: StationCreatePageProps) {
                         htmlFor="signPhoto"
                         className="cursor-pointer text-sm font-medium text-green-600 hover:text-green-700"
                       >
-                        Click to upload signature photo
+                        {t("station.clickToUpload")}
                       </label>
                       <p className="text-xs text-gray-500 mt-1">
                         PNG, JPG up to 10MB
@@ -609,7 +619,7 @@ export default function StationCreatePage({}: StationCreatePageProps) {
             ) : (
               <>
                 <Save className="mr-2 h-4 w-4" />
-                Create Station
+                {t("station.addStation")}
               </>
             )}
           </Button>

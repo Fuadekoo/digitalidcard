@@ -18,44 +18,37 @@ export default async function Layout({
   const menu = [
     [
       {
-        english: "home",
-        amharic: "መነሻ",
+        key: "home",
         url: "home",
         Icon: <User className="size-6" />,
       },
       {
-        english: "dashboard",
-        amharic: "ዳሽቦርድ",
+        key: "dashboard",
         url: "dashboard",
         Icon: <Users className="size-6" />,
       },
       {
-        english: "station",
-        amharic: "ስታሽን",
+        key: "stations",
         url: "station",
         Icon: <Users className="size-6" />,
       },
       {
-        english: "user",
-        amharic: "ተጠቃሚ",
+        key: "user",
         url: "user",
-        Icon: <BadgeDollarSignIcon className="size-6" />, // You can replace with a more suitable icon if needed
+        Icon: <BadgeDollarSignIcon className="size-6" />,
       },
       {
-        english: "report",
-        amharic: "ሪፖርት",
+        key: "reports",
         url: "reportData",
         Icon: <MessageCircle className="size-6" />,
       },
       {
-        english: "languages",
-        amharic: "ቋንቋዎች",
+        key: "languages",
         url: "languages",
         Icon: <Languages className="size-6" />,
       },
       {
-        english: "profile",
-        amharic: "መግለጫ",
+        key: "profile",
         url: "profile",
         Icon: <Calendar className="size-6" />,
       },

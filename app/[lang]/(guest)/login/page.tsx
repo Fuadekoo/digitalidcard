@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useRegistration } from "@/hooks/useRegistration";
+import useTranslation from "@/hooks/useTranslation";
 import { loginSchema } from "@/lib/zodSchema";
 import { Eye, EyeOff, KeyRound, User } from "lucide-react";
 import Image from "next/image";
@@ -26,6 +27,7 @@ export default function Page() {
     credentials?: string[];
   }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const { onSubmit, validationErrors, register, setValue, isLoading } =
     useRegistration(authenticate, loginSchema, (state) => {
       if (state.status) {
@@ -59,12 +61,12 @@ export default function Page() {
             <form onSubmit={onSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  {lang == "am" ? "መለያ ስም" : "Username"}
+                  {t("auth.username")}
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder={lang == "am" ? "መለያ ስም" : "Username"}
+                    placeholder={t("auth.username")}
                     className="pl-10 w-full"
                     {...register("username")}
                   />
@@ -78,12 +80,12 @@ export default function Page() {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  {lang == "am" ? "ሚስጥር ቁልፍ" : "Password"}
+                  {t("auth.password")}
                 </label>
                 <div className="relative">
                   <KeyRound className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder={lang == "am" ? "ሚስጥር ቁልፍ" : "Password"}
+                    placeholder={t("auth.password")}
                     className="pl-10 pr-10 w-full"
                     type={hidden ? "password" : "text"}
                     {...register("password")}
@@ -108,7 +110,7 @@ export default function Page() {
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Loading..." : lang == "am" ? "ይግቡ" : "Login"}
+                {isLoading ? t("common.loading") : t("auth.login")}
               </Button>
             </form>
           </div>

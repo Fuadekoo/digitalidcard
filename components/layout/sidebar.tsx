@@ -1,3 +1,5 @@
+"use client";
+
 import Logo from "./logo";
 import Profile from "./profile";
 import { Button } from "../ui/button";
@@ -6,19 +8,20 @@ import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { X } from "lucide-react";
 import React from "react";
+import useTranslation from "@/hooks/useTranslation";
 
 export default function SideBar({
   menu,
 }: {
   menu: {
-    english: string;
-    amharic: string;
+    key: string;
     url: string;
     Icon: React.JSX.Element;
   }[][];
 }) {
   const selected = usePathname().split("/")[3] ?? "";
   const { lang } = useParams<{ lang: string }>();
+  const { t } = useTranslation();
 
   return (
     <nav
@@ -47,7 +50,7 @@ export default function SideBar({
               <React.Fragment key={i + ""}>
                 {i !== 0 && <hr className="border-primary" />}
                 <div key={i + ""} className="py-3 flex flex-col gap-2">
-                  {item.map(({ english, amharic, url, Icon }, i) => (
+                  {item.map(({ key, url, Icon }, i) => (
                     <Button
                       key={i + ""}
                       size="lg"
@@ -57,7 +60,7 @@ export default function SideBar({
                     >
                       <Link href={`/${lang}/dashboard/${url}`}>
                         {Icon}
-                        {lang == "am" ? amharic : english}
+                        {t(`navigation.${key}`)}
                       </Link>
                     </Button>
                   ))}

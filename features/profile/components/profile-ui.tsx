@@ -10,6 +10,7 @@ import {
   Shield,
   Calendar,
 } from "lucide-react";
+import useTranslation from "@/hooks/useTranslation";
 import {
   getUserProfile,
   updateUserProfile,
@@ -46,6 +47,7 @@ type UserProfile = {
 };
 
 export default function ProfileUI() {
+  const { t } = useTranslation();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -70,10 +72,10 @@ export default function ProfileUI() {
           setUsername(result.user.username);
           setPhone(result.user.phone);
         } else {
-          toast.error(result.error || "Failed to load profile");
+          toast.error(result.error || t("profile.loadFailed"));
         }
       } catch (error) {
-        toast.error("Failed to load profile");
+        toast.error(t("profile.loadFailed"));
       } finally {
         setIsLoading(false);
       }
@@ -86,7 +88,7 @@ export default function ProfileUI() {
     e.preventDefault();
 
     if (!username.trim() || !phone.trim()) {
-      toast.error("Please fill in all fields");
+      toast.error(t("profile.fillAllFields"));
       return;
     }
 
@@ -99,17 +101,17 @@ export default function ProfileUI() {
       });
 
       if (result.success) {
-        toast.success(result.message || "Profile updated successfully");
+        toast.success(result.message || t("profile.updateSuccess"));
         // Refresh profile
         const updatedProfile = await getUserProfile();
         if (updatedProfile.success && updatedProfile.user) {
           setProfile(updatedProfile.user as UserProfile);
         }
       } else {
-        toast.error(result.error || "Failed to update profile");
+        toast.error(result.error || t("profile.updateFailed"));
       }
     } catch (error) {
-      toast.error("Failed to update profile");
+      toast.error(t("profile.updateFailed"));
     } finally {
       setIsUpdating(false);
     }
@@ -119,17 +121,17 @@ export default function ProfileUI() {
     e.preventDefault();
 
     if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error("Please fill in all password fields");
+      toast.error(t("profile.fillPasswordFields"));
       return;
     }
 
     if (newPassword.length < 6) {
-      toast.error("New password must be at least 6 characters");
+      toast.error(t("profile.passwordTooShort"));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      toast.error("New passwords do not match");
+      toast.error(t("profile.passwordsDontMatch"));
       return;
     }
 
@@ -142,16 +144,16 @@ export default function ProfileUI() {
       });
 
       if (result.success) {
-        toast.success(result.message || "Password changed successfully");
+        toast.success(result.message || t("profile.changePasswordSuccess"));
         // Clear password fields
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
       } else {
-        toast.error(result.error || "Failed to change password");
+        toast.error(result.error || t("profile.changePasswordFailed"));
       }
     } catch (error) {
-      toast.error("Failed to change password");
+      toast.error(t("profile.changePasswordFailed"));
     } finally {
       setIsChangingPassword(false);
     }
@@ -175,7 +177,13 @@ export default function ProfileUI() {
   };
 
   if (isLoading) {
-    return <LoadingSpinner message="Loading profile..." />;
+    return (
+      <LoadingSpinner
+        message={`${t("common.loading")} ${t(
+          "profile.title"
+        ).toLowerCase()}...`}
+      />
+    );
   }
 
   if (!profile) {
@@ -183,7 +191,9 @@ export default function ProfileUI() {
       <div className="h-full flex items-center justify-center overflow-y-auto">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
-            <p className="text-center text-red-600">Failed to load profile</p>
+            <p className="text-center text-red-600">
+              {t("profile.loadFailed")}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -195,11 +205,9 @@ export default function ProfileUI() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Profile Settings
+          {t("profile.title")}
         </h1>
-        <p className="text-gray-600">
-          Manage your account information and security
-        </p>
+        <p className="text-gray-600">{t("profile.manageInfo")}</p>
       </div>
 
       {/* Profile Overview Card */}
@@ -207,9 +215,9 @@ export default function ProfileUI() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="w-5 h-5" />
-            Profile Overview
+            {t("profile.profileOverview")}
           </CardTitle>
-          <CardDescription>Your account information and status</CardDescription>
+          <CardDescription>{t("profile.accountInfo")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -219,7 +227,7 @@ export default function ProfileUI() {
                 <User className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Username</p>
+                <p className="text-sm text-gray-600">{t("profile.username")}</p>
                 <p className="font-semibold text-gray-900">
                   {profile.username}
                 </p>
@@ -232,7 +240,9 @@ export default function ProfileUI() {
                 <Phone className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Phone Number</p>
+                <p className="text-sm text-gray-600">
+                  {t("profile.phoneNumber")}
+                </p>
                 <p className="font-semibold text-gray-900">{profile.phone}</p>
               </div>
             </div>
@@ -243,7 +253,7 @@ export default function ProfileUI() {
                 <Shield className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Role</p>
+                <p className="text-sm text-gray-600">{t("profile.role")}</p>
                 <Badge className={getRoleBadgeColor(profile.role)}>
                   {profile.role}
                 </Badge>
@@ -256,7 +266,7 @@ export default function ProfileUI() {
                 <Calendar className="w-5 h-5 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Status</p>
+                <p className="text-sm text-gray-600">{t("profile.status")}</p>
                 <Badge className={getStatusBadgeColor(profile.status)}>
                   {profile.status}
                 </Badge>
@@ -270,7 +280,9 @@ export default function ProfileUI() {
                   <Building2 className="w-5 h-5 text-indigo-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Station</p>
+                  <p className="text-sm text-gray-600">
+                    {t("profile.station")}
+                  </p>
                   <p className="font-semibold text-gray-900">
                     {profile.stationUser.afanOromoName ||
                       profile.stationUser.amharicName}{" "}
@@ -286,7 +298,9 @@ export default function ProfileUI() {
                 <Calendar className="w-5 h-5 text-gray-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Member Since</p>
+                <p className="text-sm text-gray-600">
+                  {t("profile.memberSince")}
+                </p>
                 <p className="font-semibold text-gray-900">
                   {format(new Date(profile.createdAt), "MMMM dd, yyyy")}
                 </p>
@@ -302,38 +316,40 @@ export default function ProfileUI() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="w-5 h-5" />
-              Edit Profile
+              {t("profile.editProfile")}
             </CardTitle>
-            <CardDescription>Update your personal information</CardDescription>
+            <CardDescription>{t("profile.updatePersonalInfo")}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleUpdateProfile} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="username">{t("profile.username")}</Label>
                 <Input
                   id="username"
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter username"
+                  placeholder={t("profile.enterUsername")}
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
+                <Label htmlFor="phone">{t("profile.phoneNumber")}</Label>
                 <Input
                   id="phone"
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Enter phone number"
+                  placeholder={t("profile.enterPhone")}
                   required
                 />
               </div>
 
               <Button type="submit" disabled={isUpdating} className="w-full">
-                {isUpdating ? "Updating..." : "Update Profile"}
+                {isUpdating
+                  ? t("profile.updating")
+                  : t("profile.updateProfile")}
               </Button>
             </form>
           </CardContent>
@@ -344,45 +360,51 @@ export default function ProfileUI() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Lock className="w-5 h-5" />
-              Change Password
+              {t("profile.changePassword")}
             </CardTitle>
-            <CardDescription>Update your account password</CardDescription>
+            <CardDescription>
+              {t("profile.updateAccountPassword")}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleChangePassword} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
+                <Label htmlFor="currentPassword">
+                  {t("profile.currentPassword")}
+                </Label>
                 <Input
                   id="currentPassword"
                   type="password"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="Enter current password"
+                  placeholder={t("profile.enterCurrentPassword")}
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
+                <Label htmlFor="newPassword">{t("profile.newPassword")}</Label>
                 <Input
                   id="newPassword"
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password"
+                  placeholder={t("profile.enterNewPassword")}
                   required
                   minLength={6}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Label htmlFor="confirmPassword">
+                  {t("profile.confirmPassword")}
+                </Label>
                 <Input
                   id="confirmPassword"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm new password"
+                  placeholder={t("profile.confirmNewPassword")}
                   required
                   minLength={6}
                 />
@@ -394,7 +416,9 @@ export default function ProfileUI() {
                 className="w-full"
                 variant="secondary"
               >
-                {isChangingPassword ? "Changing..." : "Change Password"}
+                {isChangingPassword
+                  ? t("profile.changing")
+                  : t("profile.changePassword")}
               </Button>
             </form>
           </CardContent>

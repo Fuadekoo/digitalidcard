@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import useMutation from "@/hooks/useMutation";
+import useTranslation from "@/hooks/useTranslation";
 import { createCitizen } from "@/actions/stationRegistral/citizen";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -71,6 +72,7 @@ interface CitizenCreatePageProps {
 
 export default function CitizenCreatePage({ lang }: CitizenCreatePageProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState<FormStep>("form");
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -103,11 +105,11 @@ export default function CitizenCreatePage({ lang }: CitizenCreatePageProps) {
     },
     (result) => {
       if (result.status) {
-        toast.success("Citizen created successfully!");
+        toast.success(t("citizen.createSuccess"));
         router.push(`/${lang}/dashboard/citizen`);
       } else {
         // console.log("error >>2>>", result);
-        toast.error(result.message || "Failed to create citizen");
+        toast.error(result.message || t("citizen.createFailed"));
       }
     }
   );
