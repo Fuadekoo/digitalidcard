@@ -355,6 +355,15 @@ export async function getPaymentStatus(tx_ref: string) {
 
     const res = await response.json();
 
+    if (res.data.status == "success") {
+      await prisma.order.update({
+        where: { id: order.id },
+        data: {
+          orderStatus: "APPROVED",
+          updatedAt: new Date(),
+        },
+      });
+    }
     return {
       status: res.status === "success",
       data: {
