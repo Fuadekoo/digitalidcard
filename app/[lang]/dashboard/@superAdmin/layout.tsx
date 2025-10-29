@@ -2,6 +2,7 @@ import UserLayout from "@/components/layout/userLayout";
 import {
   BadgeDollarSignIcon,
   Calendar,
+  Languages,
   MessageCircle,
   User,
   Users,
@@ -45,6 +46,12 @@ export default async function Layout({
         amharic: "ሪፖርት",
         url: "reportData",
         Icon: <MessageCircle className="size-6" />,
+      },
+      {
+        english: "languages",
+        amharic: "ቋንቋዎች",
+        url: "languages",
+        Icon: <Languages className="size-6" />,
       },
       {
         english: "profile",
